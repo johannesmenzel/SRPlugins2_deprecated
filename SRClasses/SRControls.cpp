@@ -1,234 +1,160 @@
 #include "SRControls.h"
-
+//#include "IPlug_include_in_plug_src.h"
+//#include "IControls.h"
+ 
 namespace SRPlugins {
 	namespace SRControls {
-		bool SRKnob::Draw(IGraphics * pGraphics) {
-			int i = 1 + int(0.5 + mValue * (double)(mBitmap.N - 1));
-			i = BOUNDED(i, 1, mBitmap.N);
-			pGraphics->DrawBitmap(&mBitmap, &mImgRECT, i, &mBlend);
 
-			char disp[20];
-			mPlug->GetParam(mParamIdx)->GetDisplayForHost(disp);
-			std::string final = disp;
-			if (!mEnd.empty()) {
-				final += " " + mEnd;
-			}
+IVKnobControl::IVKnobControl(IGEditorDelegate& dlg, IRECT bounds, int paramIdx,
+                             const char* label, bool displayParamValue,
+                             const IVColorSpec& colorSpec, const IText& labelText, const IText& valueText,
+                             float aMin, float aMax, float knobFrac,
+                             EDirection direction, double gearing)
+: IKnobControlBase(dlg, bounds, paramIdx, direction, gearing)
+, IVectorBase(colorSpec)
+, mAngleMin(aMin)
+, mAngleMax(aMax)
+, mLabel(label)
+, mDisplayParamValue(displayParamValue)
+, mLabelText(labelText)
+, mKnobFrac(knobFrac)
+{
+  if(mDisplayParamValue)
+    DisablePrompt(false);
+  
+  mValueText = valueText;
+  AttachIControl(this);
+}
+ 
+IVKnobControl::IVKnobControl(IGEditorDelegate& dlg, IRECT bounds, IActionFunction actionFunction,
+                             const char* label, bool displayParamValue,
+                             const IVColorSpec& colorSpec, const IText& labelText, const IText& valueText,
+                             float aMin, float aMax, float knobFrac,
+                             EDirection direction, double gearing)
+: IKnobControlBase(dlg, bounds, kNoParameter, direction, gearing)
+, IVectorBase(colorSpec)
+, mAngleMin(aMin)
+, mAngleMax(aMax)
+, mLabel(label)
+, mDisplayParamValue(displayParamValue)
+, mLabelText(labelText)
+, mKnobFrac(knobFrac)
+{
+  if(mDisplayParamValue)
+    DisablePrompt(false);
+  
+  mValueText = valueText;
+  SetActionFunction(actionFunction);
+  AttachIControl(this);
+}
+ 
+void IVKnobControl::Draw(IGraphics& g)
+{
+  g.FillRect(GetColor(kBG), mRECT);
+ 
+  const float v = mAngleMin + ((float)mValue * (mAngleMax - mAngleMin));
+  const float cx = mHandleBounds.MW(), cy = mHandleBounds.MH();
+  const float radius = (mHandleBounds.W()/2.f);
+ 
+  g.DrawArc(GetColor(kFR), cx, cy, radius + 5.f, mAngleMin, v, 0, 3.f);
+  
+  if(mDrawShadows && !mEmboss)
+    g.FillCircle(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius);
+  
+  g.FillCircle(GetColor(kFG), cx, cy, radius);
+ 
+  g.DrawCircle(GetColor(kON), cx, cy, radius * 0.9f, 0, mFrameThickness);
+ 
+  if(mMouseIsOver)
+    g.FillCircle(GetColor(kHL), cx, cy, radius * 0.8f);
+  
+  g.DrawCircle(GetColor(kFR), cx, cy, radius, 0, mFrameThickness);
+  g.DrawRadialLine(GetColor(kFR), cx, cy, v, 0.7f * radius, 0.9f * radius, 0, mFrameThickness);
+  
+  if(mLabelBounds.H())
+    g.DrawText(mLabelText, mLabel.Get(), mLabelBounds);
+  
+  if(mDisplayParamValue)
+  {
+    WDL_String str;
+    GetParam()->GetDisplayForHost(str);
+    
+    if (mShowParamLabel)
+    {
+      str.Append(" ");
+      str.Append(GetParam()->GetLabelForHost());
+    }
+    
+    g.DrawText(mValueText, str.Get(), mValueBounds);
+  }
+}
+ 
+void IVKnobControl::OnMouseDown(float x, float y, const IMouseMod& mod)
+{
+  if(mDisplayParamValue && mValueBounds.Contains(x, y))
+  {
+    PromptUserInput(mValueBounds);
+  }
+  else
+    IKnobControlBase::OnMouseDown(x, y, mod);
+}
+ 
+void IVKnobControl::OnResize()
+{
+  IRECT clickableArea;
+  
+  if(mLabel.GetLength())
+  {
+    IRECT textRect;
+    GetUI()->MeasureText(mLabelText, mLabel.Get(), textRect);
+    
+    mLabelBounds = mRECT.GetFromTop(textRect.H());
+  }
+  else
+    mLabelBounds = IRECT();
+  
+  if(mLabelBounds.H())
+    clickableArea = mRECT.GetReducedFromTop(mLabelBounds.H());
+  else
+    clickableArea = mRECT;
+ 
+  if (mDisplayParamValue)
+  {
+    IRECT textRect;
+    WDL_String str;
+    GetParam()->GetDisplayForHost(str);
+    
+    GetUI()->MeasureText(mValueText, str.Get(), textRect);
+    
+    const float valueDisplayWidth = clickableArea.W() * mKnobFrac * 0.5f;
+    switch (mValueText.mVAlign)
+    {
+      case IText::kVAlignMiddle:
+        mHandleBounds = clickableArea;
+        mValueBounds = clickableArea.GetMidVPadded(textRect.H()/2.f).GetMidHPadded(valueDisplayWidth);
+        break;
+      case IText::kVAlignBottom:
+      {
+        mValueBounds = clickableArea.GetFromBottom(textRect.H()).GetMidHPadded(valueDisplayWidth);
+        mHandleBounds = clickableArea.GetReducedFromBottom(textRect.H());
+        break;
+      }
+      case IText::kVAlignTop:
+        mValueBounds = clickableArea.GetFromTop(textRect.H()).GetMidHPadded(valueDisplayWidth);
+        mHandleBounds = clickableArea.GetReducedFromTop(textRect.H());
+        break;
+      default:
+        break;
+    }
+    
+    if(mValueBounds.W() < textRect.W())
+      mValueBounds = mValueBounds.GetMidHPadded(mTargetRECT.W()/2.f);
+  }
+  
+  mHandleBounds = GetAdjustedHandleBounds(mTargetRECT).GetScaledAboutCentre(mKnobFrac);
+  
+  SetDirty(false);
+}
 
-			if (CSTR_NOT_EMPTY(disp)) {
-				return pGraphics->DrawIText(&mText, const_cast<char*>(final.c_str()), &mTextRECT);
-			}
-			return true;
-		}
-		void SRKnob::OnMouseDown(int x, int y, IMouseMod * pMod) {
-			if (mTextRECT.Contains(x, y)) PromptUserInput(&mTextRECT);
-#ifdef RTAS_API
-			else if (pMod->A) {
-				if (mDefaultValue >= 0.0) {
-					mValue = mDefaultValue;
-					SetDirty();
-				}
-			}
-#endif
-			else {
-				OnMouseDrag(x, y, 0, 0, pMod);
-			}
-		}
-		void SRKnob::OnMouseDblClick(int x, int y, IMouseMod * pMod) {
-#ifdef RTAS_API
-			PromptUserInput(&mTextRECT);
-#else
-			if (mDefaultValue >= 0.0) {
-				mValue = mDefaultValue;
-				SetDirty();
-			}
-#endif
-		}
-		bool SRMultiMeter::Draw(IGraphics *) {
-			return true;
-		}
-		bool IPeakMeterVert::Draw(IGraphics * pGraphics) {
-			pGraphics->FillIRect(&meterbg, &mRECT);
-			IRECT filledBit = IRECT(mRECT.L, mRECT.T + int((1 - mValue) * mRECT.H()), mRECT.R, mRECT.B);
-			pGraphics->FillIRect(&meterfg, &filledBit);
-			return true;
-		}
-		bool IGrMeterVert::Draw(IGraphics * pGraphics)
-		{
-			pGraphics->FillIRect(&meterbg, &mRECT);
-			IRECT filledBit = IRECT(mRECT.L, mRECT.T, mRECT.R, mRECT.B - int(mValue * mRECT.H()));
-			pGraphics->FillIRect(&meterfg, &filledBit);
-			return true;
-		}
-		bool IPeakMeterHoriz::Draw(IGraphics * pGraphics) {
-			pGraphics->FillIRect(&meterbg, &mRECT);
-			IRECT filledBit = IRECT(mRECT.L, mRECT.T, mRECT.L + int(mValue * mRECT.W()), mRECT.B);
-			pGraphics->FillIRect(&meterfg, &filledBit);
-			return true;
-		}
-		bool ITestPopupMenu::Draw(IGraphics * pGraphics) {
-			return pGraphics->FillIRect(&COLOR_WHITE, &mRECT);;
-		}
-		void ITestPopupMenu::OnMouseDown(int x, int y, IMouseMod * pMod) {
-			doPopupMenu();
-
-			Redraw(); // seems to need this
-			SetDirty();
-		}
-		void ITestPopupMenu::doPopupMenu() {
-			IPopupMenu* selectedMenu = mPlug->GetGUI()->CreateIPopupMenu(&mMainMenu, &mRECT);
-
-			if (selectedMenu == &mMainMenu) {
-				int itemChosen = selectedMenu->GetChosenItemIdx();
-				selectedMenu->CheckItemAlone(itemChosen);
-				DBGMSG("item chosen, main menu %i\n", itemChosen);
-			}
-			else if (selectedMenu == &mSubMenu) {
-				int itemChosen = selectedMenu->GetChosenItemIdx();
-				selectedMenu->CheckItemAlone(itemChosen);
-				DBGMSG("item chosen, sub menu %i\n", itemChosen);
-			}
-			else {
-				DBGMSG("nothing chosen\n");
-			}
-		}
-		bool ITestPopupMenuB::Draw(IGraphics * pGraphics) {
-			return pGraphics->FillIRect(&COLOR_WHITE, &mRECT);;
-		}
-		void ITestPopupMenuB::OnMouseDown(int x, int y, IMouseMod * pMod) {
-			doPopupMenu();
-
-			Redraw(); // seems to need this
-			SetDirty();
-		}
-		void ITestPopupMenuB::doPopupMenu() {
-			IPopupMenu* selectedMenu = mPlug->GetGUI()->CreateIPopupMenu(&mMainMenu, &mRECT);
-
-			if (selectedMenu) {
-				int idx = selectedMenu->GetChosenItemIdx();
-				selectedMenu->CheckItem(idx, !selectedMenu->IsItemChecked(idx));
-
-				WDL_String checkedItems;
-
-				checkedItems.Append("checked: ", 1024);
-
-				for (int i = 0; i < selectedMenu->GetNItems(); i++) {
-					checkedItems.AppendFormatted(1024, "%i ", selectedMenu->IsItemChecked(i));
-				}
-
-				DBGMSG("%s\n", checkedItems.Get());
-			}
-		}
-		bool IPopUpMenuControl::Draw(IGraphics * pGraphics) {
-			pGraphics->FillIRect(&mColorBG, &mRECT);
-
-			char disp[32];
-			mPlug->GetParam(mParamIdx)->GetDisplayForHost(disp);
-
-			if (CSTR_NOT_EMPTY(disp)) {
-				return pGraphics->DrawIText(&mText, disp, &mRECT);
-			}
-
-			return true;
-		}
-		void IPopUpMenuControl::OnMouseDown(int x, int y, IMouseMod * pMod) {
-			if (pMod->L) {
-				PromptUserInput(&mRECT);
-			}
-
-			mPlug->GetGUI()->SetAllControlsDirty();
-		}
-		bool IPresetMenu::Draw(IGraphics * pGraphics) {
-			int pNumber = mPlug->GetCurrentPresetIdx();
-			mDisp.SetFormatted(32, "%02d: %s", pNumber + 1, mPlug->GetPresetName(pNumber));
-
-			IColor colorBg = IColor(50, 0, 0, 0);
-			pGraphics->FillIRect(&colorBg, &mRECT);
-
-			if (CSTR_NOT_EMPTY(mDisp.Get()))
-			{
-				return pGraphics->DrawIText(&mText, mDisp.Get(), &mRECT);
-			}
-
-			return true;
-		}
-		void IPresetMenu::OnMouseDown(int x, int y, IMouseMod * pMod) {
-			if (pMod->R) {
-				const char* pname = mPlug->GetPresetName(mPlug->GetCurrentPresetIdx());
-				mPlug->GetGUI()->CreateTextEntry(this, &mText, &mRECT, pname);
-			}
-			else {
-				doPopupMenu();
-			}
-
-			Redraw(); // seems to need this
-			SetDirty();
-		}
-		void IPresetMenu::doPopupMenu() {
-			int numItems = mPlug->NPresets();
-			IPopupMenu menu;
-
-			IGraphics* gui = mPlug->GetGUI();
-
-			int currentPresetIdx = mPlug->GetCurrentPresetIdx();
-
-			for (int i = 0; i < numItems; i++) {
-				const char* str = mPlug->GetPresetName(i);
-				if (i == currentPresetIdx)
-					menu.AddItem(str, -1, IPopupMenuItem::kChecked);
-				else
-					menu.AddItem(str);
-			}
-
-			menu.SetPrefix(2);
-
-			if (gui->CreateIPopupMenu(&menu, &mRECT)) {
-				int itemChosen = menu.GetChosenItemIdx();
-
-				if (itemChosen > -1) {
-					mPlug->RestorePreset(itemChosen);
-					mPlug->InformHostOfProgramChange();
-					mPlug->DirtyParameters();
-				}
-			}
-		}
-		void IPresetMenu::TextFromTextEntry(const char * txt) {
-			WDL_String safeName;
-			safeName.Set(txt, MAX_PRESET_NAME_LEN);
-
-			mPlug->ModifyCurrentPreset(safeName.Get());
-			mPlug->InformHostOfProgramChange();
-			mPlug->DirtyParameters();
-			SetDirty(false);
-		}
-		bool IKeyCatcher::OnKeyDown(int x, int y, int key) {
-			switch (key) {
-				//case KEY_SPACE:
-				///  DBGMSG("Space\n");
-				//  return true;
-			case KEY_LEFTARROW:;
-				DBGMSG("Left\n");
-				return true;
-			case KEY_RIGHTARROW:
-				DBGMSG("Right\n");
-				return true;
-			case KEY_UPARROW:;
-				DBGMSG("Up\n");
-				return true;
-			case KEY_DOWNARROW:
-				DBGMSG("Down\n");
-				return true;
-			default:
-				return false;
-			}
-		}
-		bool ITempoDisplay::Draw(IGraphics * pGraphics) {
-			mDisplay.SetFormatted(80, "Tempo: %f, SamplePos: %i, PPQPos: %f", mTimeInfo->mTempo, (int)mTimeInfo->mSamplePos, mTimeInfo->mPPQPos);
-			return pGraphics->DrawIText(&mText, mDisplay.Get(), &mRECT);
-		}
-
-		bool IVariableControl::Draw(IGraphics * pGraphics) {
-			mDisplay.SetFormatted(80, "%f", mDoubleValue);
-			return pGraphics->DrawIText(&mText, mDisplay.Get(), &mRECT);
-		}
-	}
-} // end namespace SRControls
+} // End namespace SRControls
+} // End namespace SRPlugins

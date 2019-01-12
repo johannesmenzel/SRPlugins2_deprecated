@@ -62,6 +62,24 @@
     <ClCompile Include="..\..\..\IGraphics\Controls\ITextEntryControl.cpp">
       <Filter>IGraphics\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRControls.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRDynamics.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRFilters.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRGain.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRHelpers.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRSaturation.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SRChannel.h" />
@@ -213,6 +231,28 @@
     <ClInclude Include="..\..\..\IGraphics\Controls\ITextEntryControl.h">
       <Filter>IGraphics\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRControls.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRDynamics.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRFilters.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRGain.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRHelpers.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRSaturation.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRConstants.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -241,6 +281,9 @@
     </Filter>
     <Filter Include="IGraphics\Controls">
       <UniqueIdentifier>{3c740de7-2371-4065-bf3d-5af9193c7b7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRClasses">
+      <UniqueIdentifier>{f69a9913-b914-4b7c-91fe-51c5a4cda4e9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

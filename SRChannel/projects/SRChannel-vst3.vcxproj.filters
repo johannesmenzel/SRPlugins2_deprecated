@@ -119,6 +119,24 @@
     <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\public.sdk\source\main\pluginfactoryvst3.cpp">
       <Filter>IPlug\VST3\VST3_SDK\public.sdk\main</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRControls.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRDynamics.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRFilters.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRGain.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRHelpers.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\SRSaturation.cpp">
+      <Filter>SRClasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />
@@ -345,6 +363,28 @@
     <ClInclude Include="..\..\..\Dependencies\IPlug\VST3_SDK\pluginterfaces\base\funknown.h">
       <Filter>IPlug\VST3\VST3_SDK\plugininterfaces\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRControls.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRDynamics.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRFilters.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRGain.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRHelpers.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRSaturation.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRConstants.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -403,6 +443,9 @@
     </Filter>
     <Filter Include="IPlug\VST3\VST3_SDK\plugininterfaces\base">
       <UniqueIdentifier>{5f06b03e-5093-46c0-9513-efb4e494c857}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRClasses">
+      <UniqueIdentifier>{0ac4fbc3-df70-4973-8925-1dba0ea411ad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

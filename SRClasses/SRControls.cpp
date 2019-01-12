@@ -5,7 +5,7 @@
 namespace SRPlugins {
 	namespace SRControls {
 
-IVKnobControl::IVKnobControl(IGEditorDelegate& dlg, IRECT bounds, int paramIdx,
+SRVectorKnobText::SRVectorKnobText(IGEditorDelegate& dlg, IRECT bounds, int paramIdx,
                              const char* label, bool displayParamValue,
                              const IVColorSpec& colorSpec, const IText& labelText, const IText& valueText,
                              float aMin, float aMax, float knobFrac,
@@ -26,7 +26,7 @@ IVKnobControl::IVKnobControl(IGEditorDelegate& dlg, IRECT bounds, int paramIdx,
   AttachIControl(this);
 }
  
-IVKnobControl::IVKnobControl(IGEditorDelegate& dlg, IRECT bounds, IActionFunction actionFunction,
+SRVectorKnobText::SRVectorKnobText(IGEditorDelegate& dlg, IRECT bounds, IActionFunction actionFunction,
                              const char* label, bool displayParamValue,
                              const IVColorSpec& colorSpec, const IText& labelText, const IText& valueText,
                              float aMin, float aMax, float knobFrac,
@@ -48,23 +48,26 @@ IVKnobControl::IVKnobControl(IGEditorDelegate& dlg, IRECT bounds, IActionFunctio
   AttachIControl(this);
 }
  
-void IVKnobControl::Draw(IGraphics& g)
+void SRVectorKnobText::Draw(IGraphics& g)
 {
   g.FillRect(GetColor(kBG), mRECT);
  
   const float v = mAngleMin + ((float)mValue * (mAngleMax - mAngleMin));
   const float cx = mHandleBounds.MW(), cy = mHandleBounds.MH();
   const float radius = (mHandleBounds.W()/2.f);
- 
-  g.DrawArc(GetColor(kFR), cx, cy, radius + 5.f, mAngleMin, v, 0, 3.f);
-  
-  if(mDrawShadows && !mEmboss)
-    g.FillCircle(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius);
-  
+  // Value Arc 
+  g.DrawArc(GetColor(kFR), cx, cy, radius + 5.f, mAngleMin, v, 0, 1.f);
+
+  // Shadow
+  if(mDrawShadows && !mEmboss) g.FillCircle(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius);
+
+  // Knob
   g.FillCircle(GetColor(kFG), cx, cy, radius);
  
+  // Rim
   g.DrawCircle(GetColor(kON), cx, cy, radius * 0.9f, 0, mFrameThickness);
- 
+
+  
   if(mMouseIsOver)
     g.FillCircle(GetColor(kHL), cx, cy, radius * 0.8f);
   
@@ -87,9 +90,10 @@ void IVKnobControl::Draw(IGraphics& g)
     
     g.DrawText(mValueText, str.Get(), mValueBounds);
   }
+  
 }
  
-void IVKnobControl::OnMouseDown(float x, float y, const IMouseMod& mod)
+void SRVectorKnobText::OnMouseDown(float x, float y, const IMouseMod& mod)
 {
   if(mDisplayParamValue && mValueBounds.Contains(x, y))
   {
@@ -99,7 +103,7 @@ void IVKnobControl::OnMouseDown(float x, float y, const IMouseMod& mod)
     IKnobControlBase::OnMouseDown(x, y, mod);
 }
  
-void IVKnobControl::OnResize()
+void SRVectorKnobText::OnResize()
 {
   IRECT clickableArea;
   

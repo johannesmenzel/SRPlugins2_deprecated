@@ -50,3 +50,4 @@
 #define APP_SIGNAL_VECTOR_SIZE 64
 
 #define ROBOTTO_FN "Roboto-Regular.ttf"
+#define LOGO_FN	"../SRImages/Logo.png"

@@ -1,7 +1,24 @@
 #pragma once
 
-const double mEqPassQ_O2_F1 = 0.70710678;					// Setting the Q constants for higher order low- and highpass filter.
-const double stQ = mEqPassQ_O2_F1;
+// PLUG ELEMENTS
+// -------------
+
+// All parameters possible data types listed here
+enum EParamDataType {
+  typeDouble = 0,
+  typeBool,
+  typeInt,
+  typeEnum,
+  kNumDataType
+};
+
+
+// DSP ELEMENTS
+// ------------
+
+// Setting the Q constants for higher order low- and highpass filter.
+const double mEqPassQ_O2_F1 = sqrt(0.5);
+const double stQ = mEqPassQ_O2_F1; // standard Q value
 const double mEqPassQ_O3_F1 = 1.;
 const double mEqPassQ_O4_F1 = 0.54119610;
 const double mEqPassQ_O4_F2 = 1.3065630;
@@ -34,8 +51,38 @@ const double mEqPassQ_O20_F8 = 1.3065630;
 const double mEqPassQ_O20_F9 = 2.1418288;
 const double mEqPassQ_O20_F10 = 6.3727474;
 
-// All possible controls listed here
+// Pass Filter Slopes in dB/oct listed here
+enum EFilterSlope {
+  dbo6 = 0,
+  dbo12,
+  dbo18,
+  dbo24,
+  dbo36,
+  dbo48,
+  dbo60,
+  dbo72,
+  dbo120,
+  kNumOrders
+};
 
+
+// UI ELEMENTS
+// -----------
+
+// Plugin constants
+const struct {
+  const IColor colorBackground;
+  const IColor colorBackground2;
+  const IText tKnobLabel;
+  const IText tKnobValue;
+} pluginLayout = {
+  IColor(255, 37, 53, 69),
+  IColor(255, 13, 18, 23),
+  IText(DEFAULT_TEXT_SIZE + 5, COLOR_WHITE, DEFAULT_FONT, IText::kStyleBold, IText::kAlignCenter, IText::kVAlignTop, 0, IText::kQualityNonAntiAliased),
+  IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityNonAntiAliased)
+};
+
+// All possible controls listed here
 enum EControlImages {
   SslBlue = 0,
   SslGreen,
@@ -49,26 +96,4 @@ enum EControlImages {
   Fader,
   none,
   kNumKnobs
-};
-
-// All parameters possible data types listed here
-enum EParamDataType {
-  typeDouble = 0,
-  typeBool,
-  typeInt,
-  typeEnum,
-  kNumDataType
-};
-
-enum EFilterSlope {
-  dbo6 = 0,
-  dbo12,
-  dbo18,
-  dbo24,
-  dbo36,
-  dbo48,
-  dbo60,
-  dbo72,
-  dbo120,
-  kNumOrders
 };

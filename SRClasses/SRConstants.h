@@ -78,7 +78,7 @@ const struct {
 } pluginLayout = {
   IColor(255, 37, 53, 69),
   IColor(255, 13, 18, 23),
-  IText(DEFAULT_TEXT_SIZE + 5, COLOR_WHITE, DEFAULT_FONT, IText::kStyleBold, IText::kAlignCenter, IText::kVAlignTop, 0, IText::kQualityNonAntiAliased),
+  IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, DEFAULT_FONT, IText::kStyleBold, IText::kAlignCenter, IText::kVAlignTop, 0, IText::kQualityNonAntiAliased),
   IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityNonAntiAliased)
 };
 

@@ -3,6 +3,8 @@
 #include "IPlug_include_in_plug_hdr.h"
 #include "../SRClasses/SRConstants.h"
 #include "SRChannelConstants.h"
+#include "IVMeterControl.h"
+#include "IVScopeControl.h"
 
 class SRChannel : public IPlug
 {
@@ -15,6 +17,10 @@ public:
   void OnParamChange(int paramIdx) override;
   void OnIdle();
 #endif
-private:
 
+private:
+  IVMeterControl<2>::IVMeterBallistics mInputMeterBallistics{ cInputMeter };
+  //IVMeterControl<3>::IVMeterBallistics mGrMeterBallistics{ cGrMeter };
+  IVMeterControl<2>::IVMeterBallistics mOutputMeterBallistics{ cOutputMeter };
+  IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
 };

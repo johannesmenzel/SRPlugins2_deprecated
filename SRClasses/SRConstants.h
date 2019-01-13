@@ -16,6 +16,10 @@ enum EParamDataType {
 // DSP ELEMENTS
 // ------------
 
+const double halfpi = PI / 2;								// Half pi defined
+const double dcoff = 1e-15;									// amount of DC offset added and subtracted respectivly at the beginning and the end of DoubleReplacing loop
+
+
 // Setting the Q constants for higher order low- and highpass filter.
 const double mEqPassQ_O2_F1 = sqrt(0.5);
 const double stQ = mEqPassQ_O2_F1; // standard Q value

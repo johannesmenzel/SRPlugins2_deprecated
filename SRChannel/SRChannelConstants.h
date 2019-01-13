@@ -2,6 +2,8 @@
 #include "../SRClasses/SRConstants.h"
 
 const int kNumPrograms = 1;
+const double METER_ATTACK = .6, METER_DECAY = .05;			// This is the global attack and release constants for meters
+const int circularBufferLenght = 65536; // should be replaced with a queue somewhen
 
 enum EParams
 {

@@ -1,6 +1,11 @@
 #pragma once
 
+// IPlug2 source
 #include "IPlug_include_in_plug_hdr.h"
+// Extra IPlug2 libs
+#include "IVMeterControl.h"
+#include "IVScopeControl.h"
+// SRClasses
 #include "../SRClasses/SRConstants.h"
 #include "../SRClasses/SRGain.h"
 #include "../SRClasses/SRFilters.h"
@@ -8,9 +13,11 @@
 #include "../SRClasses/SRSaturation.h"
 #include "../SRClasses/SRHelpers.h"
 #include "../SRClasses/SRControls.h"
+// Plugin constants
 #include "SRChannelConstants.h"
-#include "IVMeterControl.h"
-#include "IVScopeControl.h"
+// ... Commented out until implementation of oversampling
+//#include "Oversampler.h"
+//#include <functional>
 
 class SRChannel : public IPlug
 {
@@ -33,7 +40,7 @@ private:
     // GAIN + PAN
     mInputGain, mOutputGain, mInputDrive,
     mPan, mSafePanFreq,
-    vSafePanLowSignal1, vSafePanHighSignal1, vSafePanLowSignal2, vSafePanHighSignal2,
+    //vSafePanLowSignal1, vSafePanHighSignal1, vSafePanLowSignal2, vSafePanHighSignal2,
 
     // CLIP + LIMIT
     mClipperThreshold, mSaturationAmount, mSaturationHarmonics, mLimiterThresh, mSaturationSkew,
@@ -67,7 +74,7 @@ private:
     mAgc;
 
   // INT VARS
-  int mEqHpOrder, mSaturationType;
+  int mEqHpOrder, mSaturationType, mOversamplingRate;
 
     //// METERS
     //cInputPeakMeter1, cInputPeakMeter2, cOutputPeakMeter1, cOutputPeakMeter2,
@@ -103,11 +110,20 @@ private:
   SRPlugins::SRDynamics::SRLimiter fLimiter;
   SRPlugins::SRDynamics::SRDeesser fDeesser;
 
-  SRPlugins::SRDynamics::EnvelopeDetector fOutputVuMeterEnvelopeDetector1, fOutputVuMeterEnvelopeDetector2;
-  SRPlugins::SRDynamics::AttRelEnvelope fOutputVuMeterEnvelope1, fOutputVuMeterEnvelope2;
+  //SRPlugins::SRDynamics::EnvelopeDetector fOutputVuMeterEnvelopeDetector1, fOutputVuMeterEnvelopeDetector2;
+  //SRPlugins::SRDynamics::AttRelEnvelope fOutputVuMeterEnvelope1, fOutputVuMeterEnvelope2;
 
   // Saturation
-  SRPlugins::SRSaturation::SRSaturation fInputSaturation;
+  SRPlugins::SRSaturation::SRSaturation fInputSaturationL;
+  SRPlugins::SRSaturation::SRSaturation fInputSaturationR;
+
+  // ... Commented out until implementation of oversampling
+  //std::function<sample(sample)>fInputSaturationLOversampled;
+  //std::function<sample(sample)>fInputSaturationROversampled;
+
+
+  //OverSampler<sample> mOverSamplerL{ OverSampler<sample>::kNone };
+  //OverSampler<sample> mOverSamplerR{ OverSampler<sample>::kNone };
 
   // TESTVARS
   double sumIn;

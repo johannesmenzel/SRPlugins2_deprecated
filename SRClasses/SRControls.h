@@ -15,13 +15,13 @@ class SRVectorKnobText : public IKnobControlBase
 public:
   SRVectorKnobText(IGEditorDelegate& dlg, IRECT bounds, int paramIdx,
                 const char* label = "", bool displayParamValue = false,
-                const IVColorSpec& colorSpec = DEFAULT_SPEC, const IText& labelText = IText(DEFAULT_TEXT_SIZE + 5, IText::kVAlignTop), const IText& valueText = IText(DEFAULT_TEXT_SIZE, IText::kVAlignBottom),
+                const IVColorSpec& colorSpec = DEFAULT_SPEC, const IColor& color = DEFAULT_FGCOLOR, const IText& labelText = IText(DEFAULT_TEXT_SIZE + 5, IText::kVAlignTop), const IText& valueText = IText(DEFAULT_TEXT_SIZE, IText::kVAlignBottom),
                 float aMin = -135.f, float aMax = 135.f, float knobFrac = 0.50f,
                 EDirection direction = kVertical, double gearing = DEFAULT_GEARING);
 
   SRVectorKnobText(IGEditorDelegate& dlg, IRECT bounds, IActionFunction actionFunction,
                 const char* label = "", bool displayParamValue = false,
-                const IVColorSpec& colorSpec = DEFAULT_SPEC, const IText& labelText = IText(DEFAULT_TEXT_SIZE + 5, IText::kVAlignTop), const IText& valueText = IText(DEFAULT_TEXT_SIZE, IText::kVAlignBottom),
+                const IVColorSpec& colorSpec = DEFAULT_SPEC, const IColor& color = DEFAULT_FGCOLOR, const IText& labelText = IText(DEFAULT_TEXT_SIZE + 5, IText::kVAlignTop), const IText& valueText = IText(DEFAULT_TEXT_SIZE, IText::kVAlignBottom),
                 float aMin = -135.f, float aMax = 135.f, float knobFrac = 0.50f,
                 EDirection direction = kVertical, double gearing = DEFAULT_GEARING);
 
@@ -41,7 +41,9 @@ protected:
   float mKnobFrac;
   WDL_String mLabel;
   IText mLabelText;
+  IText mLabelShadowText;
   IText& mValueText = mText;
+  IColor mColor;
 };
 
 	} // End namespace SRControls

@@ -14,6 +14,7 @@ enum EParams
   kSaturationAmount,
   kSaturationHarmonics,
   kSaturationSkew,
+  kOversamplingRate,
   // EQ Stage
   // -- Filter
   kEqHpFreq,
@@ -98,6 +99,7 @@ enum ECtrlTags {
   cSaturationAmount,
   cSaturationHarmonics,
   cSaturationSkew,
+  cOversamplingRate,
 
   // EQ Stage
 
@@ -259,11 +261,12 @@ const structParameterProperties parameterProperties[kNumParams] = {
   //	{ "NAME",			"SNAME"	DEF,	MIN,	MAX,	STEP,	CENTER,	CTRPNT,	"LABEL",GROUP ,		TYPE,		KNOB,	Stage, X,		Y, "LBLMIN", "LBLMAX", "LBLCTR", "TOOLTIP"},
   // Input Stage
   { "Input Gain",      "IN",   0.,		-60.,	12.,	0.1,	0.,		10. / 12.,"dB",	"Global",	typeDouble, Fader, RectInput, 0,		2,		"-60", "12", "0",		"Input Gain is applied before everything else" },
-  { "Saturation Type", "TPE",  0,		0,		3,		-1,		-1,		-1,		"",		"Input",	typeEnum,	none,	RectInput,	2,		6,		"", "", "",				"Type of Saturation"},
+  { "Saturation Type", "TPE",  0,		0,		5,		-1,		-1,		-1,		"",		"Input",	typeEnum,	none,	RectInput,	2,		6,		"", "", "",				"Type of Saturation"},
   { "Sat Drive",       "DRV",  0.,		0.,		60.,	0.1,	30.,	.5,		"dB",	"Input",	typeDouble, SslRed,	RectInput,		0,		0,		"0", "60", "30",		"Saturation input drive, hits the saturation module harder" },
   { "Sat Amount",      "AMT",  0.,		0.,		99.,	0.01,	10.,	.5,		"%",	"Input",	typeDouble, SslOrange,RectInput,	2,		0,		"0", "100", "10",		"Amount of Saturation" },
   { "Harmonics",       "HRM",  50.,	0.,		100.,	.01,	50.,	.5,		"%",	"Input",	typeDouble, SslBlue, RectInput,	2,		2,		"Even", "Odd", "Mix",	"Dial in even harmonics by turning the knob counter-clockwise" },
   { "Sat Skew",        "SKW",  0,		-100.,	100.,	0.01,	0.,		.5,		"%",	"Input",	typeDouble, SslOrange, RectInput,	2,		4,		"-100", "100", "0",		"Saturations positive/negative skewness. Distorts waveform" },
+  { "Oversampling",    "XSP",  0,		0,		4,		-1,		-1,		-1,		"X",		"Input",	typeEnum,	Button,	RectInput,	2,		8,		"", "", "",				"Oversampling Rate"},
   // EQ Stage
   // -- Filter
   { "Highpass Freq",   "HP",   16.,	16.,	350.,	1.,		120.,	.5,		"Hz",	"Filter",		typeDouble, SslWhite,	RectEq, 0,		1,		"16", "350", "120",		"Frequency of the High Pass Filter, turn down to deactivate" },
@@ -292,8 +295,8 @@ const structParameterProperties parameterProperties[kNumParams] = {
   { "RMS Release",     "REL",	200.,	100.,	5000.,	1.,		200.,	.5,		"ms",	"Compressor",typeDouble, SslWhite, RectComp, 	2,		3,		"100", "5k", "200",		"Release of RMS Compressor" },
   { "RMS Knee",        "SKN",	0.,		0.,		30.,	0.1,	10.,	.5,		"dB",	"Compressor",typeDouble, SslGreen,	RectComp, 	2,		5,		"0", "30", "10",		"RMS Compressors width of the soft knee" },
   { "RMS Makeup",      "MK",	0.,		0.,		40.,	0.1,	10.,	.5,		"dB",	"Compressor",typeDouble, SslBlack, RectComp, 	0,		4,		"0", "40", "10",		"Makeup gain of RMS Compressor" },
-  { "RMS Topology",    "TOP",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button,		RectComp, 0,		6,	"FWD", "BCK", "",		"RMS Compressors Topology, either feed forward or feedback" },
-  { "RMS Ext SC",      "Ext",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button,RectComp,		1,		6,		"INT", "EXT", "",		"External sidechain for RMS Compressor. Use tracks input channel 3/4" },
+  { "RMS Topology",    "TOP",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button,		RectComp, 0,		7,	"FWD", "BCK", "",		"RMS Compressors Topology, either feed forward or feedback" },
+  { "RMS Ext SC",      "Ext",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button,RectComp,		2,		7,		"INT", "EXT", "",		"External sidechain for RMS Compressor. Use tracks input channel 3/4" },
   // Peak Compressor
   { "Peak Thresh",     "THR",	0.,		-40.,	0.,		0.1,	-20.,	.5,		"dB",	"Compressor",typeDouble, SslWhite, RectComp, 	0,		8,		"-40", "0", "-20",		"Threshold of Peak Compressor" },
   { "Peak Ratio",      "RAT",	3.,		0.5,	20.,	0.01,	3.,		.5,		":1",	"Compressor",typeDouble, SslWhite, RectComp, 	2,		9,		".5:1", "20:1", "3:1",	"Ratio of Peak Compressor" },
@@ -302,8 +305,8 @@ const structParameterProperties parameterProperties[kNumParams] = {
   { "Peak Knee",       "SKN",	0.,		0.,		30.,	0.1,	10.,	.5,		"dB",	"Compressor",typeDouble, SslGreen,	RectComp, 2,		13,		"0", "30", "10",		"Peak Compressors width of the soft knee" },
   { "Peak Makeup",     "MK",	0.,		0.,		40.,	0.1,	10.,	.5,		"dB",	"Compressor",typeDouble, SslBlack, RectComp, 	0,		12,		"0", "40", "10",		"Makeup Gain of Peak Compressor" },
   { "Peak SC Filter",  "SCF",	16.,	16.,	5000.,	1.,		1000.,	.5,		"Hz",	"Compressor",typeDouble, SslBlue, RectComp,	0,		14,		"16", "5k", "1k",		"Frequency of the Compressors sidechain highpass filter" },
-  { "Peak Topology",   "TOP",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button, RectComp, 		2,		15,	"FWD", "BCK", "",		"Peak Compressors Topology, either feed forward or feedback" },
-  { "Peak Ext SC",     "Ext",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button, RectComp, 3,		15,		"INT", "EXT", "",		"External sidechain for Peak Compressor. Use tracks input channel 3/4" },
+  { "Peak Topology",   "TOP",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button, RectComp, 		0,		16,	"FWD", "BCK", "",		"Peak Compressors Topology, either feed forward or feedback" },
+  { "Peak Ext SC",     "Ext",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button, RectComp, 2,		16,		"INT", "EXT", "",		"External sidechain for Peak Compressor. Use tracks input channel 3/4" },
   // Compressor
   { "Comp Ser/Par",    "Par",	0,		0,		1,		0.1,	0.5,	.5,		"",		"Compressor",typeBool,	Button,	RectComp,	0,		17,		"SER", "PAR", "",		"RMS and Peak Compressor can be run serial or parallel" },
   { "RMS/Peak Ratio",  "CR",	50.,	0.,		100.,	0.1,	50.,	.5,		"%",	"Compressor",typeDouble, SslBlack, RectComp, 	0,		18,		"0", "100", "50",		"Mix the signal of the RMS and Peak Compressor" },

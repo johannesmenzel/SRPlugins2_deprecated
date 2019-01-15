@@ -1,4 +1,5 @@
 #pragma once
+#include "IPlug_include_in_plug_hdr.h"
 
 // PLUG ELEMENTS
 // -------------
@@ -75,15 +76,49 @@ enum EFilterSlope {
 
 // Plugin constants
 const struct {
-  const IColor colorBackground;
-  const IColor colorBackground2;
+  const IColor colorPanelBG;
+  const IColor colorPluginBG;
+  const IColor colorFG;
+  const IColor colorHL;
+  const IColor colorX1;
+  const IColor colorKnobSslBlue;
+  const IColor colorKnobSslRed;
+  const IColor colorKnobSslGreen;
+  const IColor colorKnobSslOrange;
+  const IColor colorKnobSslYellow;
+  const IColor colorKnobSslBlack;
+  const IColor colorKnobSslWhite;
   const IText tKnobLabel;
   const IText tKnobValue;
 } pluginLayout = {
   IColor(255, 37, 53, 69),
   IColor(255, 13, 18, 23),
+  IColor(255, 48, 166, 186),
+  IColor(30, 255, 255, 255),
+  IColor(255, 249, 206, 34),
+  //Knob Colors
+  IColor(255, 62, 100, 121),
+  IColor(255, 131, 18, 18),
+  IColor(255, 103, 141, 52),
+  IColor(255, 234, 158, 19),
+  IColor(255, 219, 181, 30),
+  IColor(255, 23, 23, 23),
+  IColor(255, 243, 243, 243),
+  // Texts
   IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, DEFAULT_FONT, IText::kStyleBold, IText::kAlignCenter, IText::kVAlignTop, 0, IText::kQualityNonAntiAliased),
   IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityNonAntiAliased)
+};
+
+const IVColorSpec SR_SPEC = {
+  DEFAULT_BGCOLOR, // Background
+  pluginLayout.colorFG, // Foreground DEFAULT_FGCOLOR
+  DEFAULT_PRCOLOR, // Pressed
+  DEFAULT_FRCOLOR, // Frame 
+  pluginLayout.colorHL, // Higlight
+  DEFAULT_SHCOLOR, // Shadow
+  pluginLayout.colorX1, // Extra 1
+  DEFAULT_X2COLOR, // Extra 2
+  DEFAULT_X3COLOR // Extra 3
 };
 
 // All possible controls listed here

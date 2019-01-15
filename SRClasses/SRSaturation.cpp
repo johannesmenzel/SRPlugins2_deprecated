@@ -25,10 +25,8 @@ namespace SRPlugins {
 			// internal variables
 			setSaturation(pType, pDriveDb, pAmountNormalized, pHarmonicsNormalized, pPositiveSide, pSkewNormalized, pWet);
 			mAmount = 0.;
-			in1PrevSample = 0.;
-			in2PrevSample = 0.;
-			in1Dry = 0.;
-			in2Dry = 0.;
+			prev = 0.;
+			dry = 0.;
 		}
 
 		// Destructor
@@ -73,6 +71,7 @@ namespace SRPlugins {
 			this->mPositive = pPositive;
 			this->mSkewNormalized = pSkewNormalized;
 			this->mWetNormalized = pWetNormalized;
+      //this->mOversampler.SetOverSampling(OverSampler<double>::k16x);
 			calcSaturation();
 		}
 

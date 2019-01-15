@@ -8,40 +8,87 @@
 
 
 SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
-: IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo) {
+: IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo),
+mEqHfQ(stQ),
+mEqLfQ(stQ)
+{
   // Initialize Parameters
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
     IParam* param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
     const structParameterProperties &properties = parameterProperties[paramIdx];		// ... and a variable "properties" pointing at the current parameters properties
-    GetParam(paramIdx)->InitDouble(properties.name, properties.defaultVal, properties.minVal, properties.maxVal, properties.stepValue, properties.label, 0, properties.group, new IParam::ShapePowCurve(SRPlugins::SRHelpers::SetShapeCentered(properties.minVal, properties.maxVal, properties.centerVal, properties.centerPoint)), IParam::kUnitCustom);
+    switch (properties.Type)
+    {
+    case typeDouble:
+      GetParam(paramIdx)->InitDouble(properties.name, properties.defaultVal, properties.minVal, properties.maxVal, properties.stepValue, properties.label, 0, properties.group, new IParam::ShapePowCurve(SRPlugins::SRHelpers::SetShapeCentered(properties.minVal, properties.maxVal, properties.centerVal, properties.centerPoint)), IParam::kUnitCustom);
+      break;
+    case typeInt:
+      GetParam(paramIdx)->InitInt(properties.name, (int)properties.defaultVal, (int)properties.minVal, (int)properties.maxVal, properties.label, 0, properties.group);
+      break;
+    case typeBool:
+      GetParam(paramIdx)->InitBool(properties.name, (bool)properties.defaultVal, properties.label, 0, properties.group, "off", "on");
+      break;
+    case typeEnum:
+      switch (paramIdx) {
+      case kEqHpOrder: /*case kEqLpOrder:*/
+        GetParam(paramIdx)->InitEnum(
+          properties.name,
+          (int)properties.defaultVal,
+          EFilterSlope::kNumOrders,
+          properties.label,
+          0,
+          properties.group,
+          "6 dB/o",
+          "12 dB/o",
+          "18 dB/o",
+          "24 dB/o",
+          "36 dB/o",
+          "48 dB/o",
+          "60 dB/o",
+          "72 dB/o",
+          "120 dB/o"
+        );
+        break;
+      case kSaturationType:
+        GetParam(paramIdx)->InitEnum(properties.name,
+          (int)properties.defaultVal,
+          SRPlugins::SRSaturation::SaturationTypes::numTypes,
+          properties.label,
+          0,
+          properties.group,
+          "MusicDSP",
+          "Zoelzer",
+          "Pirkle",
+          "Pirkle Mod",
+          "Half Rect",
+          "Full Rect"
+        ); break;
+      //case kOversamplingRate:
+      //  GetParam(paramIdx)->InitEnum(
+      //    properties.name,
+      //    (int)properties.defaultVal,
+      //    OverSampler<double>::kNumFactors,
+      //    properties.label,
+      //    0,
+      //    properties.group,
+      //    "off",
+      //    "2X",
+      //    "4X",
+      //    "8X",
+      //    "16X"
+      //  ); break;
+      default: break;
+      }
+    default:
+      break;
+    }
 
     // Setup display texts
     switch (paramIdx)
     {
-    case kEqHpOrder:
-    //case kEqLpOrder:
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo6, "6 dB/oct");
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo12, "12 dB/oct");
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo18, "18 dB/oct");
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo24, "24 dB/oct");
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo36, "36 dB/oct");
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo48, "48 dB/oct");
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo60, "60 dB/oct");
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo72, "72 dB/oct");
-      GetParam(paramIdx)->SetDisplayText(EFilterSlope::dbo120, "120 dB/oct");
-      break;
-    case kSaturationType:
-      GetParam(paramIdx)->SetDisplayText(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, "MusicDSP");
-      GetParam(paramIdx)->SetDisplayText(SRPlugins::SRSaturation::SaturationTypes::typeZoelzer, "Zoelzer");
-      GetParam(paramIdx)->SetDisplayText(SRPlugins::SRSaturation::SaturationTypes::typePirkle, "Pirkle");
-      GetParam(paramIdx)->SetDisplayText(SRPlugins::SRSaturation::SaturationTypes::typePirkleModified, "Pirkle Mod");
-      GetParam(paramIdx)->SetDisplayText(SRPlugins::SRSaturation::SaturationTypes::typeRectHalf, "Half Rect");
-      GetParam(paramIdx)->SetDisplayText(SRPlugins::SRSaturation::SaturationTypes::typeRectFull, "Full Rect");
-      break;
-    case kLimiterThresh: GetParam(paramIdx)->SetDisplayText(10, "Off"); break;
-    case kEqHpFreq: case kCompPeakSidechainFilterFreq: GetParam(paramIdx)->SetDisplayText(16, "Off"); break;
-    case kEqLpFreq: GetParam(paramIdx)->SetDisplayText(22000, "Off"); break;
-    case kCompPeakRatio: GetParam(paramIdx)->SetDisplayText(20, "inf"); break;
+    case kLimiterThresh: GetParam(paramIdx)->SetDisplayText((int)properties.maxVal, "Off"); break;
+    case kEqHpFreq: case kCompPeakSidechainFilterFreq: GetParam(paramIdx)->SetDisplayText((int)properties.minVal, "Off"); break;
+    case kEqLpFreq: GetParam(paramIdx)->SetDisplayText((int)properties.maxVal, "Off"); break;
+    case kCompPeakRatio: GetParam(paramIdx)->SetDisplayText((int)properties.maxVal, "inf"); break;
     default: break;
     }
     OnParamChange(paramIdx);
@@ -80,18 +127,18 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     const IRECT rectOutput = rectControls.SubRectHorizontal(6, 4).GetPadded(-5.f);
     const IRECT rectMeter = rectControls.SubRectHorizontal(6, 5).GetPadded(-5.f);
 
-   // ATTACH
-    pGraphics->AttachPanelBackground(pluginLayout.colorBackground2);        // Attach Background
+    // ATTACH
+    pGraphics->AttachPanelBackground(pluginLayout.colorPluginBG);        // Attach Background
     pGraphics->AttachCornerResizer(kUIResizerScale, false);                 // Attach Resizer
 
     // Attach logo
     pGraphics->AttachControl(new IBitmapControl(*this, IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH, 70), bmpLogo, -1, kBlendNone), cBitmapLogo);
     // Attach section rects
-    pGraphics->AttachControl(new IPanelControl(*this, rectInput, pluginLayout.colorBackground, true), cPanelInput, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectEq, pluginLayout.colorBackground, true), cPanelEq, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectComp, pluginLayout.colorBackground, true), cPanelComp, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectPost, pluginLayout.colorBackground, true), cPanelPost, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectOutput, pluginLayout.colorBackground, true), cPanelOutput, "UI");
+    pGraphics->AttachControl(new IPanelControl(*this, rectInput, pluginLayout.colorPanelBG, true), cPanelInput, "UI");
+    pGraphics->AttachControl(new IPanelControl(*this, rectEq, pluginLayout.colorPanelBG, true), cPanelEq, "UI");
+    pGraphics->AttachControl(new IPanelControl(*this, rectComp, pluginLayout.colorPanelBG, true), cPanelComp, "UI");
+    pGraphics->AttachControl(new IPanelControl(*this, rectPost, pluginLayout.colorPanelBG, true), cPanelPost, "UI");
+    pGraphics->AttachControl(new IPanelControl(*this, rectOutput, pluginLayout.colorPanelBG, true), cPanelOutput, "UI");
     pGraphics->AttachControl(new IPanelControl(*this, rectMeter, COLOR_TRANSPARENT, true), cPanelMeter, "UI");
     pGraphics->AttachControl(new IVMeterControl<2>(*this, rectMeter.SubRectHorizontal(3,0), "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new IVMeterControl<3>(*this, rectMeter.SubRectHorizontal(3,1), "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
@@ -129,17 +176,35 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         case kInputGain:
         case kOutputGain:
           // Attach faders
-          pGraphics->AttachControl(new IVSliderControl(*this, rect->GetGridCell(properties.y, properties.x, panelGridRowsAndCols[0], panelGridRowsAndCols[1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false), paramIdx, DEFAULT_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
+          pGraphics->AttachControl(new IVSliderControl(*this, rect->GetGridCell(properties.y, properties.x, panelGridRowsAndCols[0], panelGridRowsAndCols[1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false), paramIdx, SR_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
           break;
         default:
           // Attach knobs
+          IColor knobColor;									// We're pointing at the type of knob we want to add
+
+          switch (properties.Knobs) {						// "knob" is gonna be a pointer to IBitmap
+          case EControlImages::SslBlue: knobColor = pluginLayout.colorKnobSslBlue; break;
+          case EControlImages::SslGreen: knobColor = pluginLayout.colorKnobSslGreen; break;
+          case EControlImages::SslRed: knobColor = pluginLayout.colorKnobSslRed; break;
+          case EControlImages::SslOrange: knobColor = pluginLayout.colorKnobSslOrange; break;
+          case EControlImages::SslYellow: knobColor = pluginLayout.colorKnobSslYellow; break;
+          case EControlImages::SslBlack: knobColor = pluginLayout.colorKnobSslBlack; break;
+          case EControlImages::SslWhite: knobColor = pluginLayout.colorKnobSslWhite; break;
+          default: knobColor = pluginLayout.colorFG; break;
+          //case EControlImages::AbbeyChicken: knob = &knobAbbeyChicken; break;
+          //case EControlImages::Button: knob = &buttonSimple; break;
+          //case EControlImages::Fader: knob = &faderGain; break;
+          //case EControlImages::none: knob = 0;
+          }
+
           pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorKnobText(
             *this,
             rect->GetGridCell(properties.y, properties.x, panelGridRowsAndCols[0], panelGridRowsAndCols[1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
             paramIdx,
             properties.name,
             true,
-            DEFAULT_SPEC,
+            SR_SPEC,
+            knobColor,
             pluginLayout.tKnobLabel,
             pluginLayout.tKnobValue
           ), ctrlIdx);
@@ -149,7 +214,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       case typeEnum:
       case typeBool:
         // Attach switches
-        pGraphics->AttachControl(new IVSwitchControl(*this, rect->GetGridCell(properties.y, properties.x, panelGridRowsAndCols[0], panelGridRowsAndCols[1]), paramIdx, FlashCircleClickActionFunc, properties.shortName, DEFAULT_SPEC, (int)properties.maxVal + 1), ctrlIdx);
+        pGraphics->AttachControl(new IVSwitchControl(*this, rect->GetGridCell(properties.y, properties.x, panelGridRowsAndCols[0], panelGridRowsAndCols[1]).FracRectHorizontal(2.f, false).GetPadded(-5.f), paramIdx, FlashCircleClickActionFunc, properties.shortName, DEFAULT_SPEC, GetParam(paramIdx)->NDisplayTexts()), ctrlIdx);
         break;
       default:
         break;
@@ -216,12 +281,12 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   //  }
   //}
 
-  double* in1 = inputs[0];
-  double* in2 = inputs[1];
-  double* sc1 = inputs[2];
-  double* sc2 = inputs[3];
-  double* out1 = outputs[0];
-  double* out2 = outputs[1];
+  sample* in1 = inputs[0];
+  sample* in2 = inputs[1];
+  sample* sc1 = inputs[2];
+  sample* sc2 = inputs[3];
+  sample* out1 = outputs[0];
+  sample* out2 = outputs[1]; 
 
   
   // Begin Processing per Frame
@@ -265,15 +330,15 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       // -------------
       if (mInputBypass != 1) {
 
-        // Upsample
-        // Insert upsample method here ...
-        // double y = mOverSampler.Process(x, [](double input) { return std::tanh(input); })
-
         // Saturation
-        if (mSaturationAmount != 0.) fInputSaturation.process(*out1, *out2);
+        if (mSaturationAmount != 0.) {
+          *out1 = fInputSaturationL.process(*out1);
+          *out2 = fInputSaturationR.process(*out2);
+          // Here I'll try to implement oversampling
+          //*out1 = mOverSamplerL.Process(*out1 * mInputDrive, [](sample input) {return std::tanh(input);});
+          //*out2 = mOverSamplerR.Process(*out2 * mInputDrive, [](sample input) {return std::tanh(input);});
 
-        // Downsample
-        // Insert downsample method here ...
+        }
 
       }
       //	----------------
@@ -368,14 +433,14 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
         // Compressor
 
-        double vCompDry1 = *out1;
-        double vCompDry2 = *out2;
+        sample vCompDry1 = *out1;
+        sample vCompDry2 = *out2;
 
         if (mCompIsParallel == 1) {
-          double vCompRmsIn1 = *out1;
-          double vCompPeakIn1 = *out1;
-          double vCompRmsIn2 = *out2;
-          double vCompPeakIn2 = *out2;
+          sample vCompRmsIn1 = *out1;
+          sample vCompPeakIn1 = *out1;
+          sample vCompRmsIn2 = *out2;
+          sample vCompPeakIn2 = *out2;
 
           if (mCompRmsRatio != 1. && mCompRmsThresh != 0.) {
             (mCompRmsIsExtSc != 1) ? fCompressorRms.process(vCompRmsIn1, vCompRmsIn2) : fCompressorRms.process(vCompRmsIn1, vCompRmsIn2, *sc1, *sc2);
@@ -424,10 +489,10 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
         // Pan
 
         if (mPan != .5 || mIsPanMonoLow == true) {
-          vSafePanLowSignal1 = *out1;
-          vSafePanHighSignal1 = *out1;
-          vSafePanLowSignal2 = *out2;
-          vSafePanHighSignal2 = *out2;
+          sample vSafePanLowSignal1 = *out1;
+          sample vSafePanHighSignal1 = *out1;
+          sample vSafePanLowSignal2 = *out2;
+          sample vSafePanHighSignal2 = *out2;
 
           vSafePanLowSignal1 = fSafePanLpL.process(vSafePanLowSignal1);
           vSafePanLowSignal2 = fSafePanLpR.process(vSafePanLowSignal2);
@@ -551,24 +616,34 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
   case kInputDrive:
     mInputDrive = GetParam(paramIdx)->Value();
-    fInputSaturation.setDrive(mInputDrive);
+    fInputSaturationL.setDrive(mInputDrive);
+    fInputSaturationR.setDrive(mInputDrive);
     break;
   case kSaturationAmount:
     mSaturationAmount = GetParam(paramIdx)->Value() / 100.;
-    fInputSaturation.setAmount(mSaturationAmount);
+    fInputSaturationL.setAmount(mSaturationAmount);
+    fInputSaturationR.setAmount(mSaturationAmount);
     break;
   case kSaturationHarmonics:
     mSaturationHarmonics = GetParam(paramIdx)->Value() / 100.;
-    fInputSaturation.setHarmonics(mSaturationHarmonics);
+    fInputSaturationL.setHarmonics(mSaturationHarmonics);
+    fInputSaturationR.setHarmonics(mSaturationHarmonics);
     break;
   case kSaturationSkew:
     mSaturationSkew = GetParam(paramIdx)->Value() * 0.05;
-    fInputSaturation.setSkew(mSaturationSkew);
+    fInputSaturationL.setSkew(mSaturationSkew);
+    fInputSaturationR.setSkew(mSaturationSkew);
     break;
   case kSaturationType:
     mSaturationType = int(GetParam(paramIdx)->Value());
-    fInputSaturation.setType(mSaturationType);
+    fInputSaturationL.setType(mSaturationType);
+    fInputSaturationR.setType(mSaturationType);
     break;
+  //case kOversamplingRate:
+  //  mOversamplingRate = int(GetParam(paramIdx)->Value());
+  //  mOverSamplerL.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+  //  mOverSamplerR.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+  //  break;
   case kClipperThreshold: mClipperThreshold = 1. - GetParam(paramIdx)->Value() / 100.; break;
   case kLimiterThresh:
     mLimiterThresh = GetParam(paramIdx)->Value();
@@ -914,11 +989,15 @@ void SRChannel::OnIdle() {
 
 
 void SRChannel::InitEffects() {
+  // Get sample rate
   mSampleRate = GetSampleRate();
+
+  // Init gain and pan
   fInputGain.initGain(mInputGain, mInputGain, double(mSampleRate) / 10., false);
   fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate) / 10., false);
   fPan.initPan(SRPlugins::SRGain::typeSinusodial, mPan, true);
 
+  // Init Eq
   fEqHpFilterOnepoleL.setFc(mEqHpFreq);
   fEqHpFilter1L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
   fEqHpFilter2L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
@@ -936,7 +1015,6 @@ void SRChannel::InitEffects() {
   fEqLmfFilterL.setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
   fEqLfFilterL.setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
   fDcBlockerL.setFc(10. / mSampleRate);
-
 
   fEqHpFilterOnepoleR.setFc(mEqHpFreq);
   fEqHpFilter1R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
@@ -956,6 +1034,7 @@ void SRChannel::InitEffects() {
   fEqLfFilterR.setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
   fDcBlockerR.setFc(10. / mSampleRate);
 
+  // Init compressor
   fCompressorPeak.initCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, mSampleRate);
   fCompressorPeak.initRuntime();
 
@@ -963,22 +1042,38 @@ void SRChannel::InitEffects() {
   fCompressorRms.initCompressor(mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease, mCompPeakSidechainFilterFreq, mCompRmsKneeWidthDb, 300., mCompRmsIsFeedback, mSampleRate);
   fCompressorRms.initRuntime();
 
+  // Init limiter
   fLimiter.setSampleRate(mSampleRate);
   fLimiter.setAttack(1.);
   fLimiter.setRelease(100.);
   fLimiter.setThresh(mLimiterThresh);
   fLimiter.initRuntime();
 
+  // Init safe pan filter
   fSafePanHpL.setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
   fSafePanLpL.setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
   fSafePanHpR.setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
   fSafePanLpR.setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
 
+  // Init deesser
   fDeesser.setDeesser(mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserFreq / mSampleRate, mDeesserQ, 10., mSampleRate);
   fDeesser.initRuntime();
 
-  fInputSaturation.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
+  // Init saturation
+  fInputSaturationL.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
+  fInputSaturationR.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
 
+  //... Commented out until implementation of oversampling
+  //fInputSaturationLOversampled = std::bind(&fInputSaturationL.process, this, std::placeholders::_1);
+  //fInputSaturationROversampled = std::bind(&fInputSaturationR.process, this, std::placeholders::_1);
+
+  // Oversampling
+  //mOverSamplerL.SetOverSampling(OverSampler<sample>::k16x);
+  //mOverSamplerR.SetOverSampling(OverSampler<sample>::k16x);
+  //mOverSamplerL.Reset();
+  //mOverSamplerR.Reset();
+
+  // Name channels
   //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
   //{
     SetChannelLabel(ERoute::kInput, 0, "In Left", true);

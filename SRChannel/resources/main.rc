@@ -176,6 +176,7 @@ IDI_ICON1               ICON                    "SRChannel.ico"
 //
 #include "..\config.h"
 ROBOTTO_FN TTF ROBOTTO_FN
+CENTURY_FN TTF CENTURY_FN
 LOGO_FN PNG LOGO_FN
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

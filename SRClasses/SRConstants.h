@@ -105,8 +105,8 @@ const struct {
   IColor(255, 23, 23, 23),
   IColor(255, 243, 243, 243),
   // Texts
-  IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, DEFAULT_FONT, IText::kStyleBold, IText::kAlignCenter, IText::kVAlignTop, 0, IText::kQualityNonAntiAliased),
-  IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityNonAntiAliased)
+  IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, nullptr, IText::kStyleBold, IText::kAlignCenter, IText::kVAlignTop, 0, IText::kQualityNonAntiAliased),
+  IText(DEFAULT_TEXT_SIZE, COLOR_WHITE, nullptr, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityNonAntiAliased)
 };
 
 const IVColorSpec SR_SPEC = {

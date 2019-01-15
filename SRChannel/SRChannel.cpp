@@ -25,7 +25,7 @@ mEqLfQ(stQ)
       GetParam(paramIdx)->InitInt(properties.name, (int)properties.defaultVal, (int)properties.minVal, (int)properties.maxVal, properties.label, 0, properties.group);
       break;
     case typeBool:
-      GetParam(paramIdx)->InitBool(properties.name, (bool)properties.defaultVal, properties.label, 0, properties.group, "off", "on");
+      GetParam(paramIdx)->InitBool(properties.name, (bool)properties.defaultVal, properties.label, 0, properties.group, properties.labelMin, properties.labelMax);
       break;
     case typeEnum:
       switch (paramIdx) {
@@ -37,15 +37,15 @@ mEqLfQ(stQ)
           properties.label,
           0,
           properties.group,
-          "6 dB/o",
-          "12 dB/o",
-          "18 dB/o",
-          "24 dB/o",
-          "36 dB/o",
-          "48 dB/o",
-          "60 dB/o",
-          "72 dB/o",
-          "120 dB/o"
+          "6 dB/oct",
+          "12 dB/oct",
+          "18 dB/oct",
+          "24 dB/oct",
+          "36 dB/oct",
+          "48 dB/oct",
+          "60 dB/oct",
+          "72 dB/oct",
+          "120 dB/oct"
         );
         break;
       case kSaturationType:
@@ -108,6 +108,7 @@ mEqLfQ(stQ)
   mLayoutFunc = [&](IGraphics* pGraphics) {
     // LOAD
     pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
+    pGraphics->LoadFont(CENTURY_FN);
     IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
 
      // SETUP
@@ -150,7 +151,6 @@ mEqLfQ(stQ)
       IParam *param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
       const IRECT *rect;
       const structParameterProperties &properties = parameterProperties[paramIdx];		// ... and a variable "properties" pointing at the current parameters properties
-      int panelGridRowsAndCols[2] = { 20, 4 };
 
       switch (properties.AttachToControlPanel) {
       case RectHeader: rect = &rectHeader; break;
@@ -162,10 +162,7 @@ mEqLfQ(stQ)
       case RectFooter: rect = &rectFooter; break;
       default: break;
       }
-      if (properties.AttachToControlPanel >= 6) {
-        panelGridRowsAndCols[0] = 1;
-        panelGridRowsAndCols[1] = 24;
-      }
+
 
       switch (properties.Type)
       {
@@ -176,7 +173,7 @@ mEqLfQ(stQ)
         case kInputGain:
         case kOutputGain:
           // Attach faders
-          pGraphics->AttachControl(new IVSliderControl(*this, rect->GetGridCell(properties.y, properties.x, panelGridRowsAndCols[0], panelGridRowsAndCols[1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false), paramIdx, SR_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
+          pGraphics->AttachControl(new IVSliderControl(*this, rect->GetGridCell(properties.y, properties.x, sectionRectGridCells[properties.AttachToControlPanel][0], sectionRectGridCells[properties.AttachToControlPanel][1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false), paramIdx, SR_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
           break;
         default:
           // Attach knobs
@@ -199,9 +196,9 @@ mEqLfQ(stQ)
 
           pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorKnobText(
             *this,
-            rect->GetGridCell(properties.y, properties.x, panelGridRowsAndCols[0], panelGridRowsAndCols[1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
+            rect->GetGridCell(properties.y, properties.x, sectionRectGridCells[properties.AttachToControlPanel][0], sectionRectGridCells[properties.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
             paramIdx,
-            properties.name,
+            properties.shortName,
             true,
             SR_SPEC,
             knobColor,
@@ -214,13 +211,13 @@ mEqLfQ(stQ)
       case typeEnum:
       case typeBool:
         // Attach switches
-        pGraphics->AttachControl(new IVSwitchControl(*this, rect->GetGridCell(properties.y, properties.x, panelGridRowsAndCols[0], panelGridRowsAndCols[1]).FracRectHorizontal(2.f, false).GetPadded(-5.f), paramIdx, FlashCircleClickActionFunc, properties.shortName, DEFAULT_SPEC, GetParam(paramIdx)->NDisplayTexts()), ctrlIdx);
+        pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorSwitch(*this, rect->GetGridCell(properties.y, properties.x, sectionRectGridCells[properties.AttachToControlPanel][0], sectionRectGridCells[properties.AttachToControlPanel][1]).FracRectHorizontal(2.f, false).GetPadded(-5.f), paramIdx, FlashCircleClickActionFunc, properties.shortName, DEFAULT_SPEC, GetParam(paramIdx)->NDisplayTexts()), ctrlIdx);
         break;
       default:
         break;
       }
-      pGraphics->GetControl(paramIdx)->SetMOWhenGrayed(true);
-      pGraphics->GetControl(paramIdx)->SetTooltip(properties.tooltip);
+      pGraphics->GetControlWithTag(ctrlIdx)->SetMOWhenGrayed(true);
+      pGraphics->GetControlWithTag(ctrlIdx)->SetTooltip(properties.tooltip);
     }
 
     // Additional tooltips
@@ -230,7 +227,6 @@ mEqLfQ(stQ)
     pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope fpr left and right channel");
 
   };
-#endif
 }
 // END GRAPHICS func
 
@@ -267,9 +263,114 @@ void SRChannel::GrayOutControls()
     }
   }
 }
+#endif
 
 // DSP func
 #if IPLUG_DSP
+
+void SRChannel::InitEffects() {
+  // Get sample rate
+  mSampleRate = GetSampleRate();
+
+  // Init gain and pan
+  fInputGain.initGain(mInputGain, mInputGain, double(mSampleRate) / 10., false);
+  fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate) / 10., false);
+  fPan.initPan(SRPlugins::SRGain::typeSinusodial, mPan, true);
+
+  // Init Eq
+  fEqHpFilterOnepoleL.setFc(mEqHpFreq);
+  fEqHpFilter1L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter2L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter3L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter4L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter5L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter6L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter7L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter8L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter9L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter10L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqLpFilter1L.setFilter(SRPlugins::SRFilters::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHfFilterL.setFilter(SRPlugins::SRFilters::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
+  fEqHmfFilterL.setFilter(SRPlugins::SRFilters::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
+  fEqLmfFilterL.setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
+  fEqLfFilterL.setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
+  fDcBlockerL.setFc(10. / mSampleRate);
+
+  fEqHpFilterOnepoleR.setFc(mEqHpFreq);
+  fEqHpFilter1R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter2R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter3R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter4R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter5R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter6R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter7R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter8R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter9R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHpFilter10R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqLpFilter1R.setFilter(SRPlugins::SRFilters::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fEqHfFilterR.setFilter(SRPlugins::SRFilters::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
+  fEqHmfFilterR.setFilter(SRPlugins::SRFilters::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
+  fEqLmfFilterR.setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
+  fEqLfFilterR.setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
+  fDcBlockerR.setFc(10. / mSampleRate);
+
+  // Init compressor
+  fCompressorPeak.initCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, mSampleRate);
+  fCompressorPeak.initRuntime();
+
+  // For sidechain filter frequency it requires an own knob later
+  fCompressorRms.initCompressor(mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease, mCompPeakSidechainFilterFreq, mCompRmsKneeWidthDb, 300., mCompRmsIsFeedback, mSampleRate);
+  fCompressorRms.initRuntime();
+
+  // Init limiter
+  fLimiter.setSampleRate(mSampleRate);
+  fLimiter.setAttack(1.);
+  fLimiter.setRelease(100.);
+  fLimiter.setThresh(mLimiterThresh);
+  fLimiter.initRuntime();
+
+  // Init safe pan filter
+  fSafePanHpL.setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+  fSafePanLpL.setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+  fSafePanHpR.setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+  fSafePanLpR.setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+
+  // Init deesser
+  fDeesser.setDeesser(mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserFreq / mSampleRate, mDeesserQ, 10., mSampleRate);
+  fDeesser.initRuntime();
+
+  // Init saturation
+  fInputSaturationL.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
+  fInputSaturationR.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
+
+  //... Commented out until implementation of oversampling
+  //fInputSaturationLOversampled = std::bind(&fInputSaturationL.process, this, std::placeholders::_1);
+  //fInputSaturationROversampled = std::bind(&fInputSaturationR.process, this, std::placeholders::_1);
+
+  // Oversampling
+  //mOverSamplerL.SetOverSampling(OverSampler<sample>::k16x);
+  //mOverSamplerR.SetOverSampling(OverSampler<sample>::k16x);
+  //mOverSamplerL.Reset();
+  //mOverSamplerR.Reset();
+
+  // Name channels
+  //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
+  //{
+  SetChannelLabel(ERoute::kInput, 0, "In Left", true);
+  SetChannelLabel(ERoute::kInput, 1, "In Right", true);
+  SetChannelLabel(ERoute::kInput, 2, "ExtSC Left", true);
+  SetChannelLabel(ERoute::kInput, 3, "ExtSC Right", true);
+  SetChannelLabel(ERoute::kOutput, 0, "Out Left", true);
+  SetChannelLabel(ERoute::kOutput, 1, "Out Right", true);
+  //}
+  //else // for AU and VST3 we name buses
+  //{
+  //  SetChannel
+  //  SetInputBusLabel(0, "Input");
+  //  SetInputBusLabel(1, "Ext SC");
+  //  SetOutputBusLabel(0, "Output");
+  //}
+}
 
 void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
@@ -985,111 +1086,6 @@ void SRChannel::OnIdle() {
   //mGrMeterBallistics.TransmitData(*this);
   mOutputMeterBallistics.TransmitData(*this);
   mScopeBallistics.TransmitData(*this);
-}
-
-
-void SRChannel::InitEffects() {
-  // Get sample rate
-  mSampleRate = GetSampleRate();
-
-  // Init gain and pan
-  fInputGain.initGain(mInputGain, mInputGain, double(mSampleRate) / 10., false);
-  fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate) / 10., false);
-  fPan.initPan(SRPlugins::SRGain::typeSinusodial, mPan, true);
-
-  // Init Eq
-  fEqHpFilterOnepoleL.setFc(mEqHpFreq);
-  fEqHpFilter1L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter2L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter3L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter4L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter5L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter6L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter7L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter8L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter9L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter10L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqLpFilter1L.setFilter(SRPlugins::SRFilters::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHfFilterL.setFilter(SRPlugins::SRFilters::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
-  fEqHmfFilterL.setFilter(SRPlugins::SRFilters::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
-  fEqLmfFilterL.setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
-  fEqLfFilterL.setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
-  fDcBlockerL.setFc(10. / mSampleRate);
-
-  fEqHpFilterOnepoleR.setFc(mEqHpFreq);
-  fEqHpFilter1R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter2R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter3R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter4R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter5R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter6R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter7R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter8R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter9R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter10R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqLpFilter1R.setFilter(SRPlugins::SRFilters::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHfFilterR.setFilter(SRPlugins::SRFilters::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
-  fEqHmfFilterR.setFilter(SRPlugins::SRFilters::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
-  fEqLmfFilterR.setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
-  fEqLfFilterR.setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
-  fDcBlockerR.setFc(10. / mSampleRate);
-
-  // Init compressor
-  fCompressorPeak.initCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, mSampleRate);
-  fCompressorPeak.initRuntime();
-
-  // For sidechain filter frequency it requires an own knob later
-  fCompressorRms.initCompressor(mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease, mCompPeakSidechainFilterFreq, mCompRmsKneeWidthDb, 300., mCompRmsIsFeedback, mSampleRate);
-  fCompressorRms.initRuntime();
-
-  // Init limiter
-  fLimiter.setSampleRate(mSampleRate);
-  fLimiter.setAttack(1.);
-  fLimiter.setRelease(100.);
-  fLimiter.setThresh(mLimiterThresh);
-  fLimiter.initRuntime();
-
-  // Init safe pan filter
-  fSafePanHpL.setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-  fSafePanLpL.setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-  fSafePanHpR.setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-  fSafePanLpR.setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-
-  // Init deesser
-  fDeesser.setDeesser(mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserFreq / mSampleRate, mDeesserQ, 10., mSampleRate);
-  fDeesser.initRuntime();
-
-  // Init saturation
-  fInputSaturationL.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
-  fInputSaturationR.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
-
-  //... Commented out until implementation of oversampling
-  //fInputSaturationLOversampled = std::bind(&fInputSaturationL.process, this, std::placeholders::_1);
-  //fInputSaturationROversampled = std::bind(&fInputSaturationR.process, this, std::placeholders::_1);
-
-  // Oversampling
-  //mOverSamplerL.SetOverSampling(OverSampler<sample>::k16x);
-  //mOverSamplerR.SetOverSampling(OverSampler<sample>::k16x);
-  //mOverSamplerL.Reset();
-  //mOverSamplerR.Reset();
-
-  // Name channels
-  //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
-  //{
-    SetChannelLabel(ERoute::kInput, 0, "In Left", true);
-    SetChannelLabel(ERoute::kInput, 1, "In Right", true);
-    SetChannelLabel(ERoute::kInput, 2, "ExtSC Left", true);
-    SetChannelLabel(ERoute::kInput, 3, "ExtSC Right", true);
-    SetChannelLabel(ERoute::kOutput, 0, "Out Left", true);
-    SetChannelLabel(ERoute::kOutput, 1, "Out Right", true);
-  //}
-  //else // for AU and VST3 we name buses
-  //{
-  //  SetChannel
-  //  SetInputBusLabel(0, "Input");
-  //  SetInputBusLabel(1, "Ext SC");
-  //  SetOutputBusLabel(0, "Output");
-  //}
 }
 
 #endif

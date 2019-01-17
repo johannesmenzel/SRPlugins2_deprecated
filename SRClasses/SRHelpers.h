@@ -1,5 +1,4 @@
-#ifndef SRHELPERS_H
-#define SRHELPERS_H
+#pragma once
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -7,58 +6,42 @@
 #include <string>
 
 namespace SRPlugins {
-	namespace SRHelpers {
+  namespace SRHelpers {
 
-		static inline double DBToAmp(double dB) { return exp(0.11512925464970 * dB); }
-		static inline double AmpToDB(double amp) { return 8.685889638065036553 * log(fabs(amp)); }
-		
-		inline double SetShapeCentered(double cMinValue, double cMaxValue, double cCenteredValue, double cControlPosition)
-		{
-			return log((cCenteredValue - cMinValue) / (cMaxValue - cMinValue)) / log(cControlPosition);
-		}
+    // CONVERSION
+    // ----------
 
-		inline double fast_tanh(double x)
-		{
-			x = exp(x + x);
-			return (x - 1) / (x + 1);
-		}
+    // Decibel - Linear conversion
+    static inline double DBToAmp(double dB) { return exp(0.11512925464970 * dB); }
+    static inline double AmpToDB(double amp) { return 8.685889638065036553 * log(fabs(amp)); }
 
-		inline char* setCharFromDouble(double doubleValue) {
-			std::string stringValue = std::to_string(doubleValue);
-			char *charValue = new char[stringValue.length() + 1];
-			return strcpy(charValue, stringValue.c_str());
-		}
+    // double to char conversion
+    // DOESNT WORK
+    inline char* setCharFromDouble(double doubleValue) {
+      std::string stringValue = std::to_string(doubleValue);
+      char *charValue = new char[stringValue.length() + 1];
+      return strcpy(charValue, stringValue.c_str());
+    }
 
-		inline double calcAutoMakeup(double threshDb, double ratio, double referenceDb, double attackMs, double releaseMs) {
-			//double threshLin = DBToAmp(threshDb);
-			//double referenceLin = DBToAmp(referenceDb);
-			//double multiplier = ((tanh(threshDb / referenceDb) + 1) / 2); // returns for x= inf; refDb; 0; -inf -> y= 1, .88, .5, 0
-			//return 1. + ((1. - threshLin) * (1. - ratio));
-			//mCompPeakAutoMakeup = (threshLin <= referenceLin) ? 1. + (1. - DBToAmp(mCompPeakThresh + 18)) * (1. - mCompPeakRatio) : 1.;
-			//return 1. + (1. - DBToAmp(threshDb - referenceDb)) * (1. - ratio);
+    inline double SetShapeCentered(double cMinValue, double cMaxValue, double cCenteredValue, double cControlPosition) {
+      return log((cCenteredValue - cMinValue) / (cMaxValue - cMinValue)) / log(cControlPosition);
+    }
 
-			//return 1. + ( (1. - threshLin) * (1. - ratio) * ((tanh(threshDb-referenceDb) + 1.) / 2.) );
-			//return 1. + (1. / DBToAmp((ratio - 1.) * (referenceDb - threshDb))) * ((1. - threshLin) * (1. - ratio));
-			//return 1.;
+    // DSP
+    // ---
 
-			return	1. + (1. / (DBToAmp(((ratio - 1.) * -threshDb) / 2)) - 1.) * sqrt(threshDb / referenceDb) * (sqrt(30.) / sqrt(attackMs)) * (sqrt(releaseMs) / sqrt(5000.));
-			//return makeup;
+    // Compressor auto makeup calculation
+    // SHOULD BE MOVED TO SRDYNAMICS CLASS
+    inline double calcAutoMakeup(double threshDb, double ratio, double referenceDb, double attackMs, double releaseMs) {
+      return	1. + (1. / (DBToAmp(((ratio - 1.) * -threshDb) / 2)) - 1.) * sqrt(threshDb / referenceDb) * (sqrt(30.) / sqrt(attackMs)) * (sqrt(releaseMs) / sqrt(5000.));
+    }
 
+    // tanh
+    inline double fast_tanh(double x) {
+      x = exp(x + x);
+      return (x - 1) / (x + 1);
+    }
 
-
-		}
-
-
-
-		//class SRHelpers
-		//{
-		//public:
-		//	SRHelpers();
-		//	~SRHelpers();
-		//};
-
-	}
+  }
 }
 // end namespaces
-
-#endif

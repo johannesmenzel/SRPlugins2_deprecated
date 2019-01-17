@@ -24,8 +24,7 @@
 //     Implementation as pointer:
 //       *out1 = name->process(*in1);
 
-#ifndef SRGain_h
-#define SRGain_h
+#pragma once
 
 // #include this and that
 #include "SRHelpers.h" // optional
@@ -145,5 +144,3 @@ namespace SRPlugins
 
 	} // namespace SRGain
 } // namespace SRPlugins
-
-#endif // SRGain_h

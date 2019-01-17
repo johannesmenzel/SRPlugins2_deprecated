@@ -22,9 +22,8 @@
 //  for your own purposes, free or commercial.
 //
 
+#pragma once
 
-#ifndef SRFilters_h
-#define SRFilters_h
 namespace SRPlugins {
 
 	namespace SRFilters {
@@ -111,5 +110,3 @@ namespace SRPlugins {
 	}
 }
 // end namespace SRFilters
-
-#endif // SRFilters_h

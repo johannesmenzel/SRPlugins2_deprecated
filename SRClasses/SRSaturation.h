@@ -24,8 +24,7 @@
 //     Implementation as pointer:
 //       *out1 = name->process(*in1);
 
-#ifndef SRSaturation_h
-#define SRSaturation_h
+#pragma once
 
 #include "SRHelpers.h"
 #include <functional>
@@ -205,5 +204,3 @@ namespace SRPlugins {
 		}
 	}
 }
-
-#endif // SRSaturation_h

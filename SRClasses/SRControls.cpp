@@ -10,19 +10,23 @@ namespace SRPlugins {
     // ----
 
 
-    SRVectorKnobText::SRVectorKnobText(IGEditorDelegate& dlg, IRECT bounds, int paramIdx,
-      const char* label, bool displayParamValue,
+    SRVectorKnobText::SRVectorKnobText(IRECT bounds, int paramIdx,
+      const char* label, const char* minLabel, const char* maxLabel, const char* ctrLabel, bool drawCircleLabels, bool displayParamValue,
       const IVColorSpec& colorSpec, const IColor& color, const IText& labelText, const IText& valueText,
-      float aMin, float aMax, float knobFrac,
+      float aMin, float aMax, float aDef, float knobFrac,
       EDirection direction, double gearing)
-      : IKnobControlBase(dlg, bounds, paramIdx, direction, gearing)
+      : IKnobControlBase(bounds, paramIdx, direction, gearing)
       , IVectorBase(colorSpec)
       , mAngleMin(aMin)
       , mAngleMax(aMax)
+      , mAngleDefault(aMin + aDef * (aMax - aMin))
       , mLabel(label)
+      , mLabelMin(minLabel)
+      , mLabelMax(maxLabel)
+      , mLabelCtr(ctrLabel)
+      , mDrawCircleLabels(drawCircleLabels)
       , mDisplayParamValue(displayParamValue)
       , mLabelText(labelText)
-      , mLabelShadowText(labelText)
       , mKnobFrac(knobFrac)
       , mColor(color)
     {
@@ -31,19 +35,23 @@ namespace SRPlugins {
       AttachIControl(this);
     }
 
-    SRVectorKnobText::SRVectorKnobText(IGEditorDelegate& dlg, IRECT bounds, IActionFunction actionFunction,
-      const char* label, bool displayParamValue,
+    SRVectorKnobText::SRVectorKnobText(IRECT bounds, IActionFunction actionFunction,
+      const char* label, const char* minLabel, const char* maxLabel, const char* ctrLabel, bool drawCircleLabels, bool displayParamValue,
       const IVColorSpec& colorSpec, const IColor& color, const IText& labelText, const IText& valueText,
-      float aMin, float aMax, float knobFrac,
+      float aMin, float aMax, float aDef, float knobFrac,
       EDirection direction, double gearing)
-      : IKnobControlBase(dlg, bounds, kNoParameter, direction, gearing)
+      : IKnobControlBase(bounds, kNoParameter, direction, gearing)
       , IVectorBase(colorSpec)
       , mAngleMin(aMin)
       , mAngleMax(aMax)
+      , mAngleDefault(aMin + aDef * (aMax - aMin))
       , mLabel(label)
+      , mLabelMin(minLabel)
+      , mLabelMax(maxLabel)
+      , mLabelCtr(ctrLabel)
+      , mDrawCircleLabels(drawCircleLabels)
       , mDisplayParamValue(displayParamValue)
       , mLabelText(labelText)
-      , mLabelShadowText(labelText)
       , mKnobFrac(knobFrac)
       , mColor(color)
     {
@@ -53,103 +61,127 @@ namespace SRPlugins {
       AttachIControl(this);
     }
 
-    void SRVectorKnobText::Draw(IGraphics& g) {
+    void SRVectorKnobText::OnInit()
+    {
 
-      const float v = mAngleMin + ((float)mValue * (mAngleMax - mAngleMin));
-      const float cx = mHandleBounds.MW(), cy = mHandleBounds.MH();
-      const float radius = (mHandleBounds.W() / 2.f);
-      const float mAngleDefault = mAngleMin + mDefaultValue * (mAngleMax - mAngleMin);
+    }
+
+    void SRVectorKnobText::Draw(IGraphics& g) {
+      const float mAngleValue = mAngleMin + ((float)mValue * (mAngleMax - mAngleMin));
       const float colorIntensity = fabs(mValue - mDefaultValue) / fmaxf(mDefaultValue, (1.f - mDefaultValue));
       IColor arcColor;
       IColor::LinearInterpolateBetween(GetColor(kBG), mColor, arcColor, 0.5f + 0.5f * colorIntensity);
-      SetFrameThickness(radius * 0.05f);
-      SetShadowOffset(radius * 0.2f);
+      const IText circleLabelMinText = IText(mText.mSize, IText::kAlignFar);
+      const IText circleLabelMaxText = IText(mText.mSize, IText::kAlignFar);
+      const IText circleLabelCtrText = IText(mText.mSize, IText::kAlignFar);
 
       // Background
       //g.FillRect(GetColor(kBG), mRECT);
 
       // Text Label
-      if (mLabelBounds.H()) mLabelShadowText.mFGColor = IColor(150, 0, 0, 0);
-      g.DrawText(mLabelShadowText, mLabel.Get(), mLabelBounds.GetHShifted(-1.f).GetVShifted(-1.f));
-      g.DrawText(mLabelText, mLabel.Get(), mLabelBounds);
+      if (mLabelBounds.H()) {
+        if (!mMouseIsOver)
+          g.DrawText(mLabelText, mLabel.Get(), mValueBounds);
+        else {
+          // Text Value
+          if (mDisplayParamValue)
+          {
+            WDL_String str;
+            GetParam()->GetDisplayForHost(str);
 
-      // Text Value
-      if (mDisplayParamValue)
-      {
-        WDL_String str;
-        GetParam()->GetDisplayForHost(str);
+            if (mShowParamLabel)
+            {
+              str.Append(" ");
+              str.Append(GetParam()->GetLabelForHost());
+            }
 
-        if (mShowParamLabel)
-        {
-          str.Append(" ");
-          str.Append(GetParam()->GetLabelForHost());
+            //g.FillRoundRect(GetColor(kFR), mValueBounds, 2.f, 0);
+            g.DrawText(mValueText, str.Get(), mValueBounds);
+          }
         }
+      }
 
-        g.FillRoundRect(GetColor(kFR), mValueBounds, 2.f, 0);
-        g.DrawText(mValueText, str.Get(), mValueBounds);
+      // Draw Circle Labels
+      if (mDrawCircleLabels) {
+        if (mMinLabelBounds.H()) {
+          g.DrawText(mTextCircleLabelMin, mLabelMin.Get(), mMinLabelBounds, 0);
+        }
+        if (mMaxLabelBounds.H()) {
+          g.DrawText(mTextCircleLabelMax, mLabelMax.Get(), mMaxLabelBounds, 0);
+        }
+        if (mCtrLabelBounds.H()) {
+          g.DrawText(mTextCircleLabelCtr, mLabelCtr.Get(), mCtrLabelBounds, 0);
+        }
       }
 
 
       // Value Arc
-      if (v <= mAngleDefault) g.DrawArc(arcColor, cx, cy, radius, v, mAngleDefault, 0, 4.f * mFrameThickness);
-      else g.DrawArc(arcColor, cx, cy, radius, mAngleDefault, v, 0, 4.f * mFrameThickness);
+      if (mAngleValue <= mAngleDefault) g.DrawArc(arcColor, mCenterX, mCenterY, knobScales.valArc.relRadius * mRadius, mAngleValue, mAngleDefault, 0, knobScales.valArc.relThickness * mRelThickness);
+      else g.DrawArc(arcColor, mCenterX, mCenterY, mRadius, mAngleDefault, mAngleValue, 0, 4.f * mRelThickness);
+
+      // Dots
+      for (int i = 0; i <= 10; i++) {
+        g.DrawRadialLine(COLOR_MID_GRAY, mCenterX, mCenterY, mAngleMin + (float(i) * 0.1f) * (mAngleMax - mAngleMin), mRadius, mRadius + knobScales.dots.relThickness * mRelThickness, 0, knobScales.dots.relThickness * mRelThickness);
+      }
+
+
 
       // Frame
-      //g.DrawCircle(GetColor(kFR), cx, cy, radius * 0.9f, 0, mFrameThickness);
+      //g.DrawCircle(GetColor(kFR), mCenterX, mCenterY, mRadius * 0.9f, 0, mRelThickness);
 
       // Rim Shadows
       if (mDrawShadows && !mEmboss) {
         // Rim Shadow
-        g.FillCircle(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius * 0.875f);
+        g.FillCircle(GetColor(kSH), mCenterX + mRelShadowOffset, mCenterY + mRelShadowOffset, mRadius * knobScales.rim.relRadius);
         // Outer Rim Shadow
-        g.DrawArc(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius * 0.9f, v + 5.f, v + 55.f, 0, mFrameThickness);
-        g.DrawArc(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius * 0.9f, v + 65.f, v + 115.f, 0, mFrameThickness);
-        g.DrawArc(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius * 0.9f, v + 125.f, v + 175.f, 0, mFrameThickness);
-        g.DrawArc(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius * 0.9f, v + 185.f, v + 235.f, 0, mFrameThickness);
-        g.DrawArc(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius * 0.9f, v + 245.f, v + 295.f, 0, mFrameThickness);
-        g.DrawArc(GetColor(kSH), cx + mShadowOffset, cy + mShadowOffset, radius * 0.9f, v + 305.f, v + 355.f, 0, mFrameThickness);
+        g.DrawArc(GetColor(kSH), mCenterX + mRelShadowOffset, mCenterY + mRelShadowOffset, mRadius * knobScales.outerRim.relRadius, mAngleValue + 5.f, mAngleValue + 55.f, 0, knobScales.outerRim.relThickness * mRelThickness);
+        g.DrawArc(GetColor(kSH), mCenterX + mRelShadowOffset, mCenterY + mRelShadowOffset, mRadius * knobScales.outerRim.relRadius, mAngleValue + 65.f, mAngleValue + 115.f, 0, knobScales.outerRim.relThickness * mRelThickness);
+        g.DrawArc(GetColor(kSH), mCenterX + mRelShadowOffset, mCenterY + mRelShadowOffset, mRadius * knobScales.outerRim.relRadius, mAngleValue + 125.f, mAngleValue + 175.f, 0, knobScales.outerRim.relThickness * mRelThickness);
+        g.DrawArc(GetColor(kSH), mCenterX + mRelShadowOffset, mCenterY + mRelShadowOffset, mRadius * knobScales.outerRim.relRadius, mAngleValue + 185.f, mAngleValue + 235.f, 0, knobScales.outerRim.relThickness * mRelThickness);
+        g.DrawArc(GetColor(kSH), mCenterX + mRelShadowOffset, mCenterY + mRelShadowOffset, mRadius * knobScales.outerRim.relRadius, mAngleValue + 245.f, mAngleValue + 295.f, 0, knobScales.outerRim.relThickness * mRelThickness);
+        g.DrawArc(GetColor(kSH), mCenterX + mRelShadowOffset, mCenterY + mRelShadowOffset, mRadius * knobScales.outerRim.relRadius, mAngleValue + 305.f, mAngleValue + 355.f, 0, knobScales.outerRim.relThickness * mRelThickness);
       }
 
       // Rim
-      g.DrawCircle(GetColor(kON), cx, cy, radius * 0.825f, 0, 2.f * mFrameThickness);
+      g.FillCircle(GetColor(kON), mCenterX, mCenterY, mRadius * knobScales.rim.relRadius, 0);
       // Outer Rim
-      g.DrawArc(GetColor(kON), cx, cy, radius * 0.9f, v + 5.f, v + 55.f, 0, mFrameThickness);
-      g.DrawArc(GetColor(kON), cx, cy, radius * 0.9f, v + 65.f, v + 115.f, 0, mFrameThickness);
-      g.DrawArc(GetColor(kON), cx, cy, radius * 0.9f, v + 125.f, v + 175.f, 0, mFrameThickness);
-      g.DrawArc(GetColor(kON), cx, cy, radius * 0.9f, v + 185.f, v + 235.f, 0, mFrameThickness);
-      g.DrawArc(GetColor(kON), cx, cy, radius * 0.9f, v + 245.f, v + 295.f, 0, mFrameThickness);
-      g.DrawArc(GetColor(kON), cx, cy, radius * 0.9f, v + 305.f, v + 355.f, 0, mFrameThickness);
+      g.FillArc(GetColor(kON), mCenterX, mCenterY, mRadius * knobScales.outerRim.relRadius, mAngleValue + 5.f, mAngleValue + 55.f, 0);
+      g.FillArc(GetColor(kON), mCenterX, mCenterY, mRadius * knobScales.outerRim.relRadius, mAngleValue + 65.f, mAngleValue + 115.f, 0);
+      g.FillArc(GetColor(kON), mCenterX, mCenterY, mRadius * knobScales.outerRim.relRadius, mAngleValue + 125.f, mAngleValue + 175.f, 0);
+      g.FillArc(GetColor(kON), mCenterX, mCenterY, mRadius * knobScales.outerRim.relRadius, mAngleValue + 185.f, mAngleValue + 235.f, 0);
+      g.FillArc(GetColor(kON), mCenterX, mCenterY, mRadius * knobScales.outerRim.relRadius, mAngleValue + 245.f, mAngleValue + 295.f, 0);
+      g.FillArc(GetColor(kON), mCenterX, mCenterY, mRadius * knobScales.outerRim.relRadius, mAngleValue + 305.f, mAngleValue + 355.f, 0);
 
 
       // Head shadow and head
-      if (mDrawShadows && !mEmboss) g.FillCircle(GetColor(kSH), cx + mFrameThickness, cy + mFrameThickness, radius * 0.8f);
-      g.FillCircle(mColor, cx, cy, (radius * 0.8f), 0);
+      if (mDrawShadows && !mEmboss) g.FillCircle(GetColor(kSH), mCenterX + mRelThickness, mCenterY + mRelThickness, mRadius * knobScales.head.relRadius);
+      g.FillCircle(mColor, mCenterX, mCenterY, (mRadius * knobScales.head.relRadius), 0);
 
       // Knob Lights
       if (!mEmboss) {
-        g.DrawArc(IColor(70, 0, 0, 0), cx, cy, (radius * 0.775f), 45.f, -135.f, 0, radius * 0.05f);
-        g.DrawArc(IColor(100, 255, 255, 255), cx, cy, (radius * 0.775f), -180.f, 90.f, 0, radius * 0.05f);
+        g.DrawArc(IColor(70, 0, 0, 0), mCenterX, mCenterY, (mRadius * knobScales.headLights.relRadius), 45.f, -135.f, 0, mRadius * knobScales.headLights.relThickness);
+        g.DrawArc(IColor(100, 255, 255, 255), mCenterX, mCenterY, (mRadius * knobScales.headLights.relRadius), -180.f, 90.f, 0, mRadius * knobScales.headLights.relThickness);
       }
 
       // Outer Arrow
-      g.DrawRadialLine(GetColor(kFR), cx, cy, v, 0.7f * radius, radius * 0.9f, 0, 3.f * mFrameThickness);
+      g.DrawRadialLine(GetColor(kFR), mCenterX, mCenterY, mAngleValue, knobScales.outerArrow.relInnerRadius * mRadius, mRadius * knobScales.outerArrow.relRadius, 0, knobScales.outerArrow.relThickness * mRelThickness);
 
       // Arrow shadow
-      g.DrawRadialLine(GetColor(kSH), cx + mFrameThickness, cy + mFrameThickness, v, 0.f, 0.8f * radius, 0, 3.f * mFrameThickness);
-      g.FillCircle(GetColor(kSH), cx + mFrameThickness, cy + mFrameThickness, 1.5f * mFrameThickness, 0);
+      g.DrawRadialLine(GetColor(kSH), mCenterX + mRelThickness, mCenterY + mRelThickness, mAngleValue, knobScales.arrow.relInnerRadius, knobScales.arrow.relRadius * mRadius, 0, knobScales.arrow.relThickness * mRelThickness);
+      g.FillCircle(GetColor(kSH), mCenterX + mRelThickness, mCenterY + mRelThickness, knobScales.arrow.relThickness * mRelThickness * 0.5f, 0);
 
       // Arrow
       if (mColor.B + mColor.R + mColor.G > 600) {
-        g.DrawRadialLine(GetColor(kFR), cx, cy, v, 0.f, 0.8f * radius, 0, 3.f * mFrameThickness);
-        g.FillCircle(GetColor(kFR), cx, cy, 1.5f * mFrameThickness, 0);
+        g.DrawRadialLine(GetColor(kFR), mCenterX, mCenterY, mAngleValue, knobScales.arrow.relInnerRadius, knobScales.arrow.relRadius * mRadius, 0, knobScales.arrow.relThickness * mRelThickness);
+        g.FillCircle(GetColor(kFR), mCenterX, mCenterY, knobScales.arrow.relThickness * mRelThickness * 0.5f, 0);
       }
       else {
-        g.DrawRadialLine(GetColor(kON), cx, cy, v, 0.f, 0.8f * radius, 0, 3.f * mFrameThickness);
-        g.FillCircle(GetColor(kON), cx, cy, 1.5f * mFrameThickness, 0);
+        g.DrawRadialLine(GetColor(kON), mCenterX, mCenterY, mAngleValue, knobScales.arrow.relInnerRadius, knobScales.arrow.relRadius * mRadius, 0, knobScales.arrow.relThickness * mRelThickness);
+        g.FillCircle(GetColor(kON), mCenterX, mCenterY, knobScales.arrow.relThickness * mRelThickness * 0.5f, 0);
       }
 
       // Mouseover
-      if (mMouseIsOver) g.FillCircle(GetColor(kHL), cx, cy, radius * 0.8f);
+      if (mMouseIsOver) g.FillCircle(GetColor(kHL), mCenterX, mCenterY, mRadius * 0.8f);
 
     }
 
@@ -162,6 +194,10 @@ namespace SRPlugins {
         IKnobControlBase::OnMouseDown(x, y, mod);
       }
     }
+
+
+
+
 
     void SRVectorKnobText::OnResize() {
       IRECT clickableArea;
@@ -216,16 +252,46 @@ namespace SRPlugins {
 
       mHandleBounds = GetAdjustedHandleBounds(mTargetRECT).GetScaledAboutCentre(mKnobFrac);
 
+      mRadius = (mHandleBounds.W() / 2.f);
+      mCenterX = mHandleBounds.MW();
+      mCenterY = mHandleBounds.MH();
+      mRelThickness = mRadius * mFrameThickness * 0.05f / 2.f;
+      mRelShadowOffset = mRadius * mShadowOffset * 0.2f / 3.f;
+
+      if (mDrawCircleLabels) {
+        if (mLabelMin.GetLength()) {
+          mTextCircleLabelMin.mSize = mRadius * 0.5f;
+          IRECT textRect;
+          GetUI()->MeasureText(mTextCircleLabelMin, mLabelMin.Get(), textRect);
+          mMinLabelBounds = IRECT(mHandleBounds.L, float(mValueBounds.T - textRect.H()), mValueBounds.L, mValueBounds.T);
+        }
+        if (mLabelMax.GetLength()) {
+          mTextCircleLabelMax.mSize = mRadius * 0.5f;
+          IRECT textRect;
+          GetUI()->MeasureText(mTextCircleLabelMax, mLabelMax.Get(), textRect);
+          mMaxLabelBounds = IRECT(mValueBounds.R, float(mValueBounds.T - textRect.H()), mHandleBounds.R, mValueBounds.T);
+        }
+        // Center Label need rework
+        if (mLabelCtr.GetLength()) {
+          mTextCircleLabelCtr.mSize = mRadius * 0.5f;
+          IRECT textRect;
+          GetUI()->MeasureText(mTextCircleLabelCtr, mLabelCtr.Get(), textRect);
+          mCtrLabelBounds = IRECT(mRECT.L, mRECT.T, mRECT.R, (mRECT.T + textRect.H()));
+        }
+      }
+
+
       SetDirty(false);
     }
+
 
 
     // SWITCH
     // ------
 
-    SRVectorSwitch::SRVectorSwitch(IGEditorDelegate& dlg, IRECT bounds, int paramIdx, IActionFunction actionFunc
+    SRVectorSwitch::SRVectorSwitch(IRECT bounds, int paramIdx, IActionFunction actionFunc
       , const char* str, const IVColorSpec& colorSpec, int numStates)
-      : ISwitchControlBase(dlg, bounds, paramIdx, actionFunc, numStates)
+      : ISwitchControlBase(bounds, paramIdx, actionFunc, numStates)
       , IVectorBase(colorSpec)
     {
       AttachIControl(this);

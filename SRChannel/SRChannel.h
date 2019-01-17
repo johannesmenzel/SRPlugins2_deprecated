@@ -16,7 +16,7 @@
 // Plugin constants
 #include "SRChannelConstants.h"
 // ... Commented out until implementation of oversampling
-//#include "Oversampler.h"
+#include "Oversampler.h"
 //#include <functional>
 
 class SRChannel : public IPlug

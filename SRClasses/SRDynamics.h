@@ -29,8 +29,6 @@
 
 #pragma once
 
-#ifndef __SRDYNAMICS_H__
-#define __SRDYNAMICS_H__
 
 #if _MSC_VER > 1000				// MS Visual Studio
 #define INLINE __forceinline	// forces inline
@@ -871,4 +869,3 @@ namespace SRPlugins {
 
 	}	// end namespace SRDynamics
 }	// end namespace SRPlugins
-#endif	// end __SRDYNAMICS_H__

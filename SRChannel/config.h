@@ -52,3 +52,4 @@
 #define ROBOTTO_FN "Roboto-Regular.ttf"
 #define CENTURY_FN "GOTHIC.TTF"
 #define LOGO_FN	"../SRImages/Logo.png"
+#define PANEL_FN	"../SRImages/SrChannel-Background.png"

@@ -178,6 +178,7 @@ IDI_ICON1               ICON                    "SRChannel.ico"
 ROBOTTO_FN TTF ROBOTTO_FN
 CENTURY_FN TTF CENTURY_FN
 LOGO_FN PNG LOGO_FN
+PANEL_FN PNG PANEL_FN
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
 

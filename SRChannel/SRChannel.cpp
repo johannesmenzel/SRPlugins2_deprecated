@@ -8,35 +8,36 @@
 
 
 SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
-: IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo),
-mEqHfQ(stQ),
-mEqLfQ(stQ)
+  : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo),
+  mEqHfQ(stQ),
+  mEqLfQ(stQ)
 {
   // Initialize Parameters
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
-    IParam* param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
-    const structParameterProperties &properties = parameterProperties[paramIdx];		// ... and a variable "properties" pointing at the current parameters properties
-    switch (properties.Type)
+    //IParam* param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
+    const StructParameterProperties &p = parameterProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
+    switch (p.Type)
     {
     case typeDouble:
-      GetParam(paramIdx)->InitDouble(properties.name, properties.defaultVal, properties.minVal, properties.maxVal, properties.stepValue, properties.label, 0, properties.group, new IParam::ShapePowCurve(SRPlugins::SRHelpers::SetShapeCentered(properties.minVal, properties.maxVal, properties.centerVal, properties.centerPoint)), IParam::kUnitCustom);
+      //InitDoubleShapeFromMiddlePosition(this, paramIdx, p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.label, 0, p.group, p.centerVal, p.centerPoint, IParam::kUnitCustom);
+      GetParam(paramIdx)->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.label, 0, p.group, new IParam::ShapePowCurve(SRPlugins::SRHelpers::SetShapeCentered(p.minVal, p.maxVal, p.centerVal, p.centerPoint)), IParam::kUnitCustom);
       break;
     case typeInt:
-      GetParam(paramIdx)->InitInt(properties.name, (int)properties.defaultVal, (int)properties.minVal, (int)properties.maxVal, properties.label, 0, properties.group);
+      GetParam(paramIdx)->InitInt(p.name, (int)p.defaultVal, (int)p.minVal, (int)p.maxVal, p.label, 0, p.group);
       break;
     case typeBool:
-      GetParam(paramIdx)->InitBool(properties.name, (bool)properties.defaultVal, properties.label, 0, properties.group, properties.labelMin, properties.labelMax);
+      GetParam(paramIdx)->InitBool(p.name, (bool)p.defaultVal, p.label, 0, p.group, p.labelMin, p.labelMax);
       break;
     case typeEnum:
       switch (paramIdx) {
       case kEqHpOrder: /*case kEqLpOrder:*/
         GetParam(paramIdx)->InitEnum(
-          properties.name,
-          (int)properties.defaultVal,
+          p.name,
+          (int)p.defaultVal,
           EFilterSlope::kNumOrders,
-          properties.label,
+          p.label,
           0,
-          properties.group,
+          p.group,
           "6 dB/oct",
           "12 dB/oct",
           "18 dB/oct",
@@ -49,12 +50,12 @@ mEqLfQ(stQ)
         );
         break;
       case kSaturationType:
-        GetParam(paramIdx)->InitEnum(properties.name,
-          (int)properties.defaultVal,
+        GetParam(paramIdx)->InitEnum(p.name,
+          (int)p.defaultVal,
           SRPlugins::SRSaturation::SaturationTypes::numTypes,
-          properties.label,
+          p.label,
           0,
-          properties.group,
+          p.group,
           "MusicDSP",
           "Zoelzer",
           "Pirkle",
@@ -62,20 +63,20 @@ mEqLfQ(stQ)
           "Half Rect",
           "Full Rect"
         ); break;
-      //case kOversamplingRate:
-      //  GetParam(paramIdx)->InitEnum(
-      //    properties.name,
-      //    (int)properties.defaultVal,
-      //    OverSampler<double>::kNumFactors,
-      //    properties.label,
-      //    0,
-      //    properties.group,
-      //    "off",
-      //    "2X",
-      //    "4X",
-      //    "8X",
-      //    "16X"
-      //  ); break;
+        case kOversamplingRate:
+          GetParam(paramIdx)->InitEnum(
+            p.name,
+            (int)p.defaultVal,
+            OverSampler<double>::kNumFactors,
+            p.label,
+            0,
+            p.group,
+            "off",
+            "2X",
+            "4X",
+            "8X",
+            "16X"
+          ); break;
       default: break;
       }
     default:
@@ -85,10 +86,10 @@ mEqLfQ(stQ)
     // Setup display texts
     switch (paramIdx)
     {
-    case kLimiterThresh: GetParam(paramIdx)->SetDisplayText((int)properties.maxVal, "Off"); break;
-    case kEqHpFreq: case kCompPeakSidechainFilterFreq: GetParam(paramIdx)->SetDisplayText((int)properties.minVal, "Off"); break;
-    case kEqLpFreq: GetParam(paramIdx)->SetDisplayText((int)properties.maxVal, "Off"); break;
-    case kCompPeakRatio: GetParam(paramIdx)->SetDisplayText((int)properties.maxVal, "inf"); break;
+    case kLimiterThresh: GetParam(paramIdx)->SetDisplayText((int)p.maxVal, "Off"); break;
+    case kEqHpFreq: case kCompPeakSidechainFilterFreq: GetParam(paramIdx)->SetDisplayText((int)p.minVal, "Off"); break;
+    case kEqLpFreq: GetParam(paramIdx)->SetDisplayText((int)p.maxVal, "Off"); break;
+    case kCompPeakRatio: GetParam(paramIdx)->SetDisplayText((int)p.maxVal, "inf"); break;
     default: break;
     }
     OnParamChange(paramIdx);
@@ -96,7 +97,12 @@ mEqLfQ(stQ)
   OnReset();
 
   // Make Presets
-  //MakeDefaultPreset("Default", 1);
+  MakeDefaultPreset("Default", 1);
+  MakePresetFromNamedParams("Kick", 3,
+    kEqLfFreq, 60.,
+    kEqLfBell, true,
+    kEqLfGain, 5.0
+  );
 
 
  // GRAPHICS func
@@ -110,6 +116,7 @@ mEqLfQ(stQ)
     pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
     pGraphics->LoadFont(CENTURY_FN);
     IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
+    IBitmap bmpPanel = pGraphics->LoadBitmap(PANEL_FN);
 
      // SETUP
     pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
@@ -133,26 +140,28 @@ mEqLfQ(stQ)
     pGraphics->AttachCornerResizer(kUIResizerScale, false);                 // Attach Resizer
 
     // Attach logo
-    pGraphics->AttachControl(new IBitmapControl(*this, IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH, 70), bmpLogo, -1, kBlendNone), cBitmapLogo);
+    pGraphics->AttachControl(new IBitmapControl(IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH, 70), bmpLogo, -1, kBlendNone), cBitmapLogo);
     // Attach section rects
-    pGraphics->AttachControl(new IPanelControl(*this, rectInput, pluginLayout.colorPanelBG, true), cPanelInput, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectEq, pluginLayout.colorPanelBG, true), cPanelEq, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectComp, pluginLayout.colorPanelBG, true), cPanelComp, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectPost, pluginLayout.colorPanelBG, true), cPanelPost, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectOutput, pluginLayout.colorPanelBG, true), cPanelOutput, "UI");
-    pGraphics->AttachControl(new IPanelControl(*this, rectMeter, COLOR_TRANSPARENT, true), cPanelMeter, "UI");
-    pGraphics->AttachControl(new IVMeterControl<2>(*this, rectMeter.SubRectHorizontal(3,0), "In Left", "In Right"), cInputMeter, "Meter");
-    pGraphics->AttachControl(new IVMeterControl<3>(*this, rectMeter.SubRectHorizontal(3,1), "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
-    pGraphics->AttachControl(new IVMeterControl<2>(*this, rectMeter.SubRectHorizontal(3,2), "Out Left", "Out Right"), cOutputMeter, "Meter");
-    pGraphics->AttachControl(new IVScopeControl<2>(*this, rectHeader, "Left", "Right"), cScope, "Meter");
+    pGraphics->AttachControl(new IPanelControl(rectInput, pluginLayout.colorPanelBG, true), cPanelInput, "UI");
+    //pGraphics->AttachControl(new IBitmapControl(rectInput, bmpPanel, -1, kBlendNone), cPanelInput, "UI"); // This would be the bmp style
+    pGraphics->AttachControl(new IPanelControl(rectEq, pluginLayout.colorPanelBG, true), cPanelEq, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectComp, pluginLayout.colorPanelBG, true), cPanelComp, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectPost, pluginLayout.colorPanelBG, true), cPanelPost, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectOutput, pluginLayout.colorPanelBG, true), cPanelOutput, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectMeter, COLOR_TRANSPARENT, true), cPanelMeter, "UI");
+    pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 0), "In Left", "In Right"), cInputMeter, "Meter");
+    pGraphics->AttachControl(new IVMeterControl<3>(rectMeter.SubRectHorizontal(3, 1), "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
+    pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 2), "Out Left", "Out Right"), cOutputMeter, "Meter");
+    pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
 
 
-    for (int paramIdx = 0, ctrlIdx = 0; paramIdx < kNumParams; paramIdx++, ctrlIdx++) {
-      IParam *param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
+    for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
+      //IParam *param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
       const IRECT *rect;
-      const structParameterProperties &properties = parameterProperties[paramIdx];		// ... and a variable "properties" pointing at the current parameters properties
+      const StructParameterProperties &p = parameterProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
+      const int ctrlIdx = p.ctrlTag;
 
-      switch (properties.AttachToControlPanel) {
+      switch (p.AttachToControlPanel) {
       case RectHeader: rect = &rectHeader; break;
       case RectInput: rect = &rectInput; break;
       case RectEq: rect = &rectEq; break;
@@ -164,7 +173,7 @@ mEqLfQ(stQ)
       }
 
 
-      switch (properties.Type)
+      switch (p.Type)
       {
       case typeInt: // No int ctrl...
       case typeDouble:
@@ -173,13 +182,13 @@ mEqLfQ(stQ)
         case kInputGain:
         case kOutputGain:
           // Attach faders
-          pGraphics->AttachControl(new IVSliderControl(*this, rect->GetGridCell(properties.y, properties.x, sectionRectGridCells[properties.AttachToControlPanel][0], sectionRectGridCells[properties.AttachToControlPanel][1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false), paramIdx, SR_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
+          pGraphics->AttachControl(new IVSliderControl(rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false), paramIdx, SR_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
           break;
         default:
           // Attach knobs
           IColor knobColor;									// We're pointing at the type of knob we want to add
 
-          switch (properties.Knobs) {						// "knob" is gonna be a pointer to IBitmap
+          switch (p.Knobs) {						// "knob" is gonna be a pointer to IBitmap
           case EControlImages::SslBlue: knobColor = pluginLayout.colorKnobSslBlue; break;
           case EControlImages::SslGreen: knobColor = pluginLayout.colorKnobSslGreen; break;
           case EControlImages::SslRed: knobColor = pluginLayout.colorKnobSslRed; break;
@@ -187,38 +196,56 @@ mEqLfQ(stQ)
           case EControlImages::SslYellow: knobColor = pluginLayout.colorKnobSslYellow; break;
           case EControlImages::SslBlack: knobColor = pluginLayout.colorKnobSslBlack; break;
           case EControlImages::SslWhite: knobColor = pluginLayout.colorKnobSslWhite; break;
-          default: knobColor = pluginLayout.colorFG; break;
           //case EControlImages::AbbeyChicken: knob = &knobAbbeyChicken; break;
           //case EControlImages::Button: knob = &buttonSimple; break;
           //case EControlImages::Fader: knob = &faderGain; break;
           //case EControlImages::none: knob = 0;
+          default: knobColor = pluginLayout.colorFG; break;
           }
 
           pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorKnobText(
-            *this,
-            rect->GetGridCell(properties.y, properties.x, sectionRectGridCells[properties.AttachToControlPanel][0], sectionRectGridCells[properties.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
+            rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
             paramIdx,
-            properties.shortName,
+            p.shortName,
+            p.labelMin,
+            p.labelMax,
+            p.labelCtr,
+            true,
             true,
             SR_SPEC,
             knobColor,
-            pluginLayout.tKnobLabel,
-            pluginLayout.tKnobValue
+            pluginLayout.textKnobLabel,
+            pluginLayout.textKnobValue,
+            -135.f,
+            135.f,
+            GetParam(paramIdx)->GetDefault(true),
+            0.6f,
+            kVertical,
+            4.f
           ), ctrlIdx);
           break;
         }
         break;
+      // Attach switches
       case typeEnum:
       case typeBool:
-        // Attach switches
-        pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorSwitch(*this, rect->GetGridCell(properties.y, properties.x, sectionRectGridCells[properties.AttachToControlPanel][0], sectionRectGridCells[properties.AttachToControlPanel][1]).FracRectHorizontal(2.f, false).GetPadded(-5.f), paramIdx, FlashCircleClickActionFunc, properties.shortName, DEFAULT_SPEC, GetParam(paramIdx)->NDisplayTexts()), ctrlIdx);
+        pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorSwitch(
+          rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectHorizontal(2.f, false).GetPadded(-5.f),
+          paramIdx,
+          FlashCircleClickActionFunc,
+          p.shortName,
+          DEFAULT_SPEC,
+          GetParam(paramIdx)->NDisplayTexts()
+        ), ctrlIdx);
         break;
       default:
         break;
       }
       pGraphics->GetControlWithTag(ctrlIdx)->SetMOWhenGrayed(true);
-      pGraphics->GetControlWithTag(ctrlIdx)->SetTooltip(properties.tooltip);
+      pGraphics->GetControlWithTag(ctrlIdx)->SetTooltip(p.tooltip);
     }
+
+    pGraphics->StyleAllVectorControls(false, true, false, 0.f, 2.f, 3.f, SR_SPEC);
 
     // Additional tooltips
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
@@ -375,7 +402,7 @@ void SRChannel::InitEffects() {
 void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
   const int nChans = NOutChansConnected();
-  
+
   //for (int s = 0; s < nFrames; s++) {
   //  for (int c = 0; c < nChans; c++) {
   //    outputs[c][s] = inputs[c][s];
@@ -387,9 +414,9 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   sample* sc1 = inputs[2];
   sample* sc2 = inputs[3];
   sample* out1 = outputs[0];
-  sample* out2 = outputs[1]; 
+  sample* out2 = outputs[1];
 
-  
+
   // Begin Processing per Frame
 
   for (int s = 0; s < nFrames; ++s, ++in1, ++in2, ++out1, ++out2) {
@@ -740,11 +767,11 @@ void SRChannel::OnParamChange(int paramIdx) {
     fInputSaturationL.setType(mSaturationType);
     fInputSaturationR.setType(mSaturationType);
     break;
-  //case kOversamplingRate:
-  //  mOversamplingRate = int(GetParam(paramIdx)->Value());
-  //  mOverSamplerL.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
-  //  mOverSamplerR.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
-  //  break;
+  case kOversamplingRate:
+    mOversamplingRate = int(GetParam(paramIdx)->Value());
+    //mOverSamplerL.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+    //mOverSamplerR.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+    break;
   case kClipperThreshold: mClipperThreshold = 1. - GetParam(paramIdx)->Value() / 100.; break;
   case kLimiterThresh:
     mLimiterThresh = GetParam(paramIdx)->Value();
@@ -915,7 +942,7 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kEqLfGain: mEqLfGain = GetParam(paramIdx)->Value(); fEqLfFilterL.setPeakGain(mEqLfGain); fEqLfFilterR.setPeakGain(mEqLfGain); break;
   case kEqLfFreq: mEqLfFreq = GetParam(paramIdx)->Value(); fEqLfFilterL.setFc(mEqLfFreq / mSampleRate); fEqLfFilterR.setFc(mEqLfFreq / mSampleRate); break;
-  //case kEqLfQ: mEqLfQ = GetParam(paramIdx)->Value(); fEqLfFilterL.setQ(mEqLfQ); fEqLfFilterR.setQ(mEqLfQ); break;
+    //case kEqLfQ: mEqLfQ = GetParam(paramIdx)->Value(); fEqLfFilterL.setQ(mEqLfQ); fEqLfFilterR.setQ(mEqLfQ); break;
 
   case kEqLmfGain: mEqLmfGain = GetParam(paramIdx)->Value(); fEqLmfFilterL.setPeakGain(mEqLmfGain); fEqLmfFilterR.setPeakGain(mEqLmfGain); break;
   case kEqLmfFreq: mEqLmfFreq = GetParam(paramIdx)->Value(); fEqLmfFilterL.setFc(mEqLmfFreq / mSampleRate); fEqLmfFilterR.setFc(mEqLmfFreq / mSampleRate); break;
@@ -927,13 +954,13 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kEqHfGain: mEqHfGain = GetParam(paramIdx)->Value(); fEqHfFilterL.setPeakGain(mEqHfGain); fEqHfFilterR.setPeakGain(mEqHfGain); break;
   case kEqHfFreq: mEqHfFreq = GetParam(paramIdx)->Value(); fEqHfFilterL.setFc(mEqHfFreq / mSampleRate); fEqHfFilterR.setFc(mEqHfFreq / mSampleRate); break;
-  //case kEqHfQ: mEqHfQ = GetParam(paramIdx)->Value(); fEqHfFilterL.setQ(mEqHfQ); fEqHfFilterR.setQ(mEqHfQ); break;
+    //case kEqHfQ: mEqHfQ = GetParam(paramIdx)->Value(); fEqHfFilterL.setQ(mEqHfQ); fEqHfFilterR.setQ(mEqHfQ); break;
 
 
-    // COMPRESSOR
-    // ----------
+      // COMPRESSOR
+      // ----------
 
-    // Peak Compressor
+      // Peak Compressor
   case kCompPeakRatio:
     mCompPeakRatio = (1. / GetParam(paramIdx)->Value());
     if (mCompPeakRatio <= 1. / 20.) {

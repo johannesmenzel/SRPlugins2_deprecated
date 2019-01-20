@@ -1,10 +1,13 @@
 #pragma once
 #include "IPlug_include_in_plug_hdr.h"
 #include "IControl.h"
+// For meter, see IVMeterControl.h
+#include "IPlugQueue.h"
+#include "IPlugStructs.h"
+#include "IVMeterControl.h"
 //#include <string>
 
 namespace SRPlugins {
-
   namespace SRControls {
 
 
@@ -56,9 +59,9 @@ namespace SRPlugins {
       bool mDrawCircleLabels;
       IText mLabelText;
       IText& mValueText = mText;
-      IText mTextCircleLabelMin = IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignFar);
-      IText mTextCircleLabelMax = IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignNear);
-      IText mTextCircleLabelCtr = IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter);
+      IText mTextCircleLabelMin;
+      IText mTextCircleLabelMax;
+      IText mTextCircleLabelCtr;
       IColor mColor;
       struct KnobScaleVals
       {
@@ -183,5 +186,289 @@ namespace SRPlugins {
       IPattern mPattern = IPattern(kLinearPattern);
     };
 
-  } // End namespace SRControls
-} // End namespace SRPlugins
+
+
+    /** A base class for mult-strip/track controls, such as multi-sliders, meters */
+    class SRTrackControl : public IControl
+      , public IVectorBase
+    {
+    public:
+      SRTrackControl(IRECT bounds, int maxNTracks = 1, float minTrackValue = 0.f, float maxTrackValue = 1.f, const char* trackNames = 0, ...)
+        : IControl(bounds)
+        , mMaxNTracks(maxNTracks)
+        , mMinTrackValue(minTrackValue)
+        , mMaxTrackValue(maxTrackValue)
+      {
+        for (int i = 0; i < maxNTracks; i++)
+        {
+          mTrackData.Add(0.f);
+          mTrackBounds.Add(IRECT());
+        }
+
+        AttachIControl(this);
+      }
+
+      void MakeRects()
+      {
+        for (int ch = 0; ch < MaxNTracks(); ch++)
+        {
+          mTrackBounds.Get()[ch] = mRECT.GetPadded(-mOuterPadding).
+            SubRect(EDirection(!mDirection), MaxNTracks(), ch).
+            GetPadded(0, -mTrackPadding * (float)mDirection, -mTrackPadding * (float)!mDirection, -mTrackPadding);
+        }
+      }
+
+      void Draw(IGraphics& g) override
+      {
+        g.FillRect(GetColor(kBG), mRECT);
+
+        for (int ch = 0; ch < MaxNTracks(); ch++)
+        {
+          DrawTrack(g, mTrackBounds.Get()[ch], ch);
+        }
+
+        if (mDrawFrame)
+          DrawFrame(g);
+      }
+
+      int NTracks() { return mNTracks; }
+      int MaxNTracks() { return mMaxNTracks; }
+      void SetTrackData(int trackIdx, float val) { mTrackData.Get()[trackIdx] = Clip(val, mMinTrackValue, mMaxTrackValue); }
+      float* GetTrackData(int trackIdx) { return &mTrackData.Get()[trackIdx]; }
+      void SetAllTrackData(float val) { memset(mTrackData.Get(), (int)Clip(val, mMinTrackValue, mMaxTrackValue), mTrackData.GetSize() * sizeof(float)); }
+    private:
+      virtual void DrawFrame(IGraphics& g)
+      {
+        g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
+      }
+
+      virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx)
+      {
+        DrawTrackBG(g, r, chIdx);
+        DrawTrackHandle(g, r, chIdx);
+
+        if (mDrawTrackFrame)
+          g.DrawRect(GetColor(kFR), r, nullptr, mFrameThickness);
+      }
+
+      virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx)
+      {
+        g.FillRect(GetColor(kSH), r);
+      }
+
+      virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
+      {
+        IRECT fillRect = r.FracRect(mDirection, *GetTrackData(chIdx));
+
+        g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
+
+        IRECT peakRect;
+
+        if (mDirection == kVertical)
+          peakRect = IRECT(fillRect.L, fillRect.T, fillRect.R, fillRect.T + mPeakSize);
+        else
+          peakRect = IRECT(fillRect.R - mPeakSize, fillRect.T, fillRect.R, fillRect.B);
+
+        DrawPeak(g, peakRect, chIdx);
+      }
+
+      virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
+      {
+        g.FillRect(GetColor(kHL), r);
+      }
+
+      void OnResize() override
+      {
+        MakeRects();
+      }
+
+    protected:
+
+      EDirection mDirection = EDirection::kVertical;
+      int mMaxNTracks;
+      WDL_TypedBuf<float> mTrackData; // real values of sliders/meters
+      WDL_TypedBuf<IRECT> mTrackBounds;
+
+      int mNTracks = 1;
+
+      float mMinTrackValue;
+      float mMaxTrackValue;
+      float mOuterPadding = 10.;
+      float mTrackPadding = 2;
+      float mPeakSize = 5.;
+      bool mDrawTrackFrame = true;
+    };
+
+    template <int MAXNC = 1, int QUEUE_SIZE = 1024>
+    class SRMeter : public IVTrackControlBase
+    {
+    public:
+      static constexpr int kUpdateMessage = 0;
+
+      /** Data packet */
+      struct Data
+      {
+        int nchans = MAXNC;
+        float vals[MAXNC] = {};
+
+        bool AboveThreshold()
+        {
+          static const float threshold = (float)DBToAmp(-90.);
+
+          float sum = 0.f;
+
+          for (int i = 0; i < MAXNC; i++)
+          {
+            sum += vals[i];
+          }
+
+          return std::abs(sum) > threshold;
+        }
+      };
+
+      /** Used on the DSP side in order to queue sample values and transfer data to low priority thread. */
+      class SRMeterBallistics
+      {
+      public:
+        SRMeterBallistics(int controlTag)
+          : mControlTag(controlTag)
+        {
+        }
+
+        void ProcessBlock(sample** inputs, int nFrames)
+        {
+          Data d;
+
+          for (auto s = 0; s < nFrames; s++)
+          {
+            for (auto c = 0; c < MAXNC; c++)
+            {
+              d.vals[c] += std::fabs((float)inputs[c][s]);
+            }
+          }
+
+          for (auto c = 0; c < MAXNC; c++)
+          {
+            d.vals[c] /= (float)nFrames;
+          }
+
+          if (mPrevAboveThreshold)
+            mQueue.Push(d); // TODO: expensive?
+
+          mPrevAboveThreshold = d.AboveThreshold();
+        }
+
+        // this must be called on the main thread - typically in MyPlugin::OnIdle()
+        void TransmitData(IEditorDelegate& dlg)
+        {
+          while (mQueue.ElementsAvailable())
+          {
+            Data d;
+            mQueue.Pop(d);
+            dlg.SendControlMsgFromDelegate(mControlTag, kUpdateMessage, sizeof(Data), (void*)&d);
+          }
+        }
+
+      private:
+        int mControlTag;
+        bool mPrevAboveThreshold = true;
+        IPlugQueue<Data> mQueue{ QUEUE_SIZE };
+      };
+
+      SRMeter(IRECT bounds, const char* trackNames = 0, ...)
+        : IVTrackControlBase(bounds, MAXNC, 0, 1., trackNames)
+      {
+      }
+
+      //  void OnResize() override;
+      //  void OnMouseDblClick(float x, float y, const IMouseMod& mod) override;
+      //  void OnMouseDown(float x, float y, const IMouseMod& mod) override;
+
+      void Draw(IGraphics& g) override
+      {
+        g.FillRect(GetColor(kBG), mRECT);
+
+        for (int ch = 0; ch < MaxNTracks(); ch++)
+        {
+          DrawTrack(g, mTrackBounds.Get()[ch], ch);
+        }
+
+        if (mDrawFrame)
+          DrawFrame(g);
+      }
+
+      void MakeRects()
+      {
+        for (int ch = 0; ch < MaxNTracks(); ch++)
+        {
+          mTrackBounds.Get()[ch] = mRECT.GetPadded(-mOuterPadding).
+            SubRect(EDirection(!mDirection), MaxNTracks(), ch).
+            GetPadded(0, -mTrackPadding, -mTrackPadding * (float)!mDirection, -mTrackPadding * (float)mDirection);
+        }
+      }
+
+      virtual void DrawFrame(IGraphics& g)
+      {
+        g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
+      }
+
+      virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx)
+      {
+        DrawTrackBG(g, r, chIdx);
+        DrawTrackHandle(g, r, chIdx);
+
+        if (mDrawTrackFrame)
+          g.DrawRect(GetColor(kFR), r, nullptr, mFrameThickness);
+      }
+
+      virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx)
+      {
+        g.FillRect(GetColor(kSH), r);
+      }
+
+      virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
+      {
+        IRECT fillRect = r.FracRect(mDirection, *GetTrackData(chIdx));
+
+        g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
+
+        IRECT peakRect;
+
+        if (mDirection == kVertical)
+          peakRect = IRECT(fillRect.L, fillRect.T, fillRect.R, fillRect.T + mPeakSize);
+        else
+          peakRect = IRECT(fillRect.R - mPeakSize, fillRect.T, fillRect.R, fillRect.B);
+
+        DrawPeak(g, peakRect, chIdx);
+      }
+
+      virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
+      {
+        g.FillRect(GetColor(kHL), r);
+      }
+
+      void OnMsgFromDelegate(int messageTag, int dataSize, const void* pData) override
+      {
+        IByteStream stream(pData, dataSize);
+
+        int pos = 0;
+        Data data;
+        pos = stream.Get(&data.nchans, pos);
+
+        while (pos < stream.Size())
+        {
+          for (auto i = 0; i < data.nchans; i++) {
+            pos = stream.Get(&data.vals[i], pos);
+            float* pVal = GetTrackData(i);
+            *pVal = Clip(data.vals[i], 0.f, 1.f);
+          }
+        }
+
+        SetDirty(false);
+      }
+    };
+
+
+
+  }
+} // End namespaces

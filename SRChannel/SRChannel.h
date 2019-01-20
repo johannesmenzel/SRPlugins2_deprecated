@@ -53,6 +53,7 @@ private:
     mEqLmfGain, mEqLmfFreq, mEqLmfQ,
     mEqHmfGain, mEqHmfFreq, mEqHmfQ,
     mEqHfGain, mEqHfFreq, mEqHfQ,
+    mEqAmount,
 
     // COMP
     mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease,
@@ -133,7 +134,7 @@ private:
   double diffInOut;
 
   IVMeterControl<2>::IVMeterBallistics mInputMeterBallistics{ cInputMeter };
-  //IVMeterControl<3>::IVMeterBallistics mGrMeterBallistics{ cGrMeter };
+  SRPlugins::SRControls::SRMeter<3>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
   IVMeterControl<2>::IVMeterBallistics mOutputMeterBallistics{ cOutputMeter };
   IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
 };

@@ -44,6 +44,7 @@ enum EParams
   kEqLfFreq,
   //kEqLfQ,
   kEqLfBell,
+  kEqAmount,
   // RMS Compressor
   kCompRmsThresh,
   kCompRmsRatio,
@@ -133,6 +134,7 @@ enum ECtrlTags {
   cEqLfFreq,
   //cEqLfQ,
   cEqLfBell,
+  cEqAmount,
 
   // RMS Compressor
   cCompRmsThresh,
@@ -378,6 +380,7 @@ const StructParameterProperties parameterProperties[kNumParams] = {
   { kEqLfFreq, cEqLfFreq, "LF Freq", "Freq", 200., 30., 450., 1., 200., .5, "Hz", "EQ", typeDouble, SslBlack, RectEq, 2, 12, "30", "450", "200", "Set the frequency of the low frequency band" },
   // { kEqLfQ, cEqLfQ, "LF Q", "Q", stQ, 0.1, 10., 0.01, stQ, .5, "", "EQ", typeDouble, SslBlack, RectEq, -1, 12, "W", "N", "", "Set the Q value of the low frequency band" },
   { kEqLfBell, cEqLfBell, "Lf Bell", "Bell", 0, 0, 1, 0.1, 0.5, .5, "", "EQ", typeBool, Button, RectEq, 2, 14, "SLF", "BLL", "", "Switches the low frequency band between bell and shelf" },
+  { kEqAmount, cEqAmount, "EQ Amount", "Amount", 100.0, -100.0, 100.0, 0.1, 0., .5, "%", "EQ", typeDouble, SslWhite, RectEq, 2, 16, "-100", "100", "0", "Sets Equalizers processong amount"},
   // RMS Compressor
   { kCompRmsThresh, cCompRmsThresh, "RMS Thresh", "Thresh", 0., -40., 0., 0.1, -20., .5, "dB", "Compressor",typeDouble, SslWhite, RectComp, 0, 0, "-40", "0", "-20", "Threshold of RMS Compressor" },
   { kCompRmsRatio, cCompRmsRatio, "RMS Ratio", "Ratio", 3., 0.5, 20., 0.01, 3., .5, ":1", "Compressor",typeDouble, SslWhite, RectComp, 2, 1, ".5:1", "20:1", "3:1", "Ratio of RMS Compressor" },

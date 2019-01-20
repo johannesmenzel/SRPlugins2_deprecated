@@ -29,6 +29,10 @@ namespace SRPlugins {
       , mLabelText(labelText)
       , mKnobFrac(knobFrac)
       , mColor(color)
+      , mTextCircleLabelMin(IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignFar))
+      , mTextCircleLabelMax(IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignNear))
+      , mTextCircleLabelCtr(IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter))
+
     {
       if (mDisplayParamValue) DisablePrompt(false);
       mValueText = valueText;

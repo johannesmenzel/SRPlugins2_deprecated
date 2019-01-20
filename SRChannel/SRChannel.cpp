@@ -10,7 +10,8 @@
 SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo),
   mEqHfQ(stQ),
-  mEqLfQ(stQ)
+  mEqLfQ(stQ),
+  mEqAmount(1.)
 {
   // Initialize Parameters
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
@@ -150,7 +151,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new IPanelControl(rectOutput, pluginLayout.colorPanelBG, true), cPanelOutput, "UI");
     pGraphics->AttachControl(new IPanelControl(rectMeter, COLOR_TRANSPARENT, true), cPanelMeter, "UI");
     pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 0), "In Left", "In Right"), cInputMeter, "Meter");
-    pGraphics->AttachControl(new IVMeterControl<3>(rectMeter.SubRectHorizontal(3, 1), "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
+    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 2), "Out Left", "Out Right"), cOutputMeter, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
 
@@ -172,6 +173,24 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       default: break;
       }
 
+      IColor knobColor;									// We're pointing at the type of knob we want to add
+
+      switch (p.Knobs) {						// "knob" is gonna be a pointer to IBitmap
+      case EControlImages::SslBlue: knobColor = pluginLayout.colorKnobSslBlue; break;
+      case EControlImages::SslGreen: knobColor = pluginLayout.colorKnobSslGreen; break;
+      case EControlImages::SslRed: knobColor = pluginLayout.colorKnobSslRed; break;
+      case EControlImages::SslOrange: knobColor = pluginLayout.colorKnobSslOrange; break;
+      case EControlImages::SslYellow: knobColor = pluginLayout.colorKnobSslYellow; break;
+      case EControlImages::SslBlack: knobColor = pluginLayout.colorKnobSslBlack; break;
+      case EControlImages::SslWhite: knobColor = pluginLayout.colorKnobSslWhite; break;
+        //case EControlImages::AbbeyChicken: knob = &knobAbbeyChicken; break;
+        //case EControlImages::Button: knob = &buttonSimple; break;
+        //case EControlImages::Fader: knob = &faderGain; break;
+        //case EControlImages::none: knob = 0;
+      default: knobColor = pluginLayout.colorFG; break;
+      }
+
+
 
       switch (p.Type)
       {
@@ -186,23 +205,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           break;
         default:
           // Attach knobs
-          IColor knobColor;									// We're pointing at the type of knob we want to add
-
-          switch (p.Knobs) {						// "knob" is gonna be a pointer to IBitmap
-          case EControlImages::SslBlue: knobColor = pluginLayout.colorKnobSslBlue; break;
-          case EControlImages::SslGreen: knobColor = pluginLayout.colorKnobSslGreen; break;
-          case EControlImages::SslRed: knobColor = pluginLayout.colorKnobSslRed; break;
-          case EControlImages::SslOrange: knobColor = pluginLayout.colorKnobSslOrange; break;
-          case EControlImages::SslYellow: knobColor = pluginLayout.colorKnobSslYellow; break;
-          case EControlImages::SslBlack: knobColor = pluginLayout.colorKnobSslBlack; break;
-          case EControlImages::SslWhite: knobColor = pluginLayout.colorKnobSslWhite; break;
-          //case EControlImages::AbbeyChicken: knob = &knobAbbeyChicken; break;
-          //case EControlImages::Button: knob = &buttonSimple; break;
-          //case EControlImages::Fader: knob = &faderGain; break;
-          //case EControlImages::none: knob = 0;
-          default: knobColor = pluginLayout.colorFG; break;
-          }
-
           pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorKnobText(
             rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
             paramIdx,
@@ -223,6 +225,20 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             kVertical,
             4.f
           ), ctrlIdx);
+          //pGraphics->AttachControl(new IVKnobControl(
+          //  rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
+          //  paramIdx,
+          //  p.shortName,
+          //  true,
+          //  SR_SPEC,
+          //  pluginLayout.textKnobLabel,
+          //  pluginLayout.textKnobValue,
+          //  -135.f,
+          //  135.f,
+          //  0.6f,
+          //  kVertical,
+          //  4.f
+          //), ctrlIdx);
           break;
         }
         break;
@@ -415,6 +431,18 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   sample* sc2 = inputs[3];
   sample* out1 = outputs[0];
   sample* out2 = outputs[1];
+
+  sample *peakGrMeterValue = new sample[nFrames]; // Should be nFrames
+  sample *rmsGrMeterValue = new sample[nFrames];
+  sample *deesserGrMeterValue = new sample[nFrames];
+
+  sample* peakGrMeterValues = peakGrMeterValue;
+  sample* rmsGrMeterValues = rmsGrMeterValue;
+  sample* deesserGrMeterValues = deesserGrMeterValue;
+  sample* grMeterValue[3] = { peakGrMeterValues, rmsGrMeterValues, deesserGrMeterValues };
+  sample** grMeterValues = grMeterValue;
+
+
 
 
   // Begin Processing per Frame
@@ -704,6 +732,10 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // -------------------------
     // End of global bypass test
 
+    peakGrMeterValue[s] = fCompressorPeak.getGrLin();
+    rmsGrMeterValue[s] = fCompressorRms.getGrLin();
+    deesserGrMeterValue[s] = fDeesser.getGrLin();
+
     (circularBufferPointer >= circularBufferLenght - 1) ? circularBufferPointer = 0 : circularBufferPointer++;
 
   }
@@ -713,16 +745,22 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
 
 
+
   mInputMeterBallistics.ProcessBlock(inputs, nFrames);
-  //mGrMeterBallistics.ProcessBlock(!!!sample **GAINREDUCTION!!!, nFrames);
+  mGrMeterBallistics.ProcessBlock(grMeterValues, nFrames);
   mOutputMeterBallistics.ProcessBlock(outputs, nFrames);
   mScopeBallistics.ProcessBlock(outputs, nFrames);
+
+  delete[] peakGrMeterValue;
+  delete[] rmsGrMeterValue;
+  delete[] deesserGrMeterValue;
 }
 
 void SRChannel::OnReset() {
   mSampleRate = GetSampleRate();
   InitEffects();
   circularBufferPointer = 0;
+  //mBlockSize = GetBlockSize();
 }
 
 void SRChannel::OnParamChange(int paramIdx) {
@@ -940,20 +978,22 @@ void SRChannel::OnParamChange(int paramIdx) {
     else { fEqLfFilterL.setType(SRPlugins::SRFilters::biquad_lowshelf); fEqLfFilterR.setType(SRPlugins::SRFilters::biquad_lowshelf); }
     break;
 
-  case kEqLfGain: mEqLfGain = GetParam(paramIdx)->Value(); fEqLfFilterL.setPeakGain(mEqLfGain); fEqLfFilterR.setPeakGain(mEqLfGain); break;
+  case kEqLfGain: mEqLfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLfFilterL.setPeakGain(mEqLfGain); fEqLfFilterR.setPeakGain(mEqLfGain); break;
   case kEqLfFreq: mEqLfFreq = GetParam(paramIdx)->Value(); fEqLfFilterL.setFc(mEqLfFreq / mSampleRate); fEqLfFilterR.setFc(mEqLfFreq / mSampleRate); break;
     //case kEqLfQ: mEqLfQ = GetParam(paramIdx)->Value(); fEqLfFilterL.setQ(mEqLfQ); fEqLfFilterR.setQ(mEqLfQ); break;
 
-  case kEqLmfGain: mEqLmfGain = GetParam(paramIdx)->Value(); fEqLmfFilterL.setPeakGain(mEqLmfGain); fEqLmfFilterR.setPeakGain(mEqLmfGain); break;
+  case kEqLmfGain: mEqLmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLmfFilterL.setPeakGain(mEqLmfGain); fEqLmfFilterR.setPeakGain(mEqLmfGain); break;
   case kEqLmfFreq: mEqLmfFreq = GetParam(paramIdx)->Value(); fEqLmfFilterL.setFc(mEqLmfFreq / mSampleRate); fEqLmfFilterR.setFc(mEqLmfFreq / mSampleRate); break;
   case kEqLmfQ: mEqLmfQ = GetParam(paramIdx)->Value(); fEqLmfFilterL.setQ(mEqLmfQ); fEqLmfFilterR.setQ(mEqLmfQ); break;
 
-  case kEqHmfGain: mEqHmfGain = GetParam(paramIdx)->Value(); fEqHmfFilterL.setPeakGain(mEqHmfGain); fEqHmfFilterR.setPeakGain(mEqHmfGain); break;
+  case kEqHmfGain: mEqHmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHmfFilterL.setPeakGain(mEqHmfGain); fEqHmfFilterR.setPeakGain(mEqHmfGain); break;
   case kEqHmfFreq: mEqHmfFreq = GetParam(paramIdx)->Value(); fEqHmfFilterL.setFc(mEqHmfFreq / mSampleRate); fEqHmfFilterR.setFc(mEqHmfFreq / mSampleRate); break;
   case kEqHmfQ: mEqHmfQ = GetParam(paramIdx)->Value(); fEqHmfFilterL.setQ(mEqHmfQ); fEqHmfFilterR.setQ(mEqHmfQ); break;
 
-  case kEqHfGain: mEqHfGain = GetParam(paramIdx)->Value(); fEqHfFilterL.setPeakGain(mEqHfGain); fEqHfFilterR.setPeakGain(mEqHfGain); break;
+  case kEqHfGain: mEqHfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHfFilterL.setPeakGain(mEqHfGain); fEqHfFilterR.setPeakGain(mEqHfGain); break;
   case kEqHfFreq: mEqHfFreq = GetParam(paramIdx)->Value(); fEqHfFilterL.setFc(mEqHfFreq / mSampleRate); fEqHfFilterR.setFc(mEqHfFreq / mSampleRate); break;
+
+  case kEqAmount: mEqAmount = GetParam(paramIdx)->Value() / 100.; OnParamChange(kEqHfGain); OnParamChange(kEqHmfGain); OnParamChange(kEqLmfGain); OnParamChange(kEqLfGain); break;
     //case kEqHfQ: mEqHfQ = GetParam(paramIdx)->Value(); fEqHfFilterL.setQ(mEqHfQ); fEqHfFilterR.setQ(mEqHfQ); break;
 
 
@@ -1110,7 +1150,7 @@ void SRChannel::OnParamChange(int paramIdx) {
 
 void SRChannel::OnIdle() {
   mInputMeterBallistics.TransmitData(*this);
-  //mGrMeterBallistics.TransmitData(*this);
+  mGrMeterBallistics.TransmitData(*this);
   mOutputMeterBallistics.TransmitData(*this);
   mScopeBallistics.TransmitData(*this);
 }

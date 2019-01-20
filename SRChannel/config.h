@@ -2,7 +2,7 @@
 #define PLUG_MFR "SRPlugins"
 #define PLUG_VERSION_HEX 0x00000200
 #define PLUG_VERSION_STR "0.2.0"
-#define PLUG_UNIQUE_ID 'SrCh'
+#define PLUG_UNIQUE_ID 'SrCn'
 #define PLUG_MFR_ID 'ShRa'
 #define PLUG_URL_STR "https://github.com/johannesmenzel"
 #define PLUG_EMAIL_STR "johannes.menzel@posteo.de"

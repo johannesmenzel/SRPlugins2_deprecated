@@ -41,50 +41,41 @@ private:
   // GLOBAL members
   double mSampleRate;
   // GAIN members
-  double mInputGain, mOutputGain, mInputDrive;
-
-  double mPan, mSafePanFreq;
-    //vSafePanLowSignal1, vSafePanHighSignal1, vSafePanLowSignal2, vSafePanHighSignal2,
-
-    // CLIP + LIMIT
-   double mClipperThreshold, mSaturationAmount, mSaturationHarmonics, mLimiterThresh, mSaturationSkew,
-
-    //mSatLfGain, mSatLfFreq, mSatMfGain, mSatMfFreq, mSatHfGain, mSatHfFreq, mSatHpFreq, mSatLpFreq,
-
-    // EQ
-    mEqHpFreq, mEqLpFreq,
+  double mInputGain, mOutputGain;
+  // SAT members
+  double mSaturationDrive, mSaturationAmount, mSaturationHarmonics, mSaturationSkew;
+  int mSaturationType, mOversamplingRate;
+  // EQ members
+  double mEqHpFreq, mEqLpFreq,
     mEqLfGain, mEqLfFreq, mEqLfQ,
     mEqLmfGain, mEqLmfFreq, mEqLmfQ,
     mEqHmfGain, mEqHmfFreq, mEqHmfQ,
     mEqHfGain, mEqHfFreq, mEqHfQ,
-    mEqAmount,
-
-    // COMP
-    mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease,
+    mEqAmount;
+  int mEqHpOrder;
+  bool mEqLfIsBell, mEqHfIsBell;
+  // COMP members
+  double mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease,
     mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease,
     mCompRmsMakeup, mCompPeakMakeup, mCompRmsAutoMakeup, mCompPeakAutoMakeup,
     mCompPeakRmsRatio, mCompDryWet,
     mCompPeakSidechainFilterFreq,
-    mCompPeakKneeWidthDb, mCompRmsKneeWidthDb,
-
-    // DEESSER
-    mDeesserFreq, mDeesserQ,
-    mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserMakeup;
-
-    // TESTPARAM
-    //mTestParam1, mTestParam2, mTestParam3, mTestParam4, mTestParam5,
-
-// BOOL VARS
-  bool mEqLfIsBell, mEqHfIsBell, mCompIsParallel, mCompPeakIsExtSc, mCompRmsIsExtSc, mCompPeakIsFeedback, mCompRmsIsFeedback, mEqBypass, mCompBypass, mInputBypass, mOutputBypass, mBypass, mIsPanMonoLow,
-    mAgc;
-
-  // INT VARS
-  int mEqHpOrder, mSaturationType, mOversamplingRate;
-
-    //// METERS
-    //cInputPeakMeter1, cInputPeakMeter2, cOutputPeakMeter1, cOutputPeakMeter2,
-    //cRmsGrMeter, cPeakGrMeter, cDeesserMeter, /*cFreqRespGraph, */cOutputVuMeter1, cOutputVuMeter2;
-
+    mCompPeakKneeWidthDb, mCompRmsKneeWidthDb;
+  bool mCompIsParallel, mCompPeakIsExtSc, mCompRmsIsExtSc, mCompPeakIsFeedback, mCompRmsIsFeedback;
+  // DEESSER members
+  double mDeesserFreq, mDeesserQ, mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserMakeup;
+  // TESTPARAM
+  // double mTestParam1, mTestParam2, mTestParam3, mTestParam4, mTestParam5;
+  // PAN members
+  double mPan, mSafePanFreq;
+  bool mIsPanMonoLow;
+  // CLIPPER members
+  double mClipperThreshold;
+  // LIMITER members
+  double mLimiterThresh;
+  // BYPASS members
+  bool mInputBypass, mEqBypass, mCompBypass, mOutputBypass, mBypass;
+  bool mAgc;
 
   // CIRCULAR BUFFER
   unsigned short int circularBufferPointer;
@@ -95,19 +86,15 @@ private:
   SRPlugins::SRGain::SRPan fPan;
 
   // Spectral Filters
-  SRPlugins::SRFilters::SRFiltersTwoPole fEqHpFilter1L, fEqHpFilter2L, fEqHpFilter3L, fEqHpFilter4L, fEqHpFilter5L, fEqHpFilter6L, fEqHpFilter7L, fEqHpFilter8L, fEqHpFilter9L, fEqHpFilter10L,
-    fEqLpFilter1L,
-    fEqLfFilterL, fEqLmfFilterL, fEqHmfFilterL, fEqHfFilterL,
-    fEqHpFilter1R, fEqHpFilter2R, fEqHpFilter3R, fEqHpFilter4R, fEqHpFilter5R, fEqHpFilter6R, fEqHpFilter7R, fEqHpFilter8R, fEqHpFilter9R, fEqHpFilter10R,
-    fEqLpFilter1R,
-    fEqLfFilterR, fEqLmfFilterR, fEqHmfFilterR, fEqHfFilterR,
-    // Safe-Pan
-    fSafePanHpL, fSafePanLpL, fSafePanHpR, fSafePanLpR,
-
-    // Deesser
-    fDeesserSidechainBandpassFilterL, fDeesserSidechainBandpassFilterR, fDeesserReductionPeakFilterL, fDeesserReductionPeakFilterR;
-
-  SRPlugins::SRFilters::SRFiltersOnePole fDcBlockerL, fDcBlockerR, fEqHpFilterOnepoleL, fEqHpFilterOnepoleR, fEqLpFilterOnepoleL, fEqLpFilterOnepoleR;
+  SRPlugins::SRFilters::SRFiltersTwoPole fEqHpFilter1[2], fEqHpFilter2[2], fEqHpFilter3[2], fEqHpFilter4[2], fEqHpFilter5[2], fEqHpFilter6[2], fEqHpFilter7[2], fEqHpFilter8[2], fEqHpFilter9[2], fEqHpFilter10[2],
+    fEqLpFilter1[2],
+    fEqLfFilter[2], fEqLmfFilter[2], fEqHmfFilter[2], fEqHfFilter[2];
+  // Safe-Pan
+  SRPlugins::SRFilters::SRFiltersTwoPole fSafePanHp[2], fSafePanLp[2];
+  // Deesser
+  SRPlugins::SRFilters::SRFiltersTwoPole fDeesserSidechainBandpassFilter[2], fDeesserReductionPeakFilter[2];
+  // Extra Filters
+  SRPlugins::SRFilters::SRFiltersOnePole fDcBlocker[2], fEqHpFilterOnepole[2], fEqLpFilterOnepole[2];
 
   // Dynamic Filters
   SRPlugins::SRDynamics::SRCompressor fCompressorPeak;
@@ -119,10 +106,8 @@ private:
   //SRPlugins::SRDynamics::AttRelEnvelope fOutputVuMeterEnvelope1, fOutputVuMeterEnvelope2;
 
   // Saturation
-  SRPlugins::SRSaturation::SRSaturation fInputSaturationL;
-  SRPlugins::SRSaturation::SRSaturation fInputSaturationR;
-  OverSampler<sample> mOverSamplerL{ OverSampler<sample>::kNone };
-  OverSampler<sample> mOverSamplerR{ OverSampler<sample>::kNone };
+  SRPlugins::SRSaturation::SRSaturation fInputSaturation[2];
+  OverSampler<sample> mOverSampler[2]{ OverSampler<sample>::kNone };
 
 
   // TESTVARS

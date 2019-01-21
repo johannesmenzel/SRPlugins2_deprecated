@@ -126,65 +126,65 @@ namespace SRPlugins {
     };
 
 
-    /** Control to test drawing gradients with path based drawing backends
-     *   @ingroup TestControls */
-    class TestGradientControl : public IKnobControlBase
-    {
-    public:
-      TestGradientControl(IRECT rect, int paramIdx = kNoParameter)
-        : IKnobControlBase(rect, paramIdx)
-      {
-        SetTooltip("TestGradientControl");
-        RandomiseGradient();
-      }
+    ///** Control to test drawing gradients with path based drawing backends
+    // *   @ingroup TestControls */
+    //class TestGradientControl : public IKnobControlBase
+    //{
+    //public:
+    //  TestGradientControl(IRECT rect, int paramIdx = kNoParameter)
+    //    : IKnobControlBase(rect, paramIdx)
+    //  {
+    //    SetTooltip("TestGradientControl");
+    //    RandomiseGradient();
+    //  }
 
-      void Draw(IGraphics& g) override
-      {
-        if (g.HasPathSupport())
-        {
-          double cr = mValue * (mRECT.H() / 2.0);
-          g.PathRoundRect(mRECT.GetPadded(-2), cr);
-          IFillOptions fillOptions;
-          IStrokeOptions strokeOptions;
-          fillOptions.mPreserve = true;
-          g.PathFill(mPattern, fillOptions);
-          g.PathStroke(IColor(255, 0, 0, 0), 3, strokeOptions);
-        }
-        else
-          g.DrawText(mText, "UNSUPPORTED", mRECT);
-      }
+    //  void Draw(IGraphics& g) override
+    //  {
+    //    if (g.HasPathSupport())
+    //    {
+    //      double cr = mValue * (mRECT.H() / 2.0);
+    //      g.PathRoundRect(mRECT.GetPadded(-2), cr);
+    //      IFillOptions fillOptions;
+    //      IStrokeOptions strokeOptions;
+    //      fillOptions.mPreserve = true;
+    //      g.PathFill(mPattern, fillOptions);
+    //      g.PathStroke(IColor(255, 0, 0, 0), 3, strokeOptions);
+    //    }
+    //    else
+    //      g.DrawText(mText, "UNSUPPORTED", mRECT);
+    //  }
 
-      void OnMouseDown(float x, float y, const IMouseMod& mod) override
-      {
-        RandomiseGradient();
-        SetDirty(false);
-      }
+    //  void OnMouseDown(float x, float y, const IMouseMod& mod) override
+    //  {
+    //    RandomiseGradient();
+    //    SetDirty(false);
+    //  }
 
-      void RandomiseGradient()
-      {
-        //IPattern tmp(kLinearPattern);
-        //tmp.SetTransform(1.0/mRECT.W(), 0, 0, 1.0/mRECT.W(), 1.0/mRECT.W()*-mRECT.L, 1.0/mRECT.W()*-mRECT.T);
-        IPattern tmp(kSolidPattern);
+    //  void RandomiseGradient()
+    //  {
+    //    //IPattern tmp(kLinearPattern);
+    //    //tmp.SetTransform(1.0/mRECT.W(), 0, 0, 1.0/mRECT.W(), 1.0/mRECT.W()*-mRECT.L, 1.0/mRECT.W()*-mRECT.T);
+    //    IPattern tmp(kSolidPattern);
 
-        if (std::rand() & 0x100)
-          tmp = IPattern::CreateRadialGradient(mRECT.MW(), mRECT.MH(), mRECT.MH());
-        else
-          tmp = IPattern::CreateLinearGradient(mRECT.L, mRECT.MH(), mRECT.L + mRECT.W() * 0.5, mRECT.MH());
+    //    if (std::rand() & 0x100)
+    //      tmp = IPattern::CreateRadialGradient(mRECT.MW(), mRECT.MH(), mRECT.MH());
+    //    else
+    //      tmp = IPattern::CreateLinearGradient(mRECT.L, mRECT.MH(), mRECT.L + mRECT.W() * 0.5, mRECT.MH());
 
-        tmp.mExtend = (std::rand() & 0x10) ? ((std::rand() & 0x1000) ? kExtendNone : kExtendPad) : ((std::rand() & 0x1000) ? kExtendRepeat : kExtendReflect);
+    //    tmp.mExtend = (std::rand() & 0x10) ? ((std::rand() & 0x1000) ? kExtendNone : kExtendPad) : ((std::rand() & 0x1000) ? kExtendRepeat : kExtendReflect);
 
-        tmp.AddStop(IColor::GetRandomColor(), 0.0);
-        tmp.AddStop(IColor::GetRandomColor(), 0.1);
-        tmp.AddStop(IColor::GetRandomColor(), 0.4);
-        tmp.AddStop(IColor::GetRandomColor(), 0.6);
-        tmp.AddStop(IColor::GetRandomColor(), 1.0);
+    //    tmp.AddStop(IColor::GetRandomColor(), 0.0);
+    //    tmp.AddStop(IColor::GetRandomColor(), 0.1);
+    //    tmp.AddStop(IColor::GetRandomColor(), 0.4);
+    //    tmp.AddStop(IColor::GetRandomColor(), 0.6);
+    //    tmp.AddStop(IColor::GetRandomColor(), 1.0);
 
-        mPattern = tmp;
-      }
+    //    mPattern = tmp;
+    //  }
 
-    private:
-      IPattern mPattern = IPattern(kLinearPattern);
-    };
+    //private:
+    //  IPattern mPattern = IPattern(kLinearPattern);
+    //};
 
 
 

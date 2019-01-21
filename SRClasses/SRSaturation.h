@@ -60,7 +60,8 @@ namespace SRPlugins {
 				double pHarmonicsNormalized,
 				bool pPositiveSide,
 				double pSkewNormalized,
-				double pWet
+				double pWet,
+        double pSamplerate
 			);
 			// destructor
 			~SRSaturation(); // destructor
@@ -73,6 +74,7 @@ namespace SRPlugins {
 			void setPositive(bool pPositive);
 			void setSkew(double pSkewNormalized);
 			void setWet(double pWetNormalized);
+      void setSamplerate(double mSamplerate);
 
 			void setSaturation(
 				int pType,
@@ -81,7 +83,8 @@ namespace SRPlugins {
 				double pHarmonicsNormalized,
 				bool pPositive,
 				double pSkewNormalized,
-				double pWetNormalized
+				double pWetNormalized,
+        double pSamplerate
 			);
 			// inline process function, if needed
       double process(double in);
@@ -108,6 +111,7 @@ namespace SRPlugins {
 			bool mPositive; // if aiming for even harmonics, the positive side of the envelope will be affected if true, otherwise the negative side
 			double mSkewNormalized;
 			double mWetNormalized;
+      double mSamplerate;
       //OverSampler<double> mOversampler;
       // internal variables
 			double prev;
@@ -187,8 +191,8 @@ namespace SRPlugins {
 			if (mAmountNormalized > .001) {
 				double mAmountModified = pow(mAmountNormalized, 3.) * (1. + (in - prev) * (1. / mDriveNormalized) * mSkewNormalized);
 				in = (in >= 0)
-					? atan(mAmountModified * in) / atan(mAmountModified)
-					: atan(mAmountModified * in) / atan(mAmountModified);
+					? tanh(mAmountModified * in) / tanh(mAmountModified)
+					: tanh(mAmountModified * in) / tanh(mAmountModified);
 			}
       return in;
 		}

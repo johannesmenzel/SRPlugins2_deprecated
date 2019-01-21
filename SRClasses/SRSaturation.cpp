@@ -18,12 +18,13 @@ namespace SRPlugins {
 			mPositive = true;
 			mSkewNormalized = 0.;
 			mWetNormalized = 1.;
+      mSamplerate = 44000.;
 		}
 
 		// Constructor
-		SRSaturation::SRSaturation(int pType, double pDriveDb, double pAmountNormalized, double pHarmonicsNormalized, bool pPositiveSide, double pSkewNormalized, double pWet) {
+		SRSaturation::SRSaturation(int pType, double pDriveDb, double pAmountNormalized, double pHarmonicsNormalized, bool pPositiveSide, double pSkewNormalized, double pWet, double pSamplerate) {
 			// internal variables
-			setSaturation(pType, pDriveDb, pAmountNormalized, pHarmonicsNormalized, pPositiveSide, pSkewNormalized, pWet);
+			setSaturation(pType, pDriveDb, pAmountNormalized, pHarmonicsNormalized, pPositiveSide, pSkewNormalized, pWet, pSamplerate);
 			mAmount = 0.;
 			prev = 0.;
 			dry = 0.;
@@ -63,7 +64,11 @@ namespace SRPlugins {
 			this->mWetNormalized = pWetNormalized;
 		}
 
-		void SRSaturation::setSaturation(int pType, double pDriveDb, double pAmountNormalized, double pHarmonicsNormalized, bool pPositive, double pSkewNormalized, double pWetNormalized) {
+    void SRSaturation::setSamplerate(double mSamplerate) {
+      this->mSamplerate = mSamplerate;
+    }
+
+		void SRSaturation::setSaturation(int pType, double pDriveDb, double pAmountNormalized, double pHarmonicsNormalized, bool pPositive, double pSkewNormalized, double pWetNormalized, double pSamplerate) {
 			this->mType = pType;
 			this->mDriveNormalized = SRPlugins::SRHelpers::DBToAmp(pDriveDb);
 			this->mAmountNormalized = pAmountNormalized;
@@ -71,6 +76,7 @@ namespace SRPlugins {
 			this->mPositive = pPositive;
 			this->mSkewNormalized = pSkewNormalized;
 			this->mWetNormalized = pWetNormalized;
+      this->mSamplerate = pSamplerate;
       //this->mOversampler.SetOverSampling(OverSampler<double>::k16x);
 			calcSaturation();
 		}

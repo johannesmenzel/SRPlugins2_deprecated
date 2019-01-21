@@ -18,7 +18,7 @@ enum EParams
   // Input Stage
   kInputGain = 0,
   kSaturationType,
-  kInputDrive,
+  kSaturationDrive,
   kSaturationAmount,
   kSaturationHarmonics,
   kSaturationSkew,
@@ -105,7 +105,7 @@ enum ECtrlTags {
   // Input Stage
   cInputGain = 0,
   cSaturationType,
-  cInputDrive,
+  cSaturationDrive,
   cSaturationAmount,
   cSaturationHarmonics,
   cSaturationSkew,
@@ -354,7 +354,7 @@ const StructParameterProperties parameterProperties[kNumParams] = {
   // Input Stage
   { kInputGain, cInputGain, "Input Gain", "Input", 0., -60., 12., 0.1, 0., 10. / 12.,"dB", "Global", typeDouble, Fader, RectInput, 0, 2, "-60", "12", "0", "Input Gain is applied before everything else" },
   { kSaturationType, cSaturationType, "Saturation Type", "Type", 0, 0, 5, -1, -1, -1, "", "Input", typeEnum, none, RectInput, 2, 6, "", "", "", "Type of Saturation"},
-  { kInputDrive, cInputDrive, "Sat Drive", "Drive", 0., 0., 60., 0.1, 30., .5, "dB", "Input", typeDouble, SslRed, RectInput, 0, 0, "0", "60", "30", "Saturation input drive, hits the saturation module harder" },
+  { kSaturationDrive, cSaturationDrive, "Sat Drive", "Drive", 0., 0., 60., 0.1, 30., .5, "dB", "Input", typeDouble, SslRed, RectInput, 0, 0, "0", "60", "30", "Saturation input drive, hits the saturation module harder" },
   { kSaturationAmount, cSaturationAmount, "Sat Amount", "Saturation", 0., 0., 99., 0.01, 10., .5, "%", "Input", typeDouble, SslOrange,RectInput, 2, 0, "0", "100", "10", "Amount of Saturation" },
   { kSaturationHarmonics, cSaturationHarmonics, "Harmonics", "Harmonics", 50., 0., 100., .01, 50., .5, "%", "Input", typeDouble, SslBlue, RectInput, 2, 2, "Even", "Odd", "Mix", "Dial in even harmonics by turning the knob counter-clockwise" },
   { kSaturationSkew, cSaturationSkew, "Sat Skew", "Skew", 0, -100., 100., 0.01, 0., .5, "%", "Input", typeDouble, SslOrange, RectInput, 2, 4, "-100", "100", "0", "Saturations positive/negative skewness. Distorts waveform" },

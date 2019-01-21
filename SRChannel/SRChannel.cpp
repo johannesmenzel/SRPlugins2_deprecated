@@ -321,42 +321,40 @@ void SRChannel::InitEffects() {
   fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate) / 10., false);
   fPan.initPan(SRPlugins::SRGain::typeSinusodial, mPan, true);
 
-  // Init Eq
-  fEqHpFilterOnepoleL.setFc(mEqHpFreq);
-  fEqHpFilter1L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter2L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter3L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter4L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter5L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter6L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter7L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter8L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter9L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter10L.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqLpFilter1L.setFilter(SRPlugins::SRFilters::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHfFilterL.setFilter(SRPlugins::SRFilters::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
-  fEqHmfFilterL.setFilter(SRPlugins::SRFilters::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
-  fEqLmfFilterL.setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
-  fEqLfFilterL.setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
-  fDcBlockerL.setFc(10. / mSampleRate);
+  for (int i = 0; i < NChannelsConnected(kOutput); i++) {
+    // Init EQ
+    fEqHpFilterOnepole[i].setFc(mEqHpFreq);
+    fEqHpFilter1[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter2[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter3[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter4[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter5[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter6[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter7[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter8[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter9[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter10[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqLpFilter1[i].setFilter(SRPlugins::SRFilters::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHfFilter[i].setFilter(SRPlugins::SRFilters::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
+    fEqHmfFilter[i].setFilter(SRPlugins::SRFilters::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
+    fEqLmfFilter[i].setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
+    fEqLfFilter[i].setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
+    fDcBlocker[i].setFc(10. / mSampleRate);
 
-  fEqHpFilterOnepoleR.setFc(mEqHpFreq);
-  fEqHpFilter1R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter2R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter3R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter4R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter5R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter6R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter7R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter8R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter9R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHpFilter10R.setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqLpFilter1R.setFilter(SRPlugins::SRFilters::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
-  fEqHfFilterR.setFilter(SRPlugins::SRFilters::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
-  fEqHmfFilterR.setFilter(SRPlugins::SRFilters::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
-  fEqLmfFilterR.setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
-  fEqLfFilterR.setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
-  fDcBlockerR.setFc(10. / mSampleRate);
+    // Init safe pan filter
+    fSafePanHp[i].setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+    fSafePanLp[i].setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+
+    // Init saturation
+    fInputSaturation[i].setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
+
+    //... Commented out until implementation of oversampling
+    //fOverSamplerProcessL = std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturation[0].process, std::placeholders::_1);
+    //fOverSamplerProcessR = std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturation[1].process, std::placeholders::_1);
+
+    // Oversampling
+    mOverSampler[i].Reset();
+  }
 
   // Init compressor
   fCompressorPeak.initCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, mSampleRate);
@@ -373,27 +371,11 @@ void SRChannel::InitEffects() {
   fLimiter.setThresh(mLimiterThresh);
   fLimiter.initRuntime();
 
-  // Init safe pan filter
-  fSafePanHpL.setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-  fSafePanLpL.setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-  fSafePanHpR.setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-  fSafePanLpR.setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-
   // Init deesser
   fDeesser.setDeesser(mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserFreq / mSampleRate, mDeesserQ, 10., mSampleRate);
   fDeesser.initRuntime();
 
-  // Init saturation
-  fInputSaturationL.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
-  fInputSaturationR.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
 
-  //... Commented out until implementation of oversampling
-  //fOverSamplerProcessL = std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturationL.process, std::placeholders::_1);
-  //fOverSamplerProcessR = std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturationR.process, std::placeholders::_1);
-
-  // Oversampling
-  mOverSamplerL.Reset();
-  mOverSamplerR.Reset();
 
   // Name channels
   //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
@@ -407,7 +389,6 @@ void SRChannel::InitEffects() {
   //}
   //else // for AU and VST3 we name buses
   //{
-  //  SetChannel
   //  SetInputBusLabel(0, "Input");
   //  SetInputBusLabel(1, "Ext SC");
   //  SetOutputBusLabel(0, "Output");
@@ -493,12 +474,12 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
           // oversampled saturation processing
           //using namespace std::placeholders;
-          *out1 = mOverSamplerL.Process(*out1, std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturationL, std::placeholders::_1));
-          *out2 = mOverSamplerR.Process(*out2, std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturationR, std::placeholders::_1));
+          *out1 = mOverSampler[0].Process(*out1, std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturation[0], std::placeholders::_1));
+          *out2 = mOverSampler[1].Process(*out2, std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturation[1], std::placeholders::_1));
 
           // oversampled saturation processing if std::function<double(double)> is at hand
-          //*out1 = mOverSamplerL.Process(*out1 * mInputDrive, [](sample input) {return std::tanh(input);});
-          //*out2 = mOverSamplerR.Process(*out2 * mInputDrive, [](sample input) {return std::tanh(input);});
+          //*out1 = mOverSamplerL.Process(*out1 * mSaturationDrive, [](sample input) {return std::tanh(input);});
+          //*out2 = mOverSamplerR.Process(*out2 * mSaturationDrive, [](sample input) {return std::tanh(input);});
         }
 
       }
@@ -519,62 +500,62 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
         if (mEqHpFreq > 16.) {
           // one pole for 1st and 3rd (and further odd) orders
           if (mEqHpOrder == EFilterSlope::dbo6 || mEqHpOrder == dbo18) {
-            *out1 = fEqHpFilterOnepoleL.process(*out1);
-            *out2 = fEqHpFilterOnepoleR.process(*out2);
+            *out1 = fEqHpFilterOnepole[0].process(*out1);
+            *out2 = fEqHpFilterOnepole[1].process(*out2);
           }
           // two pole for 2nd order
           if (mEqHpOrder >= EFilterSlope::dbo12) {
-            *out1 = fEqHpFilter1L.process(*out1);
-            *out2 = fEqHpFilter1R.process(*out2);
+            *out1 = fEqHpFilter1[0].process(*out1);
+            *out2 = fEqHpFilter1[1].process(*out2);
           }
           // two pole for 4th order
           if (mEqHpOrder >= EFilterSlope::dbo24) {
-            *out1 = fEqHpFilter2L.process(*out1);
-            *out2 = fEqHpFilter2R.process(*out2);
+            *out1 = fEqHpFilter2[0].process(*out1);
+            *out2 = fEqHpFilter2[1].process(*out2);
           }
           // two pole for 6th order
           if (mEqHpOrder >= EFilterSlope::dbo36) {
-            *out1 = fEqHpFilter3L.process(*out1);
-            *out2 = fEqHpFilter3R.process(*out2);
+            *out1 = fEqHpFilter3[0].process(*out1);
+            *out2 = fEqHpFilter3[1].process(*out2);
           }
           // two pole for 8th order
           if (mEqHpOrder >= EFilterSlope::dbo48) {
-            *out1 = fEqHpFilter4L.process(*out1);
-            *out2 = fEqHpFilter4R.process(*out2);
+            *out1 = fEqHpFilter4[0].process(*out1);
+            *out2 = fEqHpFilter4[1].process(*out2);
           }
           // two pole for 10th order
           if (mEqHpOrder >= EFilterSlope::dbo60) {
-            *out1 = fEqHpFilter5L.process(*out1);
-            *out2 = fEqHpFilter5R.process(*out2);
+            *out1 = fEqHpFilter5[0].process(*out1);
+            *out2 = fEqHpFilter5[1].process(*out2);
           }
           // two pole for 12th order
           if (mEqHpOrder >= EFilterSlope::dbo72) {
-            *out1 = fEqHpFilter6L.process(*out1);
-            *out2 = fEqHpFilter6R.process(*out2);
+            *out1 = fEqHpFilter6[0].process(*out1);
+            *out2 = fEqHpFilter6[1].process(*out2);
           }
           // two pole for 20th order
           if (mEqHpOrder >= EFilterSlope::dbo120) {
-            *out1 = fEqHpFilter7L.process(*out1);
-            *out2 = fEqHpFilter7R.process(*out2);
-            *out1 = fEqHpFilter8L.process(*out1);
-            *out2 = fEqHpFilter8R.process(*out2);
-            *out1 = fEqHpFilter9L.process(*out1);
-            *out2 = fEqHpFilter9R.process(*out2);
-            *out1 = fEqHpFilter10L.process(*out1);
-            *out2 = fEqHpFilter10R.process(*out2);
+            *out1 = fEqHpFilter7[0].process(*out1);
+            *out2 = fEqHpFilter7[1].process(*out2);
+            *out1 = fEqHpFilter8[0].process(*out1);
+            *out2 = fEqHpFilter8[1].process(*out2);
+            *out1 = fEqHpFilter9[0].process(*out1);
+            *out2 = fEqHpFilter9[1].process(*out2);
+            *out1 = fEqHpFilter10[0].process(*out1);
+            *out2 = fEqHpFilter10[1].process(*out2);
           }
         }
 
         // Low Pass
 
-        if (mEqLpFreq < 22000.0) { *out1 = fEqLpFilter1L.process(*out1); *out2 = fEqLpFilter1R.process(*out2); }
+        if (mEqLpFreq < 22000.0) { *out1 = fEqLpFilter1[0].process(*out1); *out2 = fEqLpFilter1[1].process(*out2); }
 
         // Parametric EQ
 
-        if (mEqLfGain != 0.0) { *out1 = fEqLfFilterL.process(*out1); *out2 = fEqLfFilterR.process(*out2); }
-        if (mEqLmfGain != 0.0) { *out1 = fEqLmfFilterL.process(*out1); *out2 = fEqLmfFilterR.process(*out2); }
-        if (mEqHmfGain != 0.0) { *out1 = fEqHmfFilterL.process(*out1); *out2 = fEqHmfFilterR.process(*out2); }
-        if (mEqHfGain != 0.0) { *out1 = fEqHfFilterL.process(*out1); *out2 = fEqHfFilterR.process(*out2); }
+        if (mEqLfGain != 0.0) { *out1 = fEqLfFilter[0].process(*out1); *out2 = fEqLfFilter[1].process(*out2); }
+        if (mEqLmfGain != 0.0) { *out1 = fEqLmfFilter[0].process(*out1); *out2 = fEqLmfFilter[1].process(*out2); }
+        if (mEqHmfGain != 0.0) { *out1 = fEqHmfFilter[0].process(*out1); *out2 = fEqHmfFilter[1].process(*out2); }
+        if (mEqHfGain != 0.0) { *out1 = fEqHfFilter[0].process(*out1); *out2 = fEqHfFilter[1].process(*out2); }
       }
       // --------------
       // End EQ Section
@@ -655,10 +636,10 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
           sample vSafePanLowSignal2 = *out2;
           sample vSafePanHighSignal2 = *out2;
 
-          vSafePanLowSignal1 = fSafePanLpL.process(vSafePanLowSignal1);
-          vSafePanLowSignal2 = fSafePanLpR.process(vSafePanLowSignal2);
-          vSafePanHighSignal1 = fSafePanHpL.process(vSafePanHighSignal1);
-          vSafePanHighSignal2 = fSafePanHpR.process(vSafePanHighSignal2);
+          vSafePanLowSignal1 = fSafePanLp[0].process(vSafePanLowSignal1);
+          vSafePanLowSignal2 = fSafePanLp[1].process(vSafePanLowSignal2);
+          vSafePanHighSignal1 = fSafePanHp[0].process(vSafePanHighSignal1);
+          vSafePanHighSignal2 = fSafePanHp[1].process(vSafePanHighSignal2);
 
           fPan.process(vSafePanHighSignal1, vSafePanHighSignal2);
           if (mIsPanMonoLow) {
@@ -724,8 +705,8 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       //	*out2 *= mOutputGain;
       //}
 
-      *out1 = fDcBlockerL.process(*out1);
-      *out2 = fDcBlockerR.process(*out2);
+      *out1 = fDcBlocker[0].process(*out1);
+      *out2 = fDcBlocker[1].process(*out2);
       *out1 -= dcoff;
       *out2 -= dcoff;
 
@@ -771,6 +752,7 @@ void SRChannel::OnIdle() {
 
 void SRChannel::OnReset() {
   mSampleRate = GetSampleRate();
+  const int nChans = NChannelsConnected(kOutput);
   InitEffects();
   circularBufferPointer = 0;
 }
@@ -792,35 +774,35 @@ void SRChannel::OnParamChange(int paramIdx) {
     mOutputGain = DBToAmp(GetParam(paramIdx)->Value());
     fOutputGain.setGain(mOutputGain);
     break;
-  case kInputDrive:
-    mInputDrive = GetParam(paramIdx)->Value();
-    fInputSaturationL.setDrive(mInputDrive);
-    fInputSaturationR.setDrive(mInputDrive);
+  case kSaturationDrive:
+    mSaturationDrive = GetParam(paramIdx)->Value();
+    fInputSaturation[0].setDrive(mSaturationDrive);
+    fInputSaturation[1].setDrive(mSaturationDrive);
     break;
   case kSaturationAmount:
     mSaturationAmount = GetParam(paramIdx)->Value() / 100.;
-    fInputSaturationL.setAmount(mSaturationAmount);
-    fInputSaturationR.setAmount(mSaturationAmount);
+    fInputSaturation[0].setAmount(mSaturationAmount);
+    fInputSaturation[1].setAmount(mSaturationAmount);
     break;
   case kSaturationHarmonics:
     mSaturationHarmonics = GetParam(paramIdx)->Value() / 100.;
-    fInputSaturationL.setHarmonics(mSaturationHarmonics);
-    fInputSaturationR.setHarmonics(mSaturationHarmonics);
+    fInputSaturation[0].setHarmonics(mSaturationHarmonics);
+    fInputSaturation[1].setHarmonics(mSaturationHarmonics);
     break;
   case kSaturationSkew:
     mSaturationSkew = GetParam(paramIdx)->Value() * 0.05;
-    fInputSaturationL.setSkew(mSaturationSkew);
-    fInputSaturationR.setSkew(mSaturationSkew);
+    fInputSaturation[0].setSkew(mSaturationSkew);
+    fInputSaturation[1].setSkew(mSaturationSkew);
     break;
   case kSaturationType:
     mSaturationType = int(GetParam(paramIdx)->Value());
-    fInputSaturationL.setType(mSaturationType);
-    fInputSaturationR.setType(mSaturationType);
+    fInputSaturation[0].setType(mSaturationType);
+    fInputSaturation[1].setType(mSaturationType);
     break;
   case kOversamplingRate:
     mOversamplingRate = int(GetParam(paramIdx)->Value());
-    mOverSamplerL.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
-    mOverSamplerR.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+    mOverSampler[0].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+    mOverSampler[1].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
     break;
   case kClipperThreshold: mClipperThreshold = 1. - GetParam(paramIdx)->Value() / 100.; break;
   case kLimiterThresh:
@@ -830,10 +812,10 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kPan: mPan = (GetParam(paramIdx)->Value() + 100) / 200; fPan.setPanPosition(mPan); break;
   case kPanFreq:
     mSafePanFreq = GetParam(paramIdx)->Value();
-    fSafePanHpL.setFc(mSafePanFreq / mSampleRate);
-    fSafePanHpR.setFc(mSafePanFreq / mSampleRate);
-    fSafePanLpL.setFc(mSafePanFreq / mSampleRate);
-    fSafePanLpR.setFc(mSafePanFreq / mSampleRate);
+    fSafePanHp[0].setFc(mSafePanFreq / mSampleRate);
+    fSafePanHp[1].setFc(mSafePanFreq / mSampleRate);
+    fSafePanLp[0].setFc(mSafePanFreq / mSampleRate);
+    fSafePanLp[1].setFc(mSafePanFreq / mSampleRate);
     break;
   case kIsPanMonoLow: mIsPanMonoLow = GetParam(paramIdx)->Value(); break;
 
@@ -845,31 +827,31 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kEqHpFreq:
     mEqHpFreq = GetParam(paramIdx)->Value();
     if (mEqHpOrder == EFilterSlope::dbo6 || mEqHpOrder == EFilterSlope::dbo18) {
-      fEqHpFilterOnepoleL.setFc(mEqHpFreq / mSampleRate); fEqHpFilterOnepoleR.setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilterOnepole[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilterOnepole[1].setFc(mEqHpFreq / mSampleRate);
     }
     if (mEqHpOrder >= EFilterSlope::dbo12) {
-      fEqHpFilter1L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter1R.setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter1[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter1[1].setFc(mEqHpFreq / mSampleRate);
     }
     if (mEqHpOrder >= EFilterSlope::dbo24) {
-      fEqHpFilter2L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter2R.setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter2[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter2[1].setFc(mEqHpFreq / mSampleRate);
     }
     if (mEqHpOrder >= EFilterSlope::dbo36) {
-      fEqHpFilter3L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter3R.setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter3[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter3[1].setFc(mEqHpFreq / mSampleRate);
     }
     if (mEqHpOrder >= EFilterSlope::dbo48) {
-      fEqHpFilter4L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter4R.setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter4[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter4[1].setFc(mEqHpFreq / mSampleRate);
     }
     if (mEqHpOrder >= EFilterSlope::dbo60) {
-      fEqHpFilter5L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter5R.setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter5[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter5[1].setFc(mEqHpFreq / mSampleRate);
     }
     if (mEqHpOrder >= EFilterSlope::dbo72) {
-      fEqHpFilter6L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter6R.setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter6[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter6[1].setFc(mEqHpFreq / mSampleRate);
     }
     if (mEqHpOrder >= EFilterSlope::dbo120) {
-      fEqHpFilter7L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter7R.setFc(mEqHpFreq / mSampleRate);
-      fEqHpFilter8L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter8R.setFc(mEqHpFreq / mSampleRate);
-      fEqHpFilter9L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter9R.setFc(mEqHpFreq / mSampleRate);
-      fEqHpFilter10L.setFc(mEqHpFreq / mSampleRate); fEqHpFilter10R.setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter7[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter7[1].setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter8[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter8[1].setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter9[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter9[1].setFc(mEqHpFreq / mSampleRate);
+      fEqHpFilter10[0].setFc(mEqHpFreq / mSampleRate); fEqHpFilter10[1].setFc(mEqHpFreq / mSampleRate);
     }
     break;
 
@@ -879,84 +861,84 @@ void SRChannel::OnParamChange(int paramIdx) {
     case EFilterSlope::dbo6:									// 1st order, 6 dB/Oct
       break;
     case EFilterSlope::dbo12:
-      fEqHpFilter1L.setQ(mEqPassQ_O2_F1);	// 2nd order, 12 dB/Oct
-      fEqHpFilter1R.setQ(mEqPassQ_O2_F1);
+      fEqHpFilter1[0].setQ(mEqPassQ_O2_F1);	// 2nd order, 12 dB/Oct
+      fEqHpFilter1[1].setQ(mEqPassQ_O2_F1);
       break;
     case EFilterSlope::dbo18:									// 3rd order, 18 dB/Oct
-      fEqHpFilter1L.setQ(mEqPassQ_O3_F1);
-      fEqHpFilter1R.setQ(mEqPassQ_O3_F1);
+      fEqHpFilter1[0].setQ(mEqPassQ_O3_F1);
+      fEqHpFilter1[1].setQ(mEqPassQ_O3_F1);
       break;
     case EFilterSlope::dbo24:									// 4th order, 24 dB/Oct
-      fEqHpFilter1L.setQ(mEqPassQ_O4_F1);
-      fEqHpFilter1R.setQ(mEqPassQ_O4_F1);
-      fEqHpFilter2L.setQ(mEqPassQ_O4_F2);
-      fEqHpFilter2R.setQ(mEqPassQ_O4_F2);
+      fEqHpFilter1[0].setQ(mEqPassQ_O4_F1);
+      fEqHpFilter1[1].setQ(mEqPassQ_O4_F1);
+      fEqHpFilter2[0].setQ(mEqPassQ_O4_F2);
+      fEqHpFilter2[1].setQ(mEqPassQ_O4_F2);
       break;
     case EFilterSlope::dbo36:									// 6th order, 36 dB/Oct
-      fEqHpFilter1L.setQ(mEqPassQ_O6_F1);
-      fEqHpFilter1R.setQ(mEqPassQ_O6_F1);
-      fEqHpFilter2L.setQ(mEqPassQ_O6_F2);
-      fEqHpFilter2R.setQ(mEqPassQ_O6_F2);
-      fEqHpFilter3L.setQ(mEqPassQ_O6_F3);
-      fEqHpFilter3R.setQ(mEqPassQ_O6_F3);
+      fEqHpFilter1[0].setQ(mEqPassQ_O6_F1);
+      fEqHpFilter1[1].setQ(mEqPassQ_O6_F1);
+      fEqHpFilter2[0].setQ(mEqPassQ_O6_F2);
+      fEqHpFilter2[1].setQ(mEqPassQ_O6_F2);
+      fEqHpFilter3[0].setQ(mEqPassQ_O6_F3);
+      fEqHpFilter3[1].setQ(mEqPassQ_O6_F3);
       break;
     case EFilterSlope::dbo48:									// 8th order, 48 dB/Oct
-      fEqHpFilter1L.setQ(mEqPassQ_O8_F1);
-      fEqHpFilter1R.setQ(mEqPassQ_O8_F1);
-      fEqHpFilter2L.setQ(mEqPassQ_O8_F2);
-      fEqHpFilter2R.setQ(mEqPassQ_O8_F2);
-      fEqHpFilter3L.setQ(mEqPassQ_O8_F3);
-      fEqHpFilter3R.setQ(mEqPassQ_O8_F3);
-      fEqHpFilter4L.setQ(mEqPassQ_O8_F4);
-      fEqHpFilter4R.setQ(mEqPassQ_O8_F4);
+      fEqHpFilter1[0].setQ(mEqPassQ_O8_F1);
+      fEqHpFilter1[1].setQ(mEqPassQ_O8_F1);
+      fEqHpFilter2[0].setQ(mEqPassQ_O8_F2);
+      fEqHpFilter2[1].setQ(mEqPassQ_O8_F2);
+      fEqHpFilter3[0].setQ(mEqPassQ_O8_F3);
+      fEqHpFilter3[1].setQ(mEqPassQ_O8_F3);
+      fEqHpFilter4[0].setQ(mEqPassQ_O8_F4);
+      fEqHpFilter4[1].setQ(mEqPassQ_O8_F4);
       break;
     case EFilterSlope::dbo60:									// 10th order, 48 dB/Oct
-      fEqHpFilter1L.setQ(mEqPassQ_O10_F1);
-      fEqHpFilter1R.setQ(mEqPassQ_O10_F1);
-      fEqHpFilter2L.setQ(mEqPassQ_O10_F2);
-      fEqHpFilter2R.setQ(mEqPassQ_O10_F2);
-      fEqHpFilter3L.setQ(mEqPassQ_O10_F3);
-      fEqHpFilter3R.setQ(mEqPassQ_O10_F3);
-      fEqHpFilter4L.setQ(mEqPassQ_O10_F4);
-      fEqHpFilter4R.setQ(mEqPassQ_O10_F4);
-      fEqHpFilter5L.setQ(mEqPassQ_O10_F5);
-      fEqHpFilter5R.setQ(mEqPassQ_O10_F5);
+      fEqHpFilter1[0].setQ(mEqPassQ_O10_F1);
+      fEqHpFilter1[1].setQ(mEqPassQ_O10_F1);
+      fEqHpFilter2[0].setQ(mEqPassQ_O10_F2);
+      fEqHpFilter2[1].setQ(mEqPassQ_O10_F2);
+      fEqHpFilter3[0].setQ(mEqPassQ_O10_F3);
+      fEqHpFilter3[1].setQ(mEqPassQ_O10_F3);
+      fEqHpFilter4[0].setQ(mEqPassQ_O10_F4);
+      fEqHpFilter4[1].setQ(mEqPassQ_O10_F4);
+      fEqHpFilter5[0].setQ(mEqPassQ_O10_F5);
+      fEqHpFilter5[1].setQ(mEqPassQ_O10_F5);
       break;
     case EFilterSlope::dbo72:									// 12th order, 72 db/Oct
-      fEqHpFilter1L.setQ(mEqPassQ_O12_F1);
-      fEqHpFilter1R.setQ(mEqPassQ_O12_F1);
-      fEqHpFilter2L.setQ(mEqPassQ_O12_F2);
-      fEqHpFilter2R.setQ(mEqPassQ_O12_F2);
-      fEqHpFilter3L.setQ(mEqPassQ_O12_F3);
-      fEqHpFilter3R.setQ(mEqPassQ_O12_F3);
-      fEqHpFilter4L.setQ(mEqPassQ_O12_F4);
-      fEqHpFilter4R.setQ(mEqPassQ_O12_F4);
-      fEqHpFilter5L.setQ(mEqPassQ_O12_F5);
-      fEqHpFilter5R.setQ(mEqPassQ_O12_F5);
-      fEqHpFilter6L.setQ(mEqPassQ_O12_F6);
-      fEqHpFilter6R.setQ(mEqPassQ_O12_F6);
+      fEqHpFilter1[0].setQ(mEqPassQ_O12_F1);
+      fEqHpFilter1[1].setQ(mEqPassQ_O12_F1);
+      fEqHpFilter2[0].setQ(mEqPassQ_O12_F2);
+      fEqHpFilter2[1].setQ(mEqPassQ_O12_F2);
+      fEqHpFilter3[0].setQ(mEqPassQ_O12_F3);
+      fEqHpFilter3[1].setQ(mEqPassQ_O12_F3);
+      fEqHpFilter4[0].setQ(mEqPassQ_O12_F4);
+      fEqHpFilter4[1].setQ(mEqPassQ_O12_F4);
+      fEqHpFilter5[0].setQ(mEqPassQ_O12_F5);
+      fEqHpFilter5[1].setQ(mEqPassQ_O12_F5);
+      fEqHpFilter6[0].setQ(mEqPassQ_O12_F6);
+      fEqHpFilter6[1].setQ(mEqPassQ_O12_F6);
       break;
     case EFilterSlope::dbo120:									// 20th order, 120 dB/Oct
-      fEqHpFilter1L.setQ(mEqPassQ_O20_F1);
-      fEqHpFilter1R.setQ(mEqPassQ_O20_F1);
-      fEqHpFilter2L.setQ(mEqPassQ_O20_F2);
-      fEqHpFilter2R.setQ(mEqPassQ_O20_F2);
-      fEqHpFilter3L.setQ(mEqPassQ_O20_F3);
-      fEqHpFilter3R.setQ(mEqPassQ_O20_F3);
-      fEqHpFilter4L.setQ(mEqPassQ_O20_F4);
-      fEqHpFilter4R.setQ(mEqPassQ_O20_F4);
-      fEqHpFilter5L.setQ(mEqPassQ_O20_F5);
-      fEqHpFilter5R.setQ(mEqPassQ_O20_F5);
-      fEqHpFilter6L.setQ(mEqPassQ_O20_F6);
-      fEqHpFilter6R.setQ(mEqPassQ_O20_F6);
-      fEqHpFilter7L.setQ(mEqPassQ_O20_F7);
-      fEqHpFilter7R.setQ(mEqPassQ_O20_F7);
-      fEqHpFilter8L.setQ(mEqPassQ_O20_F8);
-      fEqHpFilter8R.setQ(mEqPassQ_O20_F8);
-      fEqHpFilter9L.setQ(mEqPassQ_O20_F9);
-      fEqHpFilter9R.setQ(mEqPassQ_O20_F9);
-      fEqHpFilter10L.setQ(mEqPassQ_O20_F10);
-      fEqHpFilter10R.setQ(mEqPassQ_O20_F10);
+      fEqHpFilter1[0].setQ(mEqPassQ_O20_F1);
+      fEqHpFilter1[1].setQ(mEqPassQ_O20_F1);
+      fEqHpFilter2[0].setQ(mEqPassQ_O20_F2);
+      fEqHpFilter2[1].setQ(mEqPassQ_O20_F2);
+      fEqHpFilter3[0].setQ(mEqPassQ_O20_F3);
+      fEqHpFilter3[1].setQ(mEqPassQ_O20_F3);
+      fEqHpFilter4[0].setQ(mEqPassQ_O20_F4);
+      fEqHpFilter4[1].setQ(mEqPassQ_O20_F4);
+      fEqHpFilter5[0].setQ(mEqPassQ_O20_F5);
+      fEqHpFilter5[1].setQ(mEqPassQ_O20_F5);
+      fEqHpFilter6[0].setQ(mEqPassQ_O20_F6);
+      fEqHpFilter6[1].setQ(mEqPassQ_O20_F6);
+      fEqHpFilter7[0].setQ(mEqPassQ_O20_F7);
+      fEqHpFilter7[1].setQ(mEqPassQ_O20_F7);
+      fEqHpFilter8[0].setQ(mEqPassQ_O20_F8);
+      fEqHpFilter8[1].setQ(mEqPassQ_O20_F8);
+      fEqHpFilter9[0].setQ(mEqPassQ_O20_F9);
+      fEqHpFilter9[1].setQ(mEqPassQ_O20_F9);
+      fEqHpFilter10[0].setQ(mEqPassQ_O20_F10);
+      fEqHpFilter10[1].setQ(mEqPassQ_O20_F10);
       break;
     default:
       break;
@@ -970,8 +952,8 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kEqLpFreq:
     mEqLpFreq = GetParam(paramIdx)->Value();
-    fEqLpFilter1L.setFc(mEqLpFreq / mSampleRate);
-    fEqLpFilter1R.setFc(mEqLpFreq / mSampleRate);
+    fEqLpFilter1[0].setFc(mEqLpFreq / mSampleRate);
+    fEqLpFilter1[1].setFc(mEqLpFreq / mSampleRate);
     break;
 
 
@@ -980,33 +962,33 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kEqHfBell:
     mEqHfIsBell = GetParam(paramIdx)->Value();
-    if (mEqHfIsBell == 1) { fEqHfFilterL.setType(SRPlugins::SRFilters::biquad_peak); fEqHfFilterR.setType(SRPlugins::SRFilters::biquad_peak); }
-    else { fEqHfFilterL.setType(SRPlugins::SRFilters::biquad_highshelf); fEqHfFilterR.setType(SRPlugins::SRFilters::biquad_highshelf); }
+    if (mEqHfIsBell == 1) { fEqHfFilter[0].setType(SRPlugins::SRFilters::biquad_peak); fEqHfFilter[1].setType(SRPlugins::SRFilters::biquad_peak); }
+    else { fEqHfFilter[0].setType(SRPlugins::SRFilters::biquad_highshelf); fEqHfFilter[1].setType(SRPlugins::SRFilters::biquad_highshelf); }
     break;
 
   case kEqLfBell:
     mEqLfIsBell = GetParam(paramIdx)->Value();
-    if (mEqLfIsBell == 1) { fEqLfFilterL.setType(SRPlugins::SRFilters::biquad_peak); fEqLfFilterR.setType(SRPlugins::SRFilters::biquad_peak); }
-    else { fEqLfFilterL.setType(SRPlugins::SRFilters::biquad_lowshelf); fEqLfFilterR.setType(SRPlugins::SRFilters::biquad_lowshelf); }
+    if (mEqLfIsBell == 1) { fEqLfFilter[0].setType(SRPlugins::SRFilters::biquad_peak); fEqLfFilter[1].setType(SRPlugins::SRFilters::biquad_peak); }
+    else { fEqLfFilter[0].setType(SRPlugins::SRFilters::biquad_lowshelf); fEqLfFilter[1].setType(SRPlugins::SRFilters::biquad_lowshelf); }
     break;
 
-  case kEqLfGain: mEqLfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLfFilterL.setPeakGain(mEqLfGain); fEqLfFilterR.setPeakGain(mEqLfGain); break;
-  case kEqLfFreq: mEqLfFreq = GetParam(paramIdx)->Value(); fEqLfFilterL.setFc(mEqLfFreq / mSampleRate); fEqLfFilterR.setFc(mEqLfFreq / mSampleRate); break;
-    //case kEqLfQ: mEqLfQ = GetParam(paramIdx)->Value(); fEqLfFilterL.setQ(mEqLfQ); fEqLfFilterR.setQ(mEqLfQ); break;
+  case kEqLfGain: mEqLfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLfFilter[0].setPeakGain(mEqLfGain); fEqLfFilter[1].setPeakGain(mEqLfGain); break;
+  case kEqLfFreq: mEqLfFreq = GetParam(paramIdx)->Value(); fEqLfFilter[0].setFc(mEqLfFreq / mSampleRate); fEqLfFilter[1].setFc(mEqLfFreq / mSampleRate); break;
+    //case kEqLfQ: mEqLfQ = GetParam(paramIdx)->Value(); fEqLfFilter[0].setQ(mEqLfQ); fEqLfFilter[1].setQ(mEqLfQ); break;
 
-  case kEqLmfGain: mEqLmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLmfFilterL.setPeakGain(mEqLmfGain); fEqLmfFilterR.setPeakGain(mEqLmfGain); break;
-  case kEqLmfFreq: mEqLmfFreq = GetParam(paramIdx)->Value(); fEqLmfFilterL.setFc(mEqLmfFreq / mSampleRate); fEqLmfFilterR.setFc(mEqLmfFreq / mSampleRate); break;
-  case kEqLmfQ: mEqLmfQ = GetParam(paramIdx)->Value(); fEqLmfFilterL.setQ(mEqLmfQ); fEqLmfFilterR.setQ(mEqLmfQ); break;
+  case kEqLmfGain: mEqLmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLmfFilter[0].setPeakGain(mEqLmfGain); fEqLmfFilter[1].setPeakGain(mEqLmfGain); break;
+  case kEqLmfFreq: mEqLmfFreq = GetParam(paramIdx)->Value(); fEqLmfFilter[0].setFc(mEqLmfFreq / mSampleRate); fEqLmfFilter[1].setFc(mEqLmfFreq / mSampleRate); break;
+  case kEqLmfQ: mEqLmfQ = GetParam(paramIdx)->Value(); fEqLmfFilter[0].setQ(mEqLmfQ); fEqLmfFilter[1].setQ(mEqLmfQ); break;
 
-  case kEqHmfGain: mEqHmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHmfFilterL.setPeakGain(mEqHmfGain); fEqHmfFilterR.setPeakGain(mEqHmfGain); break;
-  case kEqHmfFreq: mEqHmfFreq = GetParam(paramIdx)->Value(); fEqHmfFilterL.setFc(mEqHmfFreq / mSampleRate); fEqHmfFilterR.setFc(mEqHmfFreq / mSampleRate); break;
-  case kEqHmfQ: mEqHmfQ = GetParam(paramIdx)->Value(); fEqHmfFilterL.setQ(mEqHmfQ); fEqHmfFilterR.setQ(mEqHmfQ); break;
+  case kEqHmfGain: mEqHmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHmfFilter[0].setPeakGain(mEqHmfGain); fEqHmfFilter[1].setPeakGain(mEqHmfGain); break;
+  case kEqHmfFreq: mEqHmfFreq = GetParam(paramIdx)->Value(); fEqHmfFilter[0].setFc(mEqHmfFreq / mSampleRate); fEqHmfFilter[1].setFc(mEqHmfFreq / mSampleRate); break;
+  case kEqHmfQ: mEqHmfQ = GetParam(paramIdx)->Value(); fEqHmfFilter[0].setQ(mEqHmfQ); fEqHmfFilter[1].setQ(mEqHmfQ); break;
 
-  case kEqHfGain: mEqHfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHfFilterL.setPeakGain(mEqHfGain); fEqHfFilterR.setPeakGain(mEqHfGain); break;
-  case kEqHfFreq: mEqHfFreq = GetParam(paramIdx)->Value(); fEqHfFilterL.setFc(mEqHfFreq / mSampleRate); fEqHfFilterR.setFc(mEqHfFreq / mSampleRate); break;
+  case kEqHfGain: mEqHfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHfFilter[0].setPeakGain(mEqHfGain); fEqHfFilter[1].setPeakGain(mEqHfGain); break;
+  case kEqHfFreq: mEqHfFreq = GetParam(paramIdx)->Value(); fEqHfFilter[0].setFc(mEqHfFreq / mSampleRate); fEqHfFilter[1].setFc(mEqHfFreq / mSampleRate); break;
 
   case kEqAmount: mEqAmount = GetParam(paramIdx)->Value() / 100.; OnParamChange(kEqHfGain); OnParamChange(kEqHmfGain); OnParamChange(kEqLmfGain); OnParamChange(kEqLfGain); break;
-    //case kEqHfQ: mEqHfQ = GetParam(paramIdx)->Value(); fEqHfFilterL.setQ(mEqHfQ); fEqHfFilterR.setQ(mEqHfQ); break;
+    //case kEqHfQ: mEqHfQ = GetParam(paramIdx)->Value(); fEqHfFilter[0].setQ(mEqHfQ); fEqHfFilter[1].setQ(mEqHfQ); break;
 
 
       // COMPRESSOR

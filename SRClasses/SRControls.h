@@ -35,8 +35,9 @@ namespace SRPlugins {
       void Draw(IGraphics& g) override;
       void OnMouseDown(float x, float y, const IMouseMod& mod) override;
       void OnInit() override;
-      //  void OnMouseDblClick(float x, float y, const IMouseMod& mod) override {  OnMouseDown(x, y, mod); }
       void OnResize() override;
+      float GetPercW() { return mCenterX / GetDelegate()->GetEditorWidth(); }
+      float GetPercH() { return mCenterY / GetDelegate()->GetEditorHeight(); }
 
 
 
@@ -63,6 +64,14 @@ namespace SRPlugins {
       IText mTextCircleLabelMax;
       IText mTextCircleLabelCtr;
       IColor mColor;
+      IPattern mPatternShadow;
+      IPattern mPatternHead;
+      IPattern mPatternRim;
+      IPattern mPatternEdge;
+      ILayerPtr mLayer;
+      IShadow mShadowFrame;
+      IShadow mShadowHead;
+      IShadow mShadowArrow;
       struct KnobScaleVals
       {
         const float relRadius = 1.f;
@@ -74,11 +83,10 @@ namespace SRPlugins {
         const KnobScaleVals valArc = { 1.f, 4.f };
         const KnobScaleVals dots = { 1.f, 2.f };
         const KnobScaleVals rim = { 0.825f, -1.f };
-        const KnobScaleVals outerRim = { 0.9f, 3.f };
-        const KnobScaleVals head = { 0.8f, -1.f };
-        const KnobScaleVals headLights = { 0.775f, 0.05f };
-        const KnobScaleVals outerArrow = { 0.9f, 3.f, 0.7f };
-        const KnobScaleVals arrow = { 0.8f, 3.f, 0.f };
+        const KnobScaleVals outerRim = { 0.9f, 0.06f };
+        const KnobScaleVals head = { 0.75f, 0.06f };
+        const KnobScaleVals outerArrow = { 0.825f, 3.f, 0.7f };
+        const KnobScaleVals arrow = { 0.75f, 3.f, 0.f };
 
       } knobScales;
     };

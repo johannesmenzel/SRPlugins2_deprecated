@@ -7,7 +7,6 @@
 #include <cmath>
 #include <functional>
 
-
 SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo),
   mEqHfQ(stQ),

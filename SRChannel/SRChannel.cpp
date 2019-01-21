@@ -143,13 +143,14 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     // Attach logo
     pGraphics->AttachControl(new IBitmapControl(IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH, 70), bmpLogo, -1, kBlendNone), cBitmapLogo);
     // Attach section rects
-    pGraphics->AttachControl(new IPanelControl(rectInput, pluginLayout.colorPanelBG, true), cPanelInput, "UI");
+    const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(pluginLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f)});
+    pGraphics->AttachControl(new IPanelControl(rectInput, patternPanel, true), cPanelInput, "UI");
     //pGraphics->AttachControl(new IBitmapControl(rectInput, bmpPanel, -1, kBlendNone), cPanelInput, "UI"); // This would be the bmp style
-    pGraphics->AttachControl(new IPanelControl(rectEq, pluginLayout.colorPanelBG, true), cPanelEq, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectComp, pluginLayout.colorPanelBG, true), cPanelComp, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectPost, pluginLayout.colorPanelBG, true), cPanelPost, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectOutput, pluginLayout.colorPanelBG, true), cPanelOutput, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectMeter, COLOR_TRANSPARENT, true), cPanelMeter, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectEq, patternPanel, true), cPanelEq, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectComp, patternPanel, true), cPanelComp, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectPost, patternPanel, true), cPanelPost, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectOutput, patternPanel, true), cPanelOutput, "UI");
+    pGraphics->AttachControl(new IPanelControl(rectMeter, patternPanel, true), cPanelMeter, "UI");
     pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 0), "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 2), "Out Left", "Out Right"), cOutputMeter, "Meter");

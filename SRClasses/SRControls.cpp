@@ -35,6 +35,7 @@ namespace SRPlugins {
       , mTextCircleLabelCtr(IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter))
       , mPatternShadow(IPattern(EPatternType::kSolidPattern))
       , mPatternHead(IPattern(EPatternType::kRadialPattern))
+      , mPatternHeadLights(IPattern(EPatternType::kRadialPattern))
       , mPatternRim(IPattern(EPatternType::kLinearPattern))
       , mPatternEdge(IPattern(EPatternType::kLinearPattern))
       , mShadowFrame(IShadow(mPatternShadow, 1.f, mShadowOffset, mShadowOffset, 0.5f, true))
@@ -71,6 +72,7 @@ namespace SRPlugins {
       , mTextCircleLabelCtr(IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter))
       , mPatternShadow(IPattern(EPatternType::kLinearPattern))
       , mPatternHead(IPattern(EPatternType::kRadialPattern))
+      , mPatternHeadLights(IPattern(EPatternType::kRadialPattern))
       , mPatternRim(IPattern(EPatternType::kLinearPattern))
       , mPatternEdge(IPattern(EPatternType::kLinearPattern))
       , mShadowFrame(IShadow(mPatternShadow, 1.f, mShadowOffset, mShadowOffset, 0.5f, true))
@@ -181,8 +183,8 @@ namespace SRPlugins {
       // Head shadow and head
       //if (mDrawShadows && !mEmboss) g.FillCircle(GetColor(kSH), mCenterX + mRelThickness, mCenterY + mRelThickness, mRadius * knobScales.head.relRadius);
 
-      g.StartLayer(mRECT);
       // Draw Head
+      g.StartLayer(mRECT);
       g.PathClear();
       g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
       g.PathFill(mPatternHead, fillOptions);
@@ -191,7 +193,11 @@ namespace SRPlugins {
       g.ApplyLayerDropShadow(mLayer, mShadowHead);
       g.DrawLayer(mLayer);
 
-      // Knob Lights
+      g.PathClear();
+      g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
+      g.PathFill(mPatternHeadLights, fillOptions);
+
+      // Head Lights
       if (!mEmboss) {
       g.PathClear();
       g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius - 0.5f * knobScales.head.relThickness * mRadius);
@@ -200,10 +206,6 @@ namespace SRPlugins {
 
       // Outer Arrow
       g.DrawRadialLine(GetColor(kFR), mCenterX, mCenterY, mAngleValue, knobScales.outerArrow.relInnerRadius * mRadius, mRadius * knobScales.outerArrow.relRadius, 0, knobScales.outerArrow.relThickness * mRelThickness);
-
-      //// Arrow shadow
-      //g.DrawRadialLine(GetColor(kSH), mCenterX + mRelThickness, mCenterY + mRelThickness, mAngleValue, knobScales.arrow.relInnerRadius, knobScales.arrow.relRadius * mRadius, 0, knobScales.arrow.relThickness * mRelThickness);
-      //g.FillCircle(GetColor(kSH), mCenterX + mRelThickness, mCenterY + mRelThickness, knobScales.arrow.relThickness * mRelThickness * 0.5f, 0);
 
       // Arrow
       g.StartLayer(mRECT);
@@ -218,6 +220,7 @@ namespace SRPlugins {
       mLayer = g.EndLayer();
       g.ApplyLayerDropShadow(mLayer, mShadowArrow);
       g.DrawLayer(mLayer);
+
       ////g.StartLayer(mRECT);
       //if (g.HasPathSupport())
       //{
@@ -343,12 +346,23 @@ namespace SRPlugins {
       // Patterns
       mPatternShadow = IPattern(COLOR_BLACK);
       mPatternHead = IPattern::CreateRadialGradient(
+        mCenterX,
+        mCenterY,
+        mRadius,
+        {
+          IColorStop(mColor, 0.9f),
+          //IColorStop(mColor.GetContrasted(1.0f), 0.9f),
+          //IColorStop(mColor, 0.95f),
+          IColorStop(ColorGetAltered(mColor, 0.5f), 1.f)
+        }
+      );
+      mPatternHeadLights = IPattern::CreateRadialGradient(
         mCenterX - GetPercW() * 0.5f * mRadius,
         mCenterY - GetPercH() * 0.5f * mRadius,
         mRadius * knobScales.head.relRadius,
         {
-          IColorStop(IColor(150, 255,255,255), 0.0f),
-          IColorStop(mColor, 1.0f)
+          IColorStop(IColor(200, 255,255,255), 0.0f),
+          IColorStop(COLOR_TRANSPARENT, 1.0f)
         }
       );
       mPatternRim = IPattern::CreateLinearGradient(
@@ -373,8 +387,8 @@ namespace SRPlugins {
       mShadowFrame = IShadow(
         mPatternShadow,
         mRadius * 0.1f,
-        0.5f * mRadius * GetPercW(),
-        0.5f * mRadius * GetPercH(),
+        0.6f * mRadius * GetPercW(),
+        0.6f * mRadius * GetPercH(),
         0.5f,
         true
       );
@@ -382,8 +396,8 @@ namespace SRPlugins {
       mShadowHead = IShadow(
         mPatternShadow,
         mRadius * 0.01f,
-        0.1f * mRadius * GetPercW(),
-        0.1f * mRadius * GetPercH(),
+        0.3f * mRadius * GetPercW(),
+        0.3f * mRadius * GetPercH(),
         0.5f,
         true
       );

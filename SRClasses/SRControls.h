@@ -38,6 +38,13 @@ namespace SRPlugins {
       void OnResize() override;
       float GetPercW() { return mCenterX / GetDelegate()->GetEditorWidth(); }
       float GetPercH() { return mCenterY / GetDelegate()->GetEditorHeight(); }
+      IColor ColorGetAltered(IColor pColor, float change) {
+        IColor color = pColor;
+        color.R = int(color.R * change); color.R = (color.R > 255) ? 255 : color.R;
+        color.B = int(color.B * change); color.B = (color.B > 255) ? 255 : color.B;
+        color.G = int(color.G * change); color.G = (color.G > 255) ? 255 : color.G;
+        return color;
+      }
 
 
 
@@ -66,19 +73,20 @@ namespace SRPlugins {
       IColor mColor;
       IPattern mPatternShadow;
       IPattern mPatternHead;
+      IPattern mPatternHeadLights;
       IPattern mPatternRim;
       IPattern mPatternEdge;
       ILayerPtr mLayer;
       IShadow mShadowFrame;
       IShadow mShadowHead;
       IShadow mShadowArrow;
-      struct KnobScaleVals
+      const struct KnobScaleVals
       {
         const float relRadius = 1.f;
         const float relThickness = 2.f;
         const float relInnerRadius = 0.f;
       };
-      struct KnobScales
+      const struct KnobScales
       {
         const KnobScaleVals valArc = { 1.f, 4.f };
         const KnobScaleVals dots = { 1.f, 2.f };

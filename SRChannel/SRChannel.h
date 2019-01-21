@@ -29,7 +29,7 @@ public:
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
   void OnReset() override;
   void OnParamChange(int paramIdx) override;
-  void OnIdle();
+  void OnIdle() override;
   double circularBufferInL[circularBufferLenght], circularBufferInR[circularBufferLenght], circularBufferOutL[circularBufferLenght], circularBufferOutR[circularBufferLenght];
 #endif
 

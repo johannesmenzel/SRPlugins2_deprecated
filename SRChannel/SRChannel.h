@@ -17,7 +17,7 @@
 #include "SRChannelConstants.h"
 // ... Commented out until implementation of oversampling
 #include "Oversampler.h"
-//#include <functional>
+#include <functional>
 
 class SRChannel : public IPlug
 {
@@ -34,16 +34,20 @@ public:
 #endif
 
 private:
+  // User Functions
   void InitEffects();
   void GrayOutControls();
-  double mSampleRate,
-    // GAIN + PAN
-    mInputGain, mOutputGain, mInputDrive,
-    mPan, mSafePanFreq,
+
+  // GLOBAL members
+  double mSampleRate;
+  // GAIN members
+  double mInputGain, mOutputGain, mInputDrive;
+
+  double mPan, mSafePanFreq;
     //vSafePanLowSignal1, vSafePanHighSignal1, vSafePanLowSignal2, vSafePanHighSignal2,
 
     // CLIP + LIMIT
-    mClipperThreshold, mSaturationAmount, mSaturationHarmonics, mLimiterThresh, mSaturationSkew,
+   double mClipperThreshold, mSaturationAmount, mSaturationHarmonics, mLimiterThresh, mSaturationSkew,
 
     //mSatLfGain, mSatLfFreq, mSatMfGain, mSatMfFreq, mSatHfGain, mSatHfFreq, mSatHpFreq, mSatLpFreq,
 
@@ -117,14 +121,9 @@ private:
   // Saturation
   SRPlugins::SRSaturation::SRSaturation fInputSaturationL;
   SRPlugins::SRSaturation::SRSaturation fInputSaturationR;
+  OverSampler<sample> mOverSamplerL{ OverSampler<sample>::kNone };
+  OverSampler<sample> mOverSamplerR{ OverSampler<sample>::kNone };
 
-  // ... Commented out until implementation of oversampling
-  //std::function<sample(sample)>fInputSaturationLOversampled;
-  //std::function<sample(sample)>fInputSaturationROversampled;
-
-
-  //OverSampler<sample> mOverSamplerL{ OverSampler<sample>::kNone };
-  //OverSampler<sample> mOverSamplerR{ OverSampler<sample>::kNone };
 
   // TESTVARS
   double sumIn;

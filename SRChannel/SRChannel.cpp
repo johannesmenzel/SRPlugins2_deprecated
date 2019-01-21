@@ -5,6 +5,7 @@
 #include <math.h>
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <functional>
 
 
 SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
@@ -64,20 +65,20 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           "Half Rect",
           "Full Rect"
         ); break;
-        case kOversamplingRate:
-          GetParam(paramIdx)->InitEnum(
-            p.name,
-            (int)p.defaultVal,
-            OverSampler<double>::kNumFactors,
-            p.label,
-            0,
-            p.group,
-            "off",
-            "2X",
-            "4X",
-            "8X",
-            "16X"
-          ); break;
+      case kOversamplingRate:
+        GetParam(paramIdx)->InitEnum(
+          p.name,
+          (int)p.defaultVal,
+          OverSampler<double>::kNumFactors,
+          p.label,
+          0,
+          p.group,
+          "off",
+          "2X",
+          "4X",
+          "8X",
+          "16X"
+        ); break;
       default: break;
       }
     default:
@@ -106,7 +107,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   );
 
 
- // GRAPHICS func
+  // GRAPHICS func
 #if IPLUG_EDITOR // All UI methods and member variables should be within an IPLUG_EDITOR guard, should you want distributed UI
   mMakeGraphicsFunc = [&]() {
     return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
@@ -119,7 +120,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
     IBitmap bmpPanel = pGraphics->LoadBitmap(PANEL_FN);
 
-     // SETUP
+    // SETUP
     pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
     pGraphics->EnableTooltips(true);                                        // Enable Tooltips
 
@@ -242,7 +243,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           break;
         }
         break;
-      // Attach switches
+        // Attach switches
       case typeEnum:
       case typeBool:
         pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorSwitch(
@@ -387,14 +388,12 @@ void SRChannel::InitEffects() {
   fInputSaturationR.setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mInputDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1.);
 
   //... Commented out until implementation of oversampling
-  //fInputSaturationLOversampled = std::bind(&fInputSaturationL.process, this, std::placeholders::_1);
-  //fInputSaturationROversampled = std::bind(&fInputSaturationR.process, this, std::placeholders::_1);
+  //fOverSamplerProcessL = std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturationL.process, std::placeholders::_1);
+  //fOverSamplerProcessR = std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturationR.process, std::placeholders::_1);
 
   // Oversampling
-  //mOverSamplerL.SetOverSampling(OverSampler<sample>::k16x);
-  //mOverSamplerR.SetOverSampling(OverSampler<sample>::k16x);
-  //mOverSamplerL.Reset();
-  //mOverSamplerR.Reset();
+  mOverSamplerL.Reset();
+  mOverSamplerR.Reset();
 
   // Name channels
   //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
@@ -488,12 +487,18 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
         // Saturation
         if (mSaturationAmount != 0.) {
-          *out1 = fInputSaturationL.process(*out1);
-          *out2 = fInputSaturationR.process(*out2);
-          // Here I'll try to implement oversampling
+          // Non oversampled saturation processing
+          //*out1 = fInputSaturationL.process(*out1);
+          //*out2 = fInputSaturationR.process(*out2);
+
+          // oversampled saturation processing
+          //using namespace std::placeholders;
+          *out1 = mOverSamplerL.Process(*out1, std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturationL, std::placeholders::_1));
+          *out2 = mOverSamplerR.Process(*out2, std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturationR, std::placeholders::_1));
+
+          // oversampled saturation processing if std::function<double(double)> is at hand
           //*out1 = mOverSamplerL.Process(*out1 * mInputDrive, [](sample input) {return std::tanh(input);});
           //*out2 = mOverSamplerR.Process(*out2 * mInputDrive, [](sample input) {return std::tanh(input);});
-
         }
 
       }
@@ -756,11 +761,18 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   delete[] deesserGrMeterValue;
 }
 
+
+void SRChannel::OnIdle() {
+  mInputMeterBallistics.TransmitData(*this);
+  mGrMeterBallistics.TransmitData(*this);
+  mOutputMeterBallistics.TransmitData(*this);
+  mScopeBallistics.TransmitData(*this);
+}
+
 void SRChannel::OnReset() {
   mSampleRate = GetSampleRate();
   InitEffects();
   circularBufferPointer = 0;
-  //mBlockSize = GetBlockSize();
 }
 
 void SRChannel::OnParamChange(int paramIdx) {
@@ -807,8 +819,8 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
   case kOversamplingRate:
     mOversamplingRate = int(GetParam(paramIdx)->Value());
-    //mOverSamplerL.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
-    //mOverSamplerR.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+    mOverSamplerL.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+    mOverSamplerR.SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
     break;
   case kClipperThreshold: mClipperThreshold = 1. - GetParam(paramIdx)->Value() / 100.; break;
   case kLimiterThresh:
@@ -1148,11 +1160,5 @@ void SRChannel::OnParamChange(int paramIdx) {
 
 }
 
-void SRChannel::OnIdle() {
-  mInputMeterBallistics.TransmitData(*this);
-  mGrMeterBallistics.TransmitData(*this);
-  mOutputMeterBallistics.TransmitData(*this);
-  mScopeBallistics.TransmitData(*this);
-}
 
 #endif

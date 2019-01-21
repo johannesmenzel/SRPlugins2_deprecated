@@ -718,9 +718,9 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // -------------------------
     // End of global bypass test
 
-    peakGrMeterValue[s] = fCompressorPeak.getGrLin();
-    rmsGrMeterValue[s] = fCompressorRms.getGrLin();
-    deesserGrMeterValue[s] = fDeesser.getGrLin();
+    peakGrMeterValue[s] = (fCompressorPeak.getGrDb() + 60.) / 60;
+    rmsGrMeterValue[s] = (fCompressorRms.getGrDb() + 60.) / 60;
+    deesserGrMeterValue[s] = (fDeesser.getGrDb() + 60.) / 60;
 
     (circularBufferPointer >= circularBufferLenght - 1) ? circularBufferPointer = 0 : circularBufferPointer++;
 

@@ -118,7 +118,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->LoadFont(CENTURY_FN);
     IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
     IBitmap bmpPanel = pGraphics->LoadBitmap(PANEL_FN);
-
     // SETUP
     pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
     pGraphics->EnableTooltips(true);                                        // Enable Tooltips
@@ -142,6 +141,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     // Attach logo
     pGraphics->AttachControl(new IBitmapControl(IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH, 70), bmpLogo, -1, kBlendNone), cBitmapLogo);
+    pGraphics->AttachControl(new ITextControl(IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH - 200, pluginLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", pluginLayout.textVersionString), cVersion, "UI");
     // Attach section rects
     const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(pluginLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f)});
     pGraphics->AttachControl(new IPanelControl(rectInput, patternPanel, true), cPanelInput, "UI");

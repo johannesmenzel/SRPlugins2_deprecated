@@ -209,6 +209,7 @@ enum ECtrlTags {
   cOutputMeter,
   cScope,
   cChannelCount,
+  cVersion,
 
   // Number of Controls
   kNumCtrlTags

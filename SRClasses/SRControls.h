@@ -204,116 +204,116 @@ namespace SRPlugins {
 
 
 
-    /** A base class for mult-strip/track controls, such as multi-sliders, meters */
-    class SRTrackControl : public IControl
-      , public IVectorBase
-    {
-    public:
-      SRTrackControl(IRECT bounds, int maxNTracks = 1, float minTrackValue = 0.f, float maxTrackValue = 1.f, const char* trackNames = 0, ...)
-        : IControl(bounds)
-        , mMaxNTracks(maxNTracks)
-        , mMinTrackValue(minTrackValue)
-        , mMaxTrackValue(maxTrackValue)
-      {
-        for (int i = 0; i < maxNTracks; i++)
-        {
-          mTrackData.Add(0.f);
-          mTrackBounds.Add(IRECT());
-        }
+    ///** A base class for mult-strip/track controls, such as multi-sliders, meters */
+    //class SRTrackControl : public IControl
+    //  , public IVectorBase
+    //{
+    //public:
+    //  SRTrackControl(IRECT bounds, int maxNTracks = 1, float minTrackValue = 0.f, float maxTrackValue = 1.f, const char* trackNames = 0, ...)
+    //    : IControl(bounds)
+    //    , mMaxNTracks(maxNTracks)
+    //    , mMinTrackValue(minTrackValue)
+    //    , mMaxTrackValue(maxTrackValue)
+    //  {
+    //    for (int i = 0; i < maxNTracks; i++)
+    //    {
+    //      mTrackData.Add(0.f);
+    //      mTrackBounds.Add(IRECT());
+    //    }
 
-        AttachIControl(this);
-      }
+    //    AttachIControl(this);
+    //  }
 
-      void MakeRects()
-      {
-        for (int ch = 0; ch < MaxNTracks(); ch++)
-        {
-          mTrackBounds.Get()[ch] = mRECT.GetPadded(-mOuterPadding).
-            SubRect(EDirection(!mDirection), MaxNTracks(), ch).
-            GetPadded(0, -mTrackPadding * (float)mDirection, -mTrackPadding * (float)!mDirection, -mTrackPadding);
-        }
-      }
+    //  void MakeRects()
+    //  {
+    //    for (int ch = 0; ch < MaxNTracks(); ch++)
+    //    {
+    //      mTrackBounds.Get()[ch] = mRECT.GetPadded(-mOuterPadding).
+    //        SubRect(EDirection(!mDirection), MaxNTracks(), ch).
+    //        GetPadded(0, -mTrackPadding * (float)mDirection, -mTrackPadding * (float)!mDirection, -mTrackPadding);
+    //    }
+    //  }
 
-      void Draw(IGraphics& g) override
-      {
-        g.FillRect(GetColor(kBG), mRECT);
+    //  void Draw(IGraphics& g) override
+    //  {
+    //    g.FillRect(GetColor(kBG), mRECT);
 
-        for (int ch = 0; ch < MaxNTracks(); ch++)
-        {
-          DrawTrack(g, mTrackBounds.Get()[ch], ch);
-        }
+    //    for (int ch = 0; ch < MaxNTracks(); ch++)
+    //    {
+    //      DrawTrack(g, mTrackBounds.Get()[ch], ch);
+    //    }
 
-        if (mDrawFrame)
-          DrawFrame(g);
-      }
+    //    if (mDrawFrame)
+    //      DrawFrame(g);
+    //  }
 
-      int NTracks() { return mNTracks; }
-      int MaxNTracks() { return mMaxNTracks; }
-      void SetTrackData(int trackIdx, float val) { mTrackData.Get()[trackIdx] = Clip(val, mMinTrackValue, mMaxTrackValue); }
-      float* GetTrackData(int trackIdx) { return &mTrackData.Get()[trackIdx]; }
-      void SetAllTrackData(float val) { memset(mTrackData.Get(), (int)Clip(val, mMinTrackValue, mMaxTrackValue), mTrackData.GetSize() * sizeof(float)); }
-    private:
-      virtual void DrawFrame(IGraphics& g)
-      {
-        g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
-      }
+    //  int NTracks() { return mNTracks; }
+    //  int MaxNTracks() { return mMaxNTracks; }
+    //  void SetTrackData(int trackIdx, float val) { mTrackData.Get()[trackIdx] = Clip(val, mMinTrackValue, mMaxTrackValue); }
+    //  float* GetTrackData(int trackIdx) { return &mTrackData.Get()[trackIdx]; }
+    //  void SetAllTrackData(float val) { memset(mTrackData.Get(), (int)Clip(val, mMinTrackValue, mMaxTrackValue), mTrackData.GetSize() * sizeof(float)); }
+    //private:
+    //  virtual void DrawFrame(IGraphics& g)
+    //  {
+    //    g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
+    //  }
 
-      virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx)
-      {
-        DrawTrackBG(g, r, chIdx);
-        DrawTrackHandle(g, r, chIdx);
+    //  virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx)
+    //  {
+    //    DrawTrackBG(g, r, chIdx);
+    //    DrawTrackHandle(g, r, chIdx);
 
-        if (mDrawTrackFrame)
-          g.DrawRect(GetColor(kFR), r, nullptr, mFrameThickness);
-      }
+    //    if (mDrawTrackFrame)
+    //      g.DrawRect(GetColor(kFR), r, nullptr, mFrameThickness);
+    //  }
 
-      virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx)
-      {
-        g.FillRect(GetColor(kSH), r);
-      }
+    //  virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx)
+    //  {
+    //    g.FillRect(GetColor(kSH), r);
+    //  }
 
-      virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
-      {
-        IRECT fillRect = r.FracRect(mDirection, *GetTrackData(chIdx));
+    //  virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
+    //  {
+    //    IRECT fillRect = r.FracRect(mDirection, *GetTrackData(chIdx));
 
-        g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
+    //    g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
 
-        IRECT peakRect;
+    //    IRECT peakRect;
 
-        if (mDirection == kVertical)
-          peakRect = IRECT(fillRect.L, fillRect.T, fillRect.R, fillRect.T + mPeakSize);
-        else
-          peakRect = IRECT(fillRect.R - mPeakSize, fillRect.T, fillRect.R, fillRect.B);
+    //    if (mDirection == kVertical)
+    //      peakRect = IRECT(fillRect.L, fillRect.T, fillRect.R, fillRect.T + mPeakSize);
+    //    else
+    //      peakRect = IRECT(fillRect.R - mPeakSize, fillRect.T, fillRect.R, fillRect.B);
 
-        DrawPeak(g, peakRect, chIdx);
-      }
+    //    DrawPeak(g, peakRect, chIdx);
+    //  }
 
-      virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
-      {
-        g.FillRect(GetColor(kHL), r);
-      }
+    //  virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
+    //  {
+    //    g.FillRect(GetColor(kHL), r);
+    //  }
 
-      void OnResize() override
-      {
-        MakeRects();
-      }
+    //  void OnResize() override
+    //  {
+    //    MakeRects();
+    //  }
 
-    protected:
+    //protected:
 
-      EDirection mDirection = EDirection::kVertical;
-      int mMaxNTracks;
-      WDL_TypedBuf<float> mTrackData; // real values of sliders/meters
-      WDL_TypedBuf<IRECT> mTrackBounds;
+    //  EDirection mDirection = EDirection::kVertical;
+    //  int mMaxNTracks;
+    //  WDL_TypedBuf<float> mTrackData; // real values of sliders/meters
+    //  WDL_TypedBuf<IRECT> mTrackBounds;
 
-      int mNTracks = 1;
+    //  int mNTracks = 1;
 
-      float mMinTrackValue;
-      float mMaxTrackValue;
-      float mOuterPadding = 10.;
-      float mTrackPadding = 2;
-      float mPeakSize = 5.;
-      bool mDrawTrackFrame = true;
-    };
+    //  float mMinTrackValue;
+    //  float mMaxTrackValue;
+    //  float mOuterPadding = 10.;
+    //  float mTrackPadding = 2;
+    //  float mPeakSize = 5.;
+    //  bool mDrawTrackFrame = true;
+    //};
 
     template <int MAXNC = 1, int QUEUE_SIZE = 1024>
     class SRMeter : public IVTrackControlBase
@@ -391,8 +391,11 @@ namespace SRPlugins {
         IPlugQueue<Data> mQueue{ QUEUE_SIZE };
       };
 
-      SRMeter(IRECT bounds, const char* trackNames = 0, ...)
+      SRMeter(IRECT bounds, bool drawFromTop = false, bool drawInverted = false, const char* trackNames = 0, ...)
         : IVTrackControlBase(bounds, MAXNC, 0, 1., trackNames)
+        , mDrawFromTop(drawFromTop)
+        , mDrawInverted(drawInverted)
+
       {
       }
 
@@ -444,7 +447,13 @@ namespace SRPlugins {
 
       virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
       {
-        IRECT fillRect = r.FracRect(mDirection, *GetTrackData(chIdx));
+        IRECT fillRect;
+        if (!mDrawInverted) {
+          fillRect = r.FracRect(mDirection, *GetTrackData(chIdx), mDrawFromTop); // HERE the value rect is drawn!
+        }
+        else {
+          fillRect = r.FracRect(mDirection, (1. - *GetTrackData(chIdx)), mDrawFromTop); // HERE the value rect is drawn!
+        }
 
         g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
 
@@ -482,6 +491,10 @@ namespace SRPlugins {
 
         SetDirty(false);
       }
+    private:
+
+      bool mDrawFromTop;
+      bool mDrawInverted;
     };
 
 

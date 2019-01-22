@@ -152,7 +152,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new IPanelControl(rectOutput, patternPanel, true), cPanelOutput, "UI");
     pGraphics->AttachControl(new IPanelControl(rectMeter, patternPanel, true), cPanelMeter, "UI");
     pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 0), "In Left", "In Right"), cInputMeter, "Meter");
-    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
+    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 2), "Out Left", "Out Right"), cOutputMeter, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
 

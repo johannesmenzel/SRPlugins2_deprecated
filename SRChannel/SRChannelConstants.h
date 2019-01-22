@@ -99,6 +99,12 @@ enum EParams
   kNumParams
 };
 
+enum EAddParams {
+  kPeakMeterValues = 0,
+  kGrMeterValues,
+  kNumAddParams
+};
+
 // Plugins control tags
 enum ECtrlTags {
 

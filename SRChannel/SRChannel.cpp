@@ -142,20 +142,20 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     // Attach logo
     pGraphics->AttachControl(new IBitmapControl(IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH, 70), bmpLogo, -1, kBlendNone), cBitmapLogo);
     pGraphics->AttachControl(new ITextControl(IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH - 200, pluginLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", pluginLayout.textVersionString), cVersion, "UI");
-    // Attach section rects
+    // Attach section rect PANELS
     const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(pluginLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f)});
     pGraphics->AttachControl(new IPanelControl(rectInput, patternPanel, true), cPanelInput, "UI");
-    //pGraphics->AttachControl(new IBitmapControl(rectInput, bmpPanel, -1, kBlendNone), cPanelInput, "UI"); // This would be the bmp style
     pGraphics->AttachControl(new IPanelControl(rectEq, patternPanel, true), cPanelEq, "UI");
     pGraphics->AttachControl(new IPanelControl(rectComp, patternPanel, true), cPanelComp, "UI");
     pGraphics->AttachControl(new IPanelControl(rectPost, patternPanel, true), cPanelPost, "UI");
     pGraphics->AttachControl(new IPanelControl(rectOutput, patternPanel, true), cPanelOutput, "UI");
     pGraphics->AttachControl(new IPanelControl(rectMeter, patternPanel, true), cPanelMeter, "UI");
-    pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 0), "In Left", "In Right"), cInputMeter, "Meter");
-    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
-    pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 2), "Out Left", "Out Right"), cOutputMeter, "Meter");
+    // METERS peak and gain reduction
+    //pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 0), "In Left", "In Right"), cInputMeter, "Meter");
+    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 0), false, false, true, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 12, "In Left", "In Right"), cInputMeter, "Meter");
+    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, true, -18., 0., SRPlugins::SRHelpers::SetShapeCentered(-18., 0., -9., .5), 6, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
+    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 2), false, false, true, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 12, "Out Left", "Out Right"), cOutputMeter, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
-
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       //IParam *param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
@@ -718,9 +718,9 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // -------------------------
     // End of global bypass test
 
-    peakGrMeterValue[s] = (fCompressorPeak.getGrDb() + 60.) / 60;
-    rmsGrMeterValue[s] = (fCompressorRms.getGrDb() + 60.) / 60;
-    deesserGrMeterValue[s] = (fDeesser.getGrDb() + 60.) / 60;
+    peakGrMeterValue[s] = fCompressorPeak.getGrLin();
+    rmsGrMeterValue[s] = fCompressorRms.getGrLin();
+    deesserGrMeterValue[s] = fDeesser.getGrLin();
 
     (circularBufferPointer >= circularBufferLenght - 1) ? circularBufferPointer = 0 : circularBufferPointer++;
 

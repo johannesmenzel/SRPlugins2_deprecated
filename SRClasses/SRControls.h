@@ -1,6 +1,7 @@
 #pragma once
 #include "IPlug_include_in_plug_hdr.h"
 #include "IControl.h"
+#include "SRHelpers.h"
 // For meter, see IVMeterControl.h
 #include "IPlugQueue.h"
 #include "IPlugStructs.h"
@@ -391,10 +392,16 @@ namespace SRPlugins {
         IPlugQueue<Data> mQueue{ QUEUE_SIZE };
       };
 
-      SRMeter(IRECT bounds, bool drawFromTop = false, bool drawInverted = false, const char* trackNames = 0, ...)
+      SRMeter(IRECT bounds, bool drawFromTop = false, bool drawInverted = false, bool drawDb = true, double minDb = 90., double maxDb = 0., double shape = 1.0, int numLabelSteps = 9, const char* trackNames = 0, ...)
         : IVTrackControlBase(bounds, MAXNC, 0, 1., trackNames)
         , mDrawFromTop(drawFromTop)
         , mDrawInverted(drawInverted)
+        , mDrawDb(drawDb)
+        , mMinDb(minDb)
+        , mMaxDb(maxDb)
+        , mShape(shape)
+        , mNumLabelSteps(numLabelSteps)
+        , mText(IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignMiddle, 0, IText::kQualityClearType))
 
       {
       }
@@ -414,6 +421,19 @@ namespace SRPlugins {
 
         if (mDrawFrame)
           DrawFrame(g);
+
+        const IRECT rectLabelFrame = mRECT.GetPadded(-mOuterPadding);
+        for (int i = 0; i <= mNumLabelSteps; i++) {
+          const float val = mMinDb + ((float)i / (float)mNumLabelSteps) * (mMaxDb - mMinDb);
+          const float vPosition = std::pow((val - mMinDb) / (mMaxDb - mMinDb), 1.0 / mShape);
+          const IRECT labelRECT = IRECT(rectLabelFrame.L, -mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H(), rectLabelFrame.R, mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H());
+          const int valInt = int(std::round(val));
+          std::string measureStr = std::to_string(valInt);
+          const char *measureChar = measureStr.c_str();
+          WDL_String str;
+          str.Set(measureChar);
+          g.DrawText(mText, str.Get(), labelRECT);
+        }
       }
 
       void MakeRects()
@@ -448,11 +468,13 @@ namespace SRPlugins {
       virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
       {
         IRECT fillRect;
+        double value = *GetTrackData(chIdx);
+        if (mDrawDb) value = std::pow((AmpToDB(value) - mMinDb) / (mMaxDb - mMinDb), 1.0 / mShape);
         if (!mDrawInverted) {
-          fillRect = r.FracRect(mDirection, *GetTrackData(chIdx), mDrawFromTop); // HERE the value rect is drawn!
+          fillRect = r.FracRect(mDirection, value, mDrawFromTop); // HERE the value rect is drawn!
         }
         else {
-          fillRect = r.FracRect(mDirection, (1. - *GetTrackData(chIdx)), mDrawFromTop); // HERE the value rect is drawn!
+          fillRect = r.FracRect(mDirection, (1. - value), mDrawFromTop); // HERE the value rect is drawn!
         }
 
         g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
@@ -465,6 +487,8 @@ namespace SRPlugins {
           peakRect = IRECT(fillRect.R - mPeakSize, fillRect.T, fillRect.R, fillRect.B);
 
         DrawPeak(g, peakRect, chIdx);
+
+
       }
 
       virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
@@ -491,10 +515,15 @@ namespace SRPlugins {
 
         SetDirty(false);
       }
-    private:
-
+    protected:
       bool mDrawFromTop;
       bool mDrawInverted;
+      bool mDrawDb;
+      double mMinDb;
+      double mMaxDb;
+      int mNumLabelSteps;
+      double mShape;
+      IText mText;
     };
 
 

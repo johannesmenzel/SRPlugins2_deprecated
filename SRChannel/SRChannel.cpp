@@ -222,7 +222,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             -135.f,
             135.f,
             GetParam(paramIdx)->GetDefault(true),
-            0.6f,
+            0.5f,
             kVertical,
             4.f
           ), ctrlIdx);
@@ -262,14 +262,13 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(ctrlIdx)->SetTooltip(p.tooltip);
     }
 
-    pGraphics->StyleAllVectorControls(false, true, false, 0.f, 2.f, 3.f, SR_SPEC);
+    pGraphics->StyleAllVectorControls(true, true, false, 0.1f, 2.f, 3.f, SR_SPEC);
 
     // Additional tooltips
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
     pGraphics->GetControlWithTag(cGrMeter)->SetTooltip("Gain reduction meter for RMS, peak and deessing compressors");
     pGraphics->GetControlWithTag(cOutputMeter)->SetTooltip("Output peak meter for left and right channel");
     pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope fpr left and right channel");
-
   };
 }
 // END GRAPHICS func
@@ -303,7 +302,8 @@ void SRChannel::GrayOutControls()
         //? grayout = true
         : grayout = false;
 
-      GetUI()->GrayOutControl(paramIdx, grayout);
+      //GetUI()->GrayOutControl(paramIdx, grayout);
+      GetUI()->GetControlWithTag(paramIdx)->GrayOut(grayout);
     }
   }
 }

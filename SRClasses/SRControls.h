@@ -35,7 +35,7 @@ namespace SRPlugins {
 
       void Draw(IGraphics& g) override;
       void OnMouseDown(float x, float y, const IMouseMod& mod) override;
-      void OnInit() override;
+      //void OnInit() override;
       void OnResize() override;
       float GetPercW() { return mCenterX / GetDelegate()->GetEditorWidth(); }
       float GetPercH() { return mCenterY / GetDelegate()->GetEditorHeight(); }
@@ -112,6 +112,9 @@ namespace SRPlugins {
       void Draw(IGraphics& g) override;
 
       void SetDirty(bool push) override;
+
+      IRECT DrawVectorButton(IGraphics&g, const IRECT& bounds, bool pressed, bool mouseOver);
+
 
     protected:
       WDL_String mStr;

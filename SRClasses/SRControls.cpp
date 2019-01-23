@@ -85,20 +85,16 @@ namespace SRPlugins {
       AttachIControl(this);
     }
 
-    void SRVectorKnobText::OnInit()
-    {
+    //void SRVectorKnobText::OnInit()
+    //{
 
-    }
+    //}
 
     void SRVectorKnobText::Draw(IGraphics& g) {
       const float mAngleValue = mAngleMin + ((float)mValue * (mAngleMax - mAngleMin));
       const float colorIntensity = fabs(mValue - mDefaultValue) / fmaxf(mDefaultValue, (1.f - mDefaultValue));
       IColor arcColor;
       IColor::LinearInterpolateBetween(GetColor(kBG), mColor, arcColor, 0.5f + 0.5f * colorIntensity);
-      const IText circleLabelMinText = IText(mText.mSize, IText::kAlignFar);
-      const IText circleLabelMaxText = IText(mText.mSize, IText::kAlignFar);
-      const IText circleLabelCtrText = IText(mText.mSize, IText::kAlignFar);
-
       IStrokeOptions strokeOptions;
       strokeOptions.mPreserve = true;
       IFillOptions fillOptions;
@@ -153,10 +149,8 @@ namespace SRPlugins {
       }
 
       g.StartLayer(mRECT);
-
       // Draw Frame
       //g.DrawCircle(GetColor(kFR), mCenterX, mCenterY, mRadius * 0.9f, 0, mRelThickness);
-
 
       // Draw Rim
       g.PathClear();
@@ -173,22 +167,17 @@ namespace SRPlugins {
       g.PathArc(mCenterX, mCenterY, mRadius * knobScales.outerRim.relRadius, mAngleValue + 307.f, mAngleValue + 353.f);
       g.PathArc(mCenterX, mCenterY, mRadius * knobScales.rim.relRadius, mAngleValue + 355.f, mAngleValue + 5.f);
       g.PathClose();
-      g.PathStroke(mPatternEdge, knobScales.outerRim.relThickness * mRadius, strokeOptions);
+      //g.PathStroke(mPatternEdge, knobScales.outerRim.relThickness * mRadius, strokeOptions);
       g.PathFill(mPatternRim);
-
       mLayer = g.EndLayer();
       g.ApplyLayerDropShadow(mLayer, mShadowFrame);
       g.DrawLayer(mLayer);
-
-      // Head shadow and head
-      //if (mDrawShadows && !mEmboss) g.FillCircle(GetColor(kSH), mCenterX + mRelThickness, mCenterY + mRelThickness, mRadius * knobScales.head.relRadius);
 
       // Draw Head
       g.StartLayer(mRECT);
       g.PathClear();
       g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
       g.PathFill(mPatternHead, fillOptions);
-
       mLayer = g.EndLayer();
       g.ApplyLayerDropShadow(mLayer, mShadowHead);
       g.DrawLayer(mLayer);
@@ -199,9 +188,9 @@ namespace SRPlugins {
 
       // Head Lights
       if (!mEmboss) {
-      g.PathClear();
-      g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius - 0.5f * knobScales.head.relThickness * mRadius);
-      g.PathStroke(mPatternEdge, mRadius * knobScales.head.relThickness, strokeOptions);
+        g.PathClear();
+        g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius - 0.5f * knobScales.head.relThickness * mRadius);
+        g.PathStroke(mPatternEdge, mRadius * knobScales.head.relThickness, strokeOptions);
       }
 
       // Outer Arrow
@@ -221,29 +210,9 @@ namespace SRPlugins {
       g.ApplyLayerDropShadow(mLayer, mShadowArrow);
       g.DrawLayer(mLayer);
 
-      ////g.StartLayer(mRECT);
-      //if (g.HasPathSupport())
-      //{
-      //  double cr = mValue * (mRECT.H() / 2.0);
-      //  //IShadow shadow = IShadow(mPatternShadow, 5.f, 10.f, 10.f, .5f, true);
-      //  g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.headLights.relRadius);
-      //  IFillOptions fillOptions;
-      //  IStrokeOptions strokeOptions;
-      //  fillOptions.mPreserve = true;
-      //  //fillOptions.mFillRule = EFillRule::kFillWinding;
-      //  g.PathFill(mPatternShadow, fillOptions);
-      //  g.PathStroke(mPatternShadow, mRadius * knobScales.headLights.relThickness, strokeOptions);
-      //}
-      //else
-      //  g.DrawText(mText, "UNSUPPORTED", mRECT);
-
-      ////mLayer = g.EndLayer();
-      ////g.ApplyLayerDropShadow(mLayer, mShadow);
-      ////g.DrawLayer(mLayer);
-
 
       // Mouseover
-      if (mMouseIsOver) g.FillCircle(GetColor(kHL), mCenterX, mCenterY, mRadius * 0.8f);
+      if (mMouseIsOver) g.FillCircle(GetColor(kHL), mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
 
     }
 
@@ -448,6 +417,57 @@ namespace SRPlugins {
         g.DrawText(mText, mStr.Get(), handleBounds);
     }
 
+    IRECT SRVectorSwitch::DrawVectorButton(IGraphics& g, const IRECT& bounds, bool pressed, bool mouseOver)
+    {
+      // background
+      g.FillRect(GetColor(kBG), bounds);
+
+      IRECT handleBounds = GetAdjustedHandleBounds(bounds);
+      const float cornerRadius = mRoundness * (handleBounds.W() / 2.f);
+
+      // Pressed
+      if (pressed) {
+        g.FillRoundRect(GetColor(kPR), handleBounds, cornerRadius);
+
+        //inner shadow
+        if (mDrawShadows && mEmboss) {
+          g.PathRect(handleBounds.GetHSliced(mShadowOffset));
+          g.PathRect(handleBounds.GetVSliced(mShadowOffset));
+          g.PathFill(GetColor(kSH));
+        }
+
+        if (mouseOver) g.FillRoundRect(GetColor(kHL), handleBounds, cornerRadius);
+        if (mControl->GetAnimationFunction()) DrawFlashCircle(g);
+        if (mDrawFrame) g.DrawRoundRect(GetColor(kFR), handleBounds, cornerRadius, 0, mFrameThickness);
+      }
+      else {
+        // Normal button state
+        if (mNumStates > 2 || mValue == 0) { 
+          //outer shadow
+          if (mDrawShadows && !mEmboss) g.FillRoundRect(GetColor(kSH), handleBounds, cornerRadius);
+          g.FillRoundRect(GetColor(kFG), handleBounds, cornerRadius);
+          if (mouseOver) g.FillRoundRect(GetColor(kHL), handleBounds, cornerRadius);
+          if (mControl->GetAnimationFunction()) DrawFlashCircle(g);
+          if (mDrawFrame) g.DrawRoundRect(GetColor(kFR), handleBounds, cornerRadius, 0, mFrameThickness);
+        }
+
+        // If button should be "inside"
+        else { 
+          g.FillRoundRect(GetColor(kPR), handleBounds.GetTranslated(mShadowOffset, mShadowOffset), cornerRadius);
+          //inner shadow
+          if (mDrawShadows && mEmboss) {
+            g.PathRect(handleBounds.GetHSliced(mShadowOffset));
+            g.PathRect(handleBounds.GetVSliced(mShadowOffset));
+            g.PathFill(GetColor(kSH));
+          }
+          if (mouseOver) g.FillRoundRect(GetColor(kHL), handleBounds.GetTranslated(mShadowOffset, mShadowOffset), cornerRadius);
+          if (mControl->GetAnimationFunction()) DrawFlashCircle(g);
+          if (mDrawFrame) g.DrawRoundRect(GetColor(kFR), handleBounds.GetTranslated(mShadowOffset, mShadowOffset), cornerRadius, 0, mFrameThickness);
+        }
+      }
+
+      return handleBounds;
+    }
 
 
     void SRLogo::SetStr(const char* str)

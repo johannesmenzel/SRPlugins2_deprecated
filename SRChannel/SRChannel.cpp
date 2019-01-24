@@ -113,20 +113,12 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   };
 
   mLayoutFunc = [&](IGraphics* pGraphics) {
-    // LOAD
-    pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
-    pGraphics->LoadFont(CENTURY_FN);
-    IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
-    IBitmap bmpPanel = pGraphics->LoadBitmap(PANEL_FN);
-    // SETUP
-    pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
-    pGraphics->EnableTooltips(true);                                        // Enable Tooltips
 
     // CANVAS'
     const IRECT rectPlugin = pGraphics->GetBounds();      // Plug canvas
-    const IRECT rectHeader = IRECT(0, 0, PLUG_WIDTH, 70);
-    const IRECT rectControls = IRECT(0, 70, PLUG_WIDTH, PLUG_HEIGHT - 30); // Control canvas
-    const IRECT rectFooter = IRECT(0, PLUG_HEIGHT - 30, PLUG_WIDTH, PLUG_HEIGHT);
+    const IRECT rectHeader = rectPlugin.GetFromTop(70.f);
+    const IRECT rectFooter = rectPlugin.GetFromBottom(30.f);
+    const IRECT rectControls = rectPlugin.GetReducedFromTop(70.f).GetReducedFromBottom(30.f); // Control canvas
     // Section rects
     const IRECT rectInput = rectControls.SubRectHorizontal(6, 0).GetPadded(-5.f);
     const IRECT rectEq = rectControls.SubRectHorizontal(6, 1).GetPadded(-5.f);
@@ -135,15 +127,92 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     const IRECT rectOutput = rectControls.SubRectHorizontal(6, 4).GetPadded(-5.f);
     const IRECT rectMeter = rectControls.SubRectHorizontal(6, 5).GetPadded(-5.f);
 
+    const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(pluginLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f) });
+
+    // pGraphics->GetControlWithTag(TAG)->SetTargetAndDrawRECTs(RECT);
+
+    if (pGraphics->NControls()) {
+
+      pGraphics->GetBackgroundControl()->SetTargetAndDrawRECTs(rectPlugin);
+      // Resize logo
+      pGraphics->GetControlWithTag(cBitmapLogo)->SetTargetAndDrawRECTs(rectHeader.GetFromRight(300.f));
+      pGraphics->GetControlWithTag(cVersion)->SetTargetAndDrawRECTs(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(pluginLayout.textKnobLabel.mSize));
+      // Resize section rect PANELS
+      pGraphics->GetControlWithTag(cPanelInput)->SetTargetAndDrawRECTs(rectInput);
+      pGraphics->GetControlWithTag(cPanelEq)->SetTargetAndDrawRECTs(rectEq);
+      pGraphics->GetControlWithTag(cPanelComp)->SetTargetAndDrawRECTs(rectComp);
+      pGraphics->GetControlWithTag(cPanelPost)->SetTargetAndDrawRECTs(rectPost);
+      pGraphics->GetControlWithTag(cPanelOutput)->SetTargetAndDrawRECTs(rectOutput);
+      pGraphics->GetControlWithTag(cPanelMeter)->SetTargetAndDrawRECTs(rectMeter);
+
+      pGraphics->GetControlWithTag(cInputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 0));
+      pGraphics->GetControlWithTag(cGrMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 1));
+      pGraphics->GetControlWithTag(cOutputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 2));
+      pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader);
+
+      for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
+        const IRECT* rect;
+        const StructParameterProperties& p = parameterProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
+        const int ctrlIdx = p.ctrlTag;
+
+        switch (p.AttachToControlPanel) {
+        case RectHeader: rect = &rectHeader; break;
+        case RectInput: rect = &rectInput; break;
+        case RectEq: rect = &rectEq; break;
+        case RectComp: rect = &rectComp; break;
+        case RectPost: rect = &rectPost; break;
+        case RectOutput: rect = &rectOutput; break;
+        case RectFooter: rect = &rectFooter; break;
+        default: break;
+        }
+
+        switch (p.Type)
+        {
+        case typeInt: // No int ctrl...
+        case typeDouble:
+          switch (paramIdx)
+          {
+          case kInputGain:
+          case kOutputGain:
+            // Resize faders
+            pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false));
+            break;
+          default:
+            // Resize knobs
+            pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false));
+            break;
+          }
+          break;
+          // Attach switches
+        case typeEnum:
+        case typeBool:
+          pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectHorizontal(2.f, false).GetPadded(-5.f));
+          break;
+        default:
+          break;
+        }
+      }
+      return;
+    }
+
+    // LOAD
+    pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
+    //pGraphics->LoadFont(CENTURY_FN);
+    IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
+    //IBitmap bmpPanel = pGraphics->LoadBitmap(PANEL_FN);
+    // SETUP
+    if (!pGraphics->CanHandleMouseOver()) pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
+    if (!pGraphics->TooltipsEnabled()) pGraphics->EnableTooltips(true);                                        // Enable Tooltips
+
+
     // ATTACH
     pGraphics->AttachPanelBackground(pluginLayout.colorPluginBG);        // Attach Background
-    pGraphics->AttachCornerResizer(kUIResizerScale, false);                 // Attach Resizer
+    pGraphics->AttachCornerResizer(kUIResizerSize, true);                 // Attach Resizer
 
     // Attach logo
-    pGraphics->AttachControl(new IBitmapControl(IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH, 70), bmpLogo, -1, kBlendNone), cBitmapLogo);
-    pGraphics->AttachControl(new ITextControl(IRECT(PLUG_WIDTH - 300, 0, PLUG_WIDTH - 200, pluginLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", pluginLayout.textVersionString), cVersion, "UI");
+    pGraphics->AttachControl(new IBitmapControl(rectHeader.GetFromRight(bmpLogo.W()), bmpLogo, -1, kBlendNone), cBitmapLogo);
+    pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(pluginLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", pluginLayout.textVersionString), cVersion, "UI");
     // Attach section rect PANELS
-    const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(pluginLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f)});
     pGraphics->AttachControl(new IPanelControl(rectInput, patternPanel, true), cPanelInput, "UI");
     pGraphics->AttachControl(new IPanelControl(rectEq, patternPanel, true), cPanelEq, "UI");
     pGraphics->AttachControl(new IPanelControl(rectComp, patternPanel, true), cPanelComp, "UI");
@@ -158,7 +227,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
-      //IParam *param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
       const IRECT *rect;
       const StructParameterProperties &p = parameterProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
       const int ctrlIdx = p.ctrlTag;
@@ -269,9 +337,8 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->GetControlWithTag(cGrMeter)->SetTooltip("Gain reduction meter for RMS, peak and deessing compressors");
     pGraphics->GetControlWithTag(cOutputMeter)->SetTooltip("Output peak meter for left and right channel");
     pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope fpr left and right channel");
-  };
-}
-// END GRAPHICS func
+  }; // END LAYOUT function
+}// END GRAPHICS functions
 
 // Method to gray controls, which are currently bypassed. Thats why you have to test from top to bottom
 void SRChannel::GrayOutControls()

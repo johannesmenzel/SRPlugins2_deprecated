@@ -32,6 +32,9 @@ public:
   void OnIdle() override;
   double circularBufferInL[circularBufferLenght], circularBufferInR[circularBufferLenght], circularBufferOutL[circularBufferLenght], circularBufferOutR[circularBufferLenght];
 #endif
+#if IPLUG_EDITOR
+  void OnParamChangeUI(int paramIdx, EParamSource source = kUnknown) override;
+#endif
 
 private:
   // User Functions

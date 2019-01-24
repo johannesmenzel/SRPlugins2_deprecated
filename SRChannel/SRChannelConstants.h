@@ -356,8 +356,8 @@ Actual properties struct.
 Keep in order of the above listet parameters.
 These are constants.
 */
-const StructParameterProperties parameterProperties[kNumParams] = {
-  // { "NAME", "SNAME" DEF, MIN, MAX, STEP, CENTER, CTRPNT, "LABEL",GROUP , TYPE, KNOB, Stage, X, Y, "LBLMIN", "LBLMAX", "LBLCTR", "TOOLTIP"},
+const SRParamProperties srchannelParamProperties[kNumParams] = {
+  // { "NAME", "SNAME" DEF, MIN, MAX, STEP, CENTER, CTRPNT, "LABEL",GROUP , TYPE, KNOB, PANEL, X, Y, "LBLMIN", "LBLMAX", "LBLCTR", "TOOLTIP"},
   // Input Stage
   { kInputGain, cInputGain, "Input Gain", "Input", 0., -60., 12., 0.1, 0., 10. / 12.,"dB", "Global", typeDouble, Fader, RectInput, 0, 2, "-60", "12", "0", "Input Gain is applied before everything else" },
   { kSaturationType, cSaturationType, "Saturation Type", "Type", 0, 0, 5, -1, -1, -1, "", "Input", typeEnum, none, RectInput, 2, 6, "", "", "", "Type of Saturation"},

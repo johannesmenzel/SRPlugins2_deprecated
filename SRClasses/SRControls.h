@@ -37,6 +37,7 @@ namespace SRPlugins {
       void OnMouseDown(float x, float y, const IMouseMod& mod) override;
       //void OnInit() override;
       void OnResize() override;
+      //void GrayOut(bool gray) override;
       float GetPercW() { return mCenterX / GetDelegate()->GetEditorWidth(); }
       float GetPercH() { return mCenterY / GetDelegate()->GetEditorHeight(); }
       IColor ColorGetAltered(IColor pColor, float change) {
@@ -529,7 +530,50 @@ namespace SRPlugins {
       IText mText;
     };
 
+    /** A basic control to fill a rectangle with a color or gradient */
+    class SRPanel : public IControl
+    {
+    public:
+      SRPanel(IRECT bounds, const IColor& color, bool drawFrame = false)
+        : IControl(bounds, kNoParameter)
+        , mPattern(color)
+        , mDrawFrame(drawFrame)
+      {
+        mIgnoreMouse = true;
+      }
 
+      SRPanel(IRECT bounds, const IPattern& pattern, bool drawFrame = false)
+        : IControl(bounds, kNoParameter)
+        , mPattern(pattern)
+        , mDrawFrame(drawFrame)
+      {
+        mIgnoreMouse = true;
+      }
+
+      void Draw(IGraphics& g) override
+      {
+        if (g.HasPathSupport())
+        {
+          g.PathRect(mRECT);
+          g.PathFill(mPattern);
+        }
+        else
+          g.FillRect(mPattern.GetStop(0).mColor, mRECT);
+
+        if (mDrawFrame)
+          g.DrawRect(COLOR_LIGHT_GRAY, mRECT);
+      }
+
+      void SetPattern(const IPattern& pattern)
+      {
+        mPattern = pattern;
+        SetDirty(false);
+      }
+
+    private:
+      IPattern mPattern;
+      bool mDrawFrame;
+    };
 
   }
 } // End namespaces

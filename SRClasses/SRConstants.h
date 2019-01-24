@@ -22,7 +22,7 @@ enum EParamDataType {
 //}
 
 // Struct object containing possible parameters properties
-struct StructParameterProperties {
+struct SRParamProperties {
   const int paramIdx;
   const int ctrlTag;
   const char* name; // Name of parameter displayed in host
@@ -185,7 +185,7 @@ const struct {
   const IColor colorKnobSslWhite = IColor(255, 243, 243, 243);
   const IColor colorDefaultText = COLOR_LIGHT_GRAY;
   const int textSize = 14;
-  const IText textKnobLabel = IText(textSize, colorDefaultText, nullptr, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignTop, 0, IText::kQualityClearType, colorPanelBG, colorDefaultText);
+  const IText textKnobLabel = IText(textSize, colorDefaultText, nullptr, IText::kStyleBold, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityClearType, colorPanelBG, colorDefaultText);
   const IText textKnobValue = IText(textSize, colorDefaultText, nullptr, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityClearType, colorPanelBG, colorDefaultText);
   const IText textVersionString = IText(20, colorDefaultText, nullptr, IText::kStyleNormal, IText::kAlignNear, IText::kVAlignMiddle, 0, IText::kQualityClearType, colorPanelBG, colorDefaultText);
 } pluginLayout;

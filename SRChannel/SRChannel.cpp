@@ -16,7 +16,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   // Initialize Parameters
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
     //IParam* param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
-    const StructParameterProperties &p = parameterProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
+    const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
     switch (p.Type)
     {
     case typeDouble:
@@ -72,11 +72,11 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           p.label,
           0,
           p.group,
-          "off",
-          "2X",
-          "4X",
-          "8X",
-          "16X"
+          "OS OFF",
+          "OS 2X",
+          "OS 4X",
+          "OS 8X",
+          "OS 16X"
         ); break;
       default: break;
       }
@@ -129,8 +129,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(pluginLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f) });
 
-    // pGraphics->GetControlWithTag(TAG)->SetTargetAndDrawRECTs(RECT);
-
+    // Set new RECTs on resize
     if (pGraphics->NControls()) {
 
       pGraphics->GetBackgroundControl()->SetTargetAndDrawRECTs(rectPlugin);
@@ -144,6 +143,12 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(cPanelPost)->SetTargetAndDrawRECTs(rectPost);
       pGraphics->GetControlWithTag(cPanelOutput)->SetTargetAndDrawRECTs(rectOutput);
       pGraphics->GetControlWithTag(cPanelMeter)->SetTargetAndDrawRECTs(rectMeter);
+      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelInput))->SetPattern(patternPanel);
+      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelEq))->SetPattern(patternPanel);
+      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelComp))->SetPattern(patternPanel);
+      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelPost))->SetPattern(patternPanel);
+      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelOutput))->SetPattern(patternPanel);
+      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelMeter))->SetPattern(patternPanel);
 
       pGraphics->GetControlWithTag(cInputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 0));
       pGraphics->GetControlWithTag(cGrMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 1));
@@ -152,7 +157,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
       for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
         const IRECT* rect;
-        const StructParameterProperties& p = parameterProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
+        const SRParamProperties& p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
         const int ctrlIdx = p.ctrlTag;
 
         switch (p.AttachToControlPanel) {
@@ -193,7 +198,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         }
       }
       return;
-    }
+    } // End resize function
 
     // LOAD
     pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
@@ -203,6 +208,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     // SETUP
     if (!pGraphics->CanHandleMouseOver()) pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
     if (!pGraphics->TooltipsEnabled()) pGraphics->EnableTooltips(true);                                        // Enable Tooltips
+
 
 
     // ATTACH
@@ -219,16 +225,21 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new IPanelControl(rectPost, patternPanel, true), cPanelPost, "UI");
     pGraphics->AttachControl(new IPanelControl(rectOutput, patternPanel, true), cPanelOutput, "UI");
     pGraphics->AttachControl(new IPanelControl(rectMeter, patternPanel, true), cPanelMeter, "UI");
+
     // METERS peak and gain reduction
-    //pGraphics->AttachControl(new IVMeterControl<2>(rectMeter.SubRectHorizontal(3, 0), "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 0), false, false, true, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 12, "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, true, -18., 0., SRPlugins::SRHelpers::SetShapeCentered(-18., 0., -9., .5), 6, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 2), false, false, true, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 12, "Out Left", "Out Right"), cOutputMeter, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
+    // Set Tooltip for these
+    pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
+    pGraphics->GetControlWithTag(cGrMeter)->SetTooltip("Gain reduction meter for RMS, peak and deessing compressors");
+    pGraphics->GetControlWithTag(cOutputMeter)->SetTooltip("Output peak meter for left and right channel");
+    pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope fpr left and right channel");
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       const IRECT *rect;
-      const StructParameterProperties &p = parameterProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
+      const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
       const int ctrlIdx = p.ctrlTag;
 
       switch (p.AttachToControlPanel) {
@@ -252,14 +263,8 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       case EControlImages::SslYellow: knobColor = pluginLayout.colorKnobSslYellow; break;
       case EControlImages::SslBlack: knobColor = pluginLayout.colorKnobSslBlack; break;
       case EControlImages::SslWhite: knobColor = pluginLayout.colorKnobSslWhite; break;
-        //case EControlImages::AbbeyChicken: knob = &knobAbbeyChicken; break;
-        //case EControlImages::Button: knob = &buttonSimple; break;
-        //case EControlImages::Fader: knob = &faderGain; break;
-        //case EControlImages::none: knob = 0;
       default: knobColor = pluginLayout.colorFG; break;
       }
-
-
 
       switch (p.Type)
       {
@@ -294,20 +299,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             kVertical,
             4.f
           ), ctrlIdx);
-          //pGraphics->AttachControl(new IVKnobControl(
-          //  rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
-          //  paramIdx,
-          //  p.shortName,
-          //  true,
-          //  SR_SPEC,
-          //  pluginLayout.textKnobLabel,
-          //  pluginLayout.textKnobValue,
-          //  -135.f,
-          //  135.f,
-          //  0.6f,
-          //  kVertical,
-          //  4.f
-          //), ctrlIdx);
           break;
         }
         break;
@@ -331,49 +322,53 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     }
 
     pGraphics->StyleAllVectorControls(true, true, false, 0.1f, 2.f, 3.f, SR_SPEC);
-
-    // Additional tooltips
-    pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
-    pGraphics->GetControlWithTag(cGrMeter)->SetTooltip("Gain reduction meter for RMS, peak and deessing compressors");
-    pGraphics->GetControlWithTag(cOutputMeter)->SetTooltip("Output peak meter for left and right channel");
-    pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope fpr left and right channel");
   }; // END LAYOUT function
 }// END GRAPHICS functions
+
+
 
 // Method to gray controls, which are currently bypassed. Thats why you have to test from top to bottom
 void SRChannel::GrayOutControls()
 {
   if (GetUI()) {
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
-      bool grayout;
-
-      (mBypass == 1 && parameterProperties[paramIdx].group != "Global")
-        ? grayout = true
-        : (mInputBypass == 1 && parameterProperties[paramIdx].group == "Input")
-        ? grayout = true
-        : (mCompBypass == 1 && (parameterProperties[paramIdx].group == "Compressor" || parameterProperties[paramIdx].group == "Deesser"))
-        ? grayout = true
-        : (mEqBypass == 1 && parameterProperties[paramIdx].group == "EQ")
-        ? grayout = true
-        : (mOutputBypass == 1 && parameterProperties[paramIdx].group == "Output")
-        ? grayout = true
-        : (mCompIsParallel == 0 && paramIdx == kCompPeakRmsRatio)
-        ? grayout = true
+      const SRParamProperties& p = srchannelParamProperties[paramIdx];
+      const bool grayout =
+        (mBypass == 1 && p.group != "Global") ? true
+        : (mInputBypass == 1 && p.group == "Input") ? true
+        : (mCompBypass == 1 && (p.group == "Compressor" || p.group == "Deesser")) ? true
+        : (mEqBypass == 1 && p.group == "EQ") ? true
+        : (mOutputBypass == 1 && p.group == "Output") ? true
+        : (mCompIsParallel == 0 && paramIdx == kCompPeakRmsRatio) ? true
         //: (paramIdx == kTestParam1
         //  || paramIdx == kTestParam2
         //  || paramIdx == kTestParam3
         //  || paramIdx == kTestParam4
         //  || paramIdx == kTestParam5
-        //  || paramIdx == kEqLpOrder
-        //  )
-        //? grayout = true
-        : grayout = false;
-
-      //GetUI()->GrayOutControl(paramIdx, grayout);
-      GetUI()->GetControlWithTag(paramIdx)->GrayOut(grayout);
+        //  || paramIdx == kEqLpOrder ? true
+        : false;
+      GetUI()->GetControlWithTag(p.ctrlTag)->GrayOut(grayout);
     }
   }
 }
+
+void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
+{
+  switch (paramIdx)
+  {
+  case kCompPeakRmsRatio:
+  case kEqBypass: 
+  case kCompBypass: 
+  case kInputBypass: 
+  case kOutputBypass: 
+  case kBypass:
+    GrayOutControls();
+    break;
+  default:
+    break;
+  }
+}
+
 #endif
 
 // DSP func
@@ -1136,7 +1131,7 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kCompDryWet: mCompDryWet = GetParam(paramIdx)->Value() / 100; break;
 
     // Bool Switches
-  case kCompIsParallel: mCompIsParallel = GetParam(paramIdx)->Value(); if (GetUI()) GrayOutControls(); break;
+  case kCompIsParallel: mCompIsParallel = GetParam(paramIdx)->Value(); break;
   case kCompPeakIsExtSc: mCompPeakIsExtSc = GetParam(paramIdx)->Value(); break;
   case kCompRmsIsExrSc: mCompRmsIsExtSc = GetParam(paramIdx)->Value(); break;
   case kCompPeakIsFeedback: mCompPeakIsFeedback = GetParam(paramIdx)->Value(); fCompressorPeak.setTopologyFeedback(mCompPeakIsFeedback); break;
@@ -1146,11 +1141,11 @@ void SRChannel::OnParamChange(int paramIdx) {
     // GLOBAL BYPASS
     // -------------
 
-  case kEqBypass: mEqBypass = GetParam(paramIdx)->Value(); GrayOutControls(); break;
-  case kCompBypass: mCompBypass = GetParam(paramIdx)->Value(); GrayOutControls(); break;
-  case kInputBypass: mInputBypass = GetParam(paramIdx)->Value(); GrayOutControls(); break;
-  case kOutputBypass: mOutputBypass = GetParam(paramIdx)->Value(); GrayOutControls(); break;
-  case kBypass: mBypass = GetParam(paramIdx)->Value(); GrayOutControls(); break;
+  case kEqBypass: mEqBypass = GetParam(paramIdx)->Value(); break;
+  case kCompBypass: mCompBypass = GetParam(paramIdx)->Value(); break;
+  case kInputBypass: mInputBypass = GetParam(paramIdx)->Value(); break;
+  case kOutputBypass: mOutputBypass = GetParam(paramIdx)->Value(); break;
+  case kBypass: mBypass = GetParam(paramIdx)->Value(); break;
 
 
     // AUTOMATIC GAIN CONTROL

@@ -170,24 +170,28 @@ namespace SRPlugins {
       //g.PathStroke(mPatternEdge, knobScales.outerRim.relThickness * mRadius, strokeOptions);
       g.PathFill(mPatternRim);
       mLayer = g.EndLayer();
-      g.ApplyLayerDropShadow(mLayer, mShadowFrame);
+      if (!mEmboss && !mGrayed) g.ApplyLayerDropShadow(mLayer, mShadowFrame);
       g.DrawLayer(mLayer);
 
       // Draw Head
       g.StartLayer(mRECT);
       g.PathClear();
       g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
-      g.PathFill(mPatternHead, fillOptions);
+      if (!mGrayed) g.PathFill(mPatternHead, fillOptions);
+      else g.PathFill(COLOR_GRAY, fillOptions);
       mLayer = g.EndLayer();
-      g.ApplyLayerDropShadow(mLayer, mShadowHead);
+      if (!mEmboss && !mGrayed) g.ApplyLayerDropShadow(mLayer, mShadowHead);
       g.DrawLayer(mLayer);
 
-      g.PathClear();
-      g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
-      g.PathFill(mPatternHeadLights, fillOptions);
+      if (!mEmboss && !mGrayed) {
+        g.PathClear();
+        g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
+        g.PathFill(mPatternHeadLights, fillOptions);
+      }
+
 
       // Head Lights
-      if (!mEmboss) {
+      if (!mEmboss && !mGrayed) {
         g.PathClear();
         g.PathCircle(mCenterX, mCenterY, mRadius * knobScales.head.relRadius - 0.5f * knobScales.head.relThickness * mRadius);
         g.PathStroke(mPatternEdge, mRadius * knobScales.head.relThickness, strokeOptions);
@@ -207,12 +211,12 @@ namespace SRPlugins {
         g.FillCircle(GetColor(kON), mCenterX, mCenterY, knobScales.arrow.relThickness * mRelThickness * 0.5f, 0);
       }
       mLayer = g.EndLayer();
-      g.ApplyLayerDropShadow(mLayer, mShadowArrow);
+      if (!mEmboss && !mGrayed) g.ApplyLayerDropShadow(mLayer, mShadowArrow);
       g.DrawLayer(mLayer);
 
 
       // Mouseover
-      if (mMouseIsOver) g.FillCircle(GetColor(kHL), mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
+      if (mMouseIsOver && !mGrayed) g.FillCircle(GetColor(kHL), mCenterX, mCenterY, mRadius * knobScales.head.relRadius);
 
     }
 
@@ -231,23 +235,41 @@ namespace SRPlugins {
 
 
     void SRVectorKnobText::OnResize() {
-      IRECT clickableArea;
 
+      mTargetRECT = mHandleBounds = mRECT;
+      mTextCircleLabelMin.mSize = mTextCircleLabelMax.mSize = mTextCircleLabelCtr.mSize = int(mRECT.H() * 0.18f);
+      mLabelText.mSize = mValueText.mSize = int(mRECT.H() * 0.22f);
+
+
+      // LABEL
       if (mLabel.GetLength())
       {
         IRECT textRect;
         GetUI()->MeasureText(mLabelText, mLabel.Get(), textRect);
-
-        mLabelBounds = mRECT.GetFromTop(textRect.H());
+        const float labelDisplayWidth = mTargetRECT.W() * mKnobFrac * 0.5f;
+        switch (mLabelText.mVAlign)
+        {
+        case IText::kVAlignTop:
+          mLabelBounds = mTargetRECT.GetFromTop(textRect.H()).GetMidHPadded(labelDisplayWidth);
+          mHandleBounds = mHandleBounds.GetReducedFromTop(textRect.H());
+          break;
+        case IText::kVAlignMiddle:
+          mLabelBounds = mTargetRECT.GetMidVPadded(textRect.H() / 2.f).GetMidHPadded(labelDisplayWidth);
+          break;
+        case IText::kVAlignBottom:
+          mLabelBounds = mTargetRECT.GetFromBottom(textRect.H()).GetMidHPadded(labelDisplayWidth);
+          mHandleBounds = mHandleBounds.GetReducedFromBottom(textRect.H());
+          break;
+        default:
+          break;
+        }
+        if (mLabelBounds.W() < textRect.W()) mLabelBounds = mLabelBounds.GetMidHPadded(mTargetRECT.W() / 2.f);
       }
-      else
+      else {
         mLabelBounds = IRECT();
+      }
 
-      if (mLabelBounds.H())
-        clickableArea = mRECT.GetReducedFromTop(mLabelBounds.H());
-      else
-        clickableArea = mRECT;
-
+      // DISPLAY VALUE
       if (mDisplayParamValue)
       {
         IRECT textRect;
@@ -256,60 +278,79 @@ namespace SRPlugins {
 
         GetUI()->MeasureText(mValueText, str.Get(), textRect);
 
-        const float valueDisplayWidth = clickableArea.W() * mKnobFrac * 0.5f;
-        switch (mValueText.mVAlign)
-        {
+        const float valueDisplayWidth = mTargetRECT.W() * mKnobFrac * 0.5f;
+
+        switch (mValueText.mVAlign) {
+        case IText::kVAlignTop:
+          mValueBounds = mTargetRECT.GetFromTop(textRect.H()).GetMidHPadded(valueDisplayWidth);
+          if (mLabelText.mVAlign != IText::kVAlignTop)
+            mHandleBounds = mHandleBounds.GetReducedFromTop(textRect.H());
+          break;
         case IText::kVAlignMiddle:
-          mHandleBounds = clickableArea;
-          mValueBounds = clickableArea.GetMidVPadded(textRect.H() / 2.f).GetMidHPadded(valueDisplayWidth);
+          mValueBounds = mTargetRECT.GetMidVPadded(textRect.H() / 2.f).GetMidHPadded(valueDisplayWidth);
           break;
         case IText::kVAlignBottom:
-        {
-          mValueBounds = clickableArea.GetFromBottom(textRect.H()).GetMidHPadded(valueDisplayWidth);
-          mHandleBounds = clickableArea.GetReducedFromBottom(textRect.H());
-          break;
-        }
-        case IText::kVAlignTop:
-          mValueBounds = clickableArea.GetFromTop(textRect.H()).GetMidHPadded(valueDisplayWidth);
-          mHandleBounds = clickableArea.GetReducedFromTop(textRect.H());
+          mValueBounds = mTargetRECT.GetFromBottom(textRect.H()).GetMidHPadded(valueDisplayWidth);
+          if (mLabelText.mVAlign != IText::kVAlignBottom)
+            mHandleBounds = mHandleBounds.GetReducedFromBottom(textRect.H());
           break;
         default:
           break;
         }
 
-        if (mValueBounds.W() < textRect.W())
-          mValueBounds = mValueBounds.GetMidHPadded(mTargetRECT.W() / 2.f);
+        if (mValueBounds.W() < textRect.W()) mValueBounds = mValueBounds.GetMidHPadded(mTargetRECT.W() / 2.f);
+      }
+      else {
+        mValueBounds = IRECT();
       }
 
-      mHandleBounds = GetAdjustedHandleBounds(mTargetRECT).GetScaledAboutCentre(mKnobFrac);
+      // CIRCLE LABELS
+      if (mDrawCircleLabels) {
+        mHandleBounds = mHandleBounds.GetReducedFromTop(mTextCircleLabelCtr.mSize);
+      }
 
-      mRadius = (mHandleBounds.W() / 2.f);
+      mHandleBounds = mHandleBounds.GetMidHPadded(mHandleBounds.H() * 0.5f);
+      mTargetRECT = mTargetRECT.GetMidHPadded(mHandleBounds.W() * 0.5f);
+
+      if (mDrawCircleLabels) {
+        if (mLabelMin.GetLength()) {
+          IRECT textRect;
+          GetUI()->MeasureText(mTextCircleLabelMin, mLabelMin.Get(), textRect);
+          mMinLabelBounds = IRECT(mRECT.L, mHandleBounds.B - textRect.H(), mHandleBounds.L, mHandleBounds.B);
+        }
+        if (mLabelMax.GetLength()) {
+          IRECT textRect;
+          GetUI()->MeasureText(mTextCircleLabelMax, mLabelMax.Get(), textRect);
+          mMaxLabelBounds = IRECT(mHandleBounds.R, mHandleBounds.B - textRect.H(), mRECT.R, mHandleBounds.B);
+        }
+        // Center Label need rework
+        if (mLabelCtr.GetLength()) {
+          IRECT textRect;
+          GetUI()->MeasureText(mTextCircleLabelCtr, mLabelCtr.Get(), textRect);
+          mCtrLabelBounds = mRECT.GetFromTop(textRect.H()).GetMidHPadded(textRect.W() * 0.5f);
+        }
+
+      }
+
+      //mHandleBounds = GetAdjustedHandleBounds(mTargetRECT).GetReducedFromTop(mCtrLabelBounds.H()).GetReducedFromBottom(;
+
+
+      // ----------------------------------------------------------------------------
+
+ 
+
+
+
+
+
+
+
+
+      mRadius = (mHandleBounds.W() * 0.5f);
       mCenterX = mHandleBounds.MW();
       mCenterY = mHandleBounds.MH();
       mRelThickness = mRadius * mFrameThickness * 0.05f / 2.f;
       mRelShadowOffset = mRadius * mShadowOffset * 0.2f / 3.f;
-
-      if (mDrawCircleLabels) {
-        if (mLabelMin.GetLength()) {
-          mTextCircleLabelMin.mSize = mRadius * 0.5f;
-          IRECT textRect;
-          GetUI()->MeasureText(mTextCircleLabelMin, mLabelMin.Get(), textRect);
-          mMinLabelBounds = IRECT(mHandleBounds.L, float(mValueBounds.T - textRect.H()), mValueBounds.L, mValueBounds.T);
-        }
-        if (mLabelMax.GetLength()) {
-          mTextCircleLabelMax.mSize = mRadius * 0.5f;
-          IRECT textRect;
-          GetUI()->MeasureText(mTextCircleLabelMax, mLabelMax.Get(), textRect);
-          mMaxLabelBounds = IRECT(mValueBounds.R, float(mValueBounds.T - textRect.H()), mHandleBounds.R, mValueBounds.T);
-        }
-        // Center Label need rework
-        if (mLabelCtr.GetLength()) {
-          mTextCircleLabelCtr.mSize = mRadius * 0.5f;
-          IRECT textRect;
-          GetUI()->MeasureText(mTextCircleLabelCtr, mLabelCtr.Get(), textRect);
-          mCtrLabelBounds = IRECT(mRECT.L, mRECT.T, mRECT.R, (mRECT.T + textRect.H()));
-        }
-      }
 
       // PATTERN TEST
       // Patterns
@@ -384,6 +425,13 @@ namespace SRPlugins {
       SetDirty(false);
     }
 
+    //void SRVectorKnobText::GrayOut(bool gray)
+    //{
+    //  mGrayed = gray;
+    //  if (mGrayed) mColor = COLOR_GRAY;
+    //  SetDirty(false);
+    //}
+
 
 
     // SWITCH
@@ -442,7 +490,7 @@ namespace SRPlugins {
       }
       else {
         // Normal button state
-        if (mNumStates > 2 || mValue == 0) { 
+        if (mNumStates > 2 || mValue == 0) {
           //outer shadow
           if (mDrawShadows && !mEmboss) g.FillRoundRect(GetColor(kSH), handleBounds, cornerRadius);
           g.FillRoundRect(GetColor(kFG), handleBounds, cornerRadius);
@@ -452,7 +500,7 @@ namespace SRPlugins {
         }
 
         // If button should be "inside"
-        else { 
+        else {
           g.FillRoundRect(GetColor(kPR), handleBounds.GetTranslated(mShadowOffset, mShadowOffset), cornerRadius);
           //inner shadow
           if (mDrawShadows && mEmboss) {

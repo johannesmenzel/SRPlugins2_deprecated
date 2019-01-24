@@ -86,6 +86,9 @@
     <ClCompile Include="..\..\..\IGraphics\Controls\ITextEntryControl.cpp">
       <Filter>IGraphics\Controls</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
+      <Filter>IPlug</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\SRClasses\SRControls.cpp">
       <Filter>SRClasses</Filter>
     </ClCompile>
@@ -288,6 +291,13 @@
     <ClInclude Include="..\..\..\IGraphics\Controls\ITextEntryControl.h">
       <Filter>IGraphics\Controls</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\IPlug\IPlugPaths.h">
+      <Filter>IPlug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SRChannelConstants.h" />
+    <ClInclude Include="..\..\SRClasses\SRConstants.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\SRClasses\SRControls.h">
       <Filter>SRClasses</Filter>
     </ClInclude>
@@ -306,10 +316,6 @@
     <ClInclude Include="..\..\SRClasses\SRSaturation.h">
       <Filter>SRClasses</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRConstants.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -343,7 +349,7 @@
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{7c32b4c9-84e7-42a0-9281-420e5b2561e1}</UniqueIdentifier>
+      <UniqueIdentifier>{016b846d-ef3e-452b-a4a2-0b0ef7377bb7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

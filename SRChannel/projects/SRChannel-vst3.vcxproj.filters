@@ -119,6 +119,9 @@
     <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\public.sdk\source\main\pluginfactoryvst3.cpp">
       <Filter>IPlug\VST3\VST3_SDK\public.sdk\main</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
+      <Filter>IPlug</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\SRClasses\SRControls.cpp">
       <Filter>SRClasses</Filter>
     </ClCompile>
@@ -363,6 +366,12 @@
     <ClInclude Include="..\..\..\Dependencies\IPlug\VST3_SDK\pluginterfaces\base\funknown.h">
       <Filter>IPlug\VST3\VST3_SDK\plugininterfaces\base</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\IPlug\IPlugPaths.h">
+      <Filter>IPlug</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\SRConstants.h">
+      <Filter>SRClasses</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\SRClasses\SRControls.h">
       <Filter>SRClasses</Filter>
     </ClInclude>
@@ -379,9 +388,6 @@
       <Filter>SRClasses</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SRClasses\SRSaturation.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRConstants.h">
       <Filter>SRClasses</Filter>
     </ClInclude>
     <ClInclude Include="..\SRChannelConstants.h" />
@@ -445,7 +451,7 @@
       <UniqueIdentifier>{5f06b03e-5093-46c0-9513-efb4e494c857}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{0ac4fbc3-df70-4973-8925-1dba0ea411ad}</UniqueIdentifier>
+      <UniqueIdentifier>{778347dd-8a4c-4aee-9a99-117014c218dc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -405,12 +405,15 @@ namespace SRPlugins {
         , mMaxDb(maxDb)
         , mShape(shape)
         , mNumLabelSteps(numLabelSteps)
-        , mText(IText(10, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignMiddle, 0, IText::kQualityClearType))
+        , mText(IText(14, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignMiddle, 0, IText::kQualityClearType))
 
       {
       }
 
-      //  void OnResize() override;
+      void OnResize() override {
+        MakeRects();
+        mText.mSize = mRECT.W() * 0.25f;
+      };
       //  void OnMouseDblClick(float x, float y, const IMouseMod& mod) override;
       //  void OnMouseDown(float x, float y, const IMouseMod& mod) override;
 
@@ -423,19 +426,17 @@ namespace SRPlugins {
           DrawTrack(g, mTrackBounds.Get()[ch], ch);
         }
 
-        if (mDrawFrame)
-          DrawFrame(g);
+        //if (mDrawFrame)
+        //  DrawFrame(g);
 
-        const IRECT rectLabelFrame = mRECT.GetPadded(-mOuterPadding);
+        const IRECT rectLabelFrame = mRECT.GetPadded(-mOuterPadding - mTrackPadding);
         for (int i = 0; i <= mNumLabelSteps; i++) {
           const float val = mMinDb + ((float)i / (float)mNumLabelSteps) * (mMaxDb - mMinDb);
           const float vPosition = std::pow((val - mMinDb) / (mMaxDb - mMinDb), 1.0 / mShape);
           const IRECT labelRECT = IRECT(rectLabelFrame.L, -mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H(), rectLabelFrame.R, mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H());
-          const int valInt = int(std::round(val));
-          std::string measureStr = std::to_string(valInt);
-          const char *measureChar = measureStr.c_str();
           WDL_String str;
-          str.Set(measureChar);
+          str.SetFormatted(MAX_PARAM_DISPLAY_LEN, "%d", static_cast<int>(roundf(val)));
+          //str.SetFormatted(MAX_PARAM_DISPLAY_LEN, "%.*f", 0, val);
           g.DrawText(mText, str.Get(), labelRECT);
         }
       }
@@ -450,23 +451,23 @@ namespace SRPlugins {
         }
       }
 
-      virtual void DrawFrame(IGraphics& g)
-      {
-        g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
-      }
+      //virtual void DrawFrame(IGraphics& g)
+      //{
+      //  //g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
+      //}
 
       virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx)
       {
         DrawTrackBG(g, r, chIdx);
         DrawTrackHandle(g, r, chIdx);
 
-        if (mDrawTrackFrame)
-          g.DrawRect(GetColor(kFR), r, nullptr, mFrameThickness);
+        //if (mDrawTrackFrame)
+        //  g.DrawRect(GetColor(kBG), r, nullptr, mFrameThickness);
       }
 
       virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx)
       {
-        g.FillRect(GetColor(kSH), r);
+        g.FillRect(GetColor(kHL), r);
       }
 
       virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
@@ -497,7 +498,7 @@ namespace SRPlugins {
 
       virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
       {
-        g.FillRect(GetColor(kHL), r);
+        g.FillRect(GetColor(kX1), r);
       }
 
       void OnMsgFromDelegate(int messageTag, int dataSize, const void* pData) override

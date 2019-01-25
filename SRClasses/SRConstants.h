@@ -192,14 +192,6 @@ enum EControlImages {
 const struct {
   const IColor colorPanelBG = IColor(255, 37, 53, 69);
   const IColor colorPluginBG = IColor(255, 13, 18, 23);
-  
-  
-  
-  
-  
-  
-  
-  
   const IColor colorKnobSslBlue = IColor(255, 62, 100, 121);
   const IColor colorKnobSslRed = IColor(255, 131, 18, 18);
   const IColor colorKnobSslGreen = IColor(255, 103, 141, 52);

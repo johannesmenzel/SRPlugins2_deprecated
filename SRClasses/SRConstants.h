@@ -55,7 +55,7 @@ struct SRParamProperties {
   const char* group = ""; // Parameter group, not supported by every host
   const IParam::EParamType Type = IParam::EParamType::kTypeNone; // Data type of parameter
   const IParam::EFlags Flags = IParam::EFlags::kFlagsNone;
-  const int Knobs; // Used control bitmap
+  const int Knobs = 0; // Used control bitmap
   const struct Position
   {
     const int AttachToControlPanel = 0; // Panel where control should appear
@@ -174,7 +174,8 @@ const double mEqPassQ_O20_F10 = 6.3727474;
 
 // All possible controls listed here
 enum EControlImages {
-  SslBlue = 0,
+  kKnobNone = 0,
+  SslBlue,
   SslGreen,
   SslRed,
   SslOrange,
@@ -184,7 +185,6 @@ enum EControlImages {
   AbbeyChicken,
   Button,
   Fader,
-  none,
   kNumKnobs
 };
 
@@ -192,14 +192,14 @@ enum EControlImages {
 const struct {
   const IColor colorPanelBG = IColor(255, 37, 53, 69);
   const IColor colorPluginBG = IColor(255, 13, 18, 23);
-  const IColor colorFG = IColor(255, 48, 166, 186);
-  const IColor colorPR = IColor(255, 200, 200, 200);
-  const IColor colorFR = IColor(255, 70, 70, 70);
-  const IColor colorHL = IColor(30, 255, 255, 255);
-  const IColor colorSH = IColor(100, 0, 0, 0);
-  const IColor colorX1 = IColor(255, 249, 206, 34);
-  const IColor colorX2 = IColor(255, 249, 206, 34);
-  const IColor colorX3 = IColor(255, 249, 206, 34);
+  
+  
+  
+  
+  
+  
+  
+  
   const IColor colorKnobSslBlue = IColor(255, 62, 100, 121);
   const IColor colorKnobSslRed = IColor(255, 131, 18, 18);
   const IColor colorKnobSslGreen = IColor(255, 103, 141, 52);
@@ -208,20 +208,20 @@ const struct {
   const IColor colorKnobSslBlack = IColor(255, 23, 23, 23);
   const IColor colorKnobSslWhite = IColor(255, 243, 243, 243);
   const IColor colorDefaultText = COLOR_LIGHT_GRAY;
+  const IVColorSpec colorSpec = {
+    COLOR_TRANSPARENT,                // Background (DEFAULT_BGCOLOR = COLOR_TRANSPARENT(0, 0, 0, 0))
+    IColor(255, 48, 166, 186),  // Foreground (DEFAULT_FGCOLOR = COLOR_MID_GRAY(255, 200, 200, 200))
+    IColor(255, 200, 200, 200), // Pressed    (DEFAULT_PRCOLOR = COLOR_LIGHT_GRAY(255, 240, 240, 240))
+    IColor(255, 70, 70, 70),    // Frame      (DEFAULT_FRCOLOR = COLOR_DARK_GRAY(255, 70, 70, 70))
+    IColor(30, 255, 255, 255),  // Higlight   (DEFAULT_HLCOLOR = COLOR_TRANSLUCENT(10, 0, 0, 0))
+    IColor(100, 0, 0, 0),       // Shadow     (DEFAULT_SHCOLOR = IColor(60, 0, 0, 0)
+    IColor(255, 249, 206, 34),  // Extra 1    (DEFAULT_X1COLOR = COLOR_RED(255, 255, 0, 0))
+    IColor(255, 249, 206, 34),  // Extra 2    (DEFAULT_X2COLOR = COLOR_GREEN(255, 0, 255, 0))
+    IColor(255, 249, 206, 34),  // Extra 3    (DEFAULT_X3COLOR = COLOR_BLUE(255, 0, 0, 255))
+  };
   const int textSize = 14;
   const IText textKnobLabel = IText(textSize, colorDefaultText, nullptr, IText::kStyleBold, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityClearType, colorPanelBG, colorDefaultText);
   const IText textKnobValue = IText(textSize, colorDefaultText, nullptr, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignBottom, 0, IText::kQualityClearType, colorPanelBG, colorDefaultText);
   const IText textVersionString = IText(20, colorDefaultText, nullptr, IText::kStyleNormal, IText::kAlignNear, IText::kVAlignMiddle, 0, IText::kQualityClearType, colorPanelBG, colorDefaultText);
-} pluginLayout;
+} SRLayout;
 
-const IVColorSpec SR_SPEC = {
-  DEFAULT_BGCOLOR,      // Background (DEFAULT_BGCOLOR = COLOR_TRANSPARENT(0, 0, 0, 0))
-  pluginLayout.colorFG, // Foreground (DEFAULT_FGCOLOR = COLOR_MID_GRAY(255, 200, 200, 200))
-  pluginLayout.colorPR, // Pressed    (DEFAULT_PRCOLOR = COLOR_LIGHT_GRAY(255, 240, 240, 240))
-  pluginLayout.colorFR, // Frame      (DEFAULT_FRCOLOR = COLOR_DARK_GRAY(255, 70, 70, 70))
-  pluginLayout.colorHL, // Higlight   (DEFAULT_HLCOLOR = COLOR_TRANSLUCENT(10, 0, 0, 0))
-  pluginLayout.colorSH, // Shadow     (DEFAULT_SHCOLOR = IColor(60, 0, 0, 0)
-  pluginLayout.colorX1, // Extra 1    (DEFAULT_X1COLOR = COLOR_RED(255, 255, 0, 0))
-  pluginLayout.colorX2, // Extra 2    (DEFAULT_X2COLOR = COLOR_GREEN(255, 0, 255, 0))
-  pluginLayout.colorX3  // Extra 3    (DEFAULT_X3COLOR = COLOR_BLUE(255, 0, 0, 255))
-};

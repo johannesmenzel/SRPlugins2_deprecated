@@ -127,7 +127,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     const IRECT rectOutput = rectControls.SubRectHorizontal(6, 4).GetPadded(-5.f);
     const IRECT rectMeter = rectControls.SubRectHorizontal(6, 5).GetPadded(-5.f);
 
-    const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(pluginLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f) });
+    const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(SRLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f) });
 
     // Set new RECTs on resize
     if (pGraphics->NControls()) {
@@ -135,7 +135,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetBackgroundControl()->SetTargetAndDrawRECTs(rectPlugin);
       // Resize logo
       pGraphics->GetControlWithTag(cBitmapLogo)->SetTargetAndDrawRECTs(rectHeader.GetFromRight(300.f));
-      pGraphics->GetControlWithTag(cVersion)->SetTargetAndDrawRECTs(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(pluginLayout.textKnobLabel.mSize));
+      pGraphics->GetControlWithTag(cVersion)->SetTargetAndDrawRECTs(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize));
       // Resize section rect PANELS
       pGraphics->GetControlWithTag(cPanelInput)->SetTargetAndDrawRECTs(rectInput);
       pGraphics->GetControlWithTag(cPanelEq)->SetTargetAndDrawRECTs(rectEq);
@@ -215,12 +215,12 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
 
     // ATTACH
-    pGraphics->AttachPanelBackground(pluginLayout.colorPluginBG);        // Attach Background
+    pGraphics->AttachPanelBackground(SRLayout.colorPluginBG);        // Attach Background
     pGraphics->AttachCornerResizer(kUIResizerSize, true);                 // Attach Resizer
 
     // Attach logo
     pGraphics->AttachControl(new IBitmapControl(rectHeader.GetFromRight(bmpLogo.W()), bmpLogo, -1, kBlendNone), cBitmapLogo);
-    pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(pluginLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", pluginLayout.textVersionString), cVersion, "UI");
+    pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", SRLayout.textVersionString), cVersion, "UI");
     // Attach section rect PANELS
     pGraphics->AttachControl(new IPanelControl(rectInput, patternPanel, true), cPanelInput, "UI");
     pGraphics->AttachControl(new IPanelControl(rectEq, patternPanel, true), cPanelEq, "UI");
@@ -260,14 +260,14 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       IColor knobColor;									// We're pointing at the type of knob we want to add
 
       switch (p.Knobs) {						// "knob" is gonna be a pointer to IBitmap
-      case EControlImages::SslBlue: knobColor = pluginLayout.colorKnobSslBlue; break;
-      case EControlImages::SslGreen: knobColor = pluginLayout.colorKnobSslGreen; break;
-      case EControlImages::SslRed: knobColor = pluginLayout.colorKnobSslRed; break;
-      case EControlImages::SslOrange: knobColor = pluginLayout.colorKnobSslOrange; break;
-      case EControlImages::SslYellow: knobColor = pluginLayout.colorKnobSslYellow; break;
-      case EControlImages::SslBlack: knobColor = pluginLayout.colorKnobSslBlack; break;
-      case EControlImages::SslWhite: knobColor = pluginLayout.colorKnobSslWhite; break;
-      default: knobColor = pluginLayout.colorFG; break;
+      case EControlImages::SslBlue: knobColor = SRLayout.colorKnobSslBlue; break;
+      case EControlImages::SslGreen: knobColor = SRLayout.colorKnobSslGreen; break;
+      case EControlImages::SslRed: knobColor = SRLayout.colorKnobSslRed; break;
+      case EControlImages::SslOrange: knobColor = SRLayout.colorKnobSslOrange; break;
+      case EControlImages::SslYellow: knobColor = SRLayout.colorKnobSslYellow; break;
+      case EControlImages::SslBlack: knobColor = SRLayout.colorKnobSslBlack; break;
+      case EControlImages::SslWhite: knobColor = SRLayout.colorKnobSslWhite; break;
+      default: knobColor = SRLayout.colorSpec.mFGColor; break;
       }
 
       switch (p.Type)
@@ -279,7 +279,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         case kInputGain:
         case kOutputGain:
           // Attach faders
-          pGraphics->AttachControl(new IVSliderControl(rectCurrentControl, paramIdx, SR_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
+          pGraphics->AttachControl(new IVSliderControl(rectCurrentControl, paramIdx, SRLayout.colorSpec, kVertical, true, 32.f, 2.f), ctrlIdx);
           break;
         default:
           // Attach knobs
@@ -292,10 +292,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             p.labelCtr,
             true,
             true,
-            SR_SPEC,
+            SRLayout.colorSpec,
             knobColor,
-            pluginLayout.textKnobLabel,
-            pluginLayout.textKnobValue,
+            SRLayout.textKnobLabel,
+            SRLayout.textKnobValue,
             -135.f,
             135.f,
             GetParam(paramIdx)->GetDefault(true),
@@ -325,7 +325,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(ctrlIdx)->SetTooltip(p.tooltip);
     }
 
-    pGraphics->StyleAllVectorControls(true, true, false, 0.1f, 2.f, 3.f, SR_SPEC);
+    pGraphics->StyleAllVectorControls(true, true, false, 0.1f, 2.f, 3.f, SRLayout.colorSpec);
   }; // END LAYOUT function
 }// END GRAPHICS functions
 

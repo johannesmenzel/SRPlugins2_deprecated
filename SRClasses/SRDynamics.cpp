@@ -38,9 +38,9 @@ namespace SRPlugins {
 		EnvelopeDetector::EnvelopeDetector(double ms, double sampleRate)
 		{
 			assert(sampleRate > 0.0);
-			assert(ms > 0.0);
+        //assert(ms > 0.0);
 			mSampleRate = sampleRate;
-			mTimeConstantMs = ms;
+			mTimeConstantMs = (ms > 1000. / mSampleRate) ? ms : 1000. / mSampleRate;
 			setCoef();
 		}
 
@@ -49,8 +49,9 @@ namespace SRPlugins {
 		//-------------------------------------------------------------
 		void EnvelopeDetector::setTc(double ms)
 		{
-			assert( ms > 0.0 );
-			mTimeConstantMs = ms;
+      if (ms <= 0.0)
+			//assert( ms > 0.0 );
+      mTimeConstantMs = (ms > 1000. / mSampleRate) ? ms : 1000. / mSampleRate;
 			setCoef();
 		}
 

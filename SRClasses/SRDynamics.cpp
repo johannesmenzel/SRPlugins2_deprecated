@@ -30,392 +30,391 @@
 #include "SRDynamics.h"
 namespace SRPlugins {
 
-	namespace SRDynamics {
+  namespace SRDynamics {
 
-		//-------------------------------------------------------------
-		// envelope detector
-		//-------------------------------------------------------------
-		EnvelopeDetector::EnvelopeDetector(double ms, double sampleRate)
-		{
-			assert(sampleRate > 0.0);
-        //assert(ms > 0.0);
-			mSampleRate = sampleRate;
-			mTimeConstantMs = (ms > 1000. / mSampleRate) ? ms : 1000. / mSampleRate;
-			setCoef();
-		}
-
-
-
-		//-------------------------------------------------------------
-		void EnvelopeDetector::setTc(double ms)
-		{
-      if (ms <= 0.0)
-			//assert( ms > 0.0 );
+    //-------------------------------------------------------------
+    // envelope detector
+    //-------------------------------------------------------------
+    EnvelopeDetector::EnvelopeDetector(double ms, double sampleRate)
+    {
+      assert(sampleRate > 0.0);
+      assert(ms > 0.0);
+      mSampleRate = sampleRate;
       mTimeConstantMs = (ms > 1000. / mSampleRate) ? ms : 1000. / mSampleRate;
-			setCoef();
-		}
-
-		//-------------------------------------------------------------
-		void EnvelopeDetector::setSampleRate(double sampleRate)
-		{
-			assert(sampleRate > 0.0);
-			mSampleRate = sampleRate;
-			setCoef();
-		}
-
-		//-------------------------------------------------------------
-		void EnvelopeDetector::setCoef(void)
-		{
-			mRuntimeCoeff = exp(-1000.0 / (mTimeConstantMs * mSampleRate));
-		}
-
-		//-------------------------------------------------------------
-		// attack/release envelope
-		//-------------------------------------------------------------
-		AttRelEnvelope::AttRelEnvelope(double att_ms, double rel_ms, double sampleRate)
-			: mEnvelopeDetectorAttack(att_ms, sampleRate)
-			, mEnvelopeDetectorRelease(rel_ms, sampleRate)
-		{
-		}
-
-		//-------------------------------------------------------------
-		void AttRelEnvelope::setAttack(double ms)
-		{
-			mEnvelopeDetectorAttack.setTc(ms);
-		}
-
-		//-------------------------------------------------------------
-		void AttRelEnvelope::setRelease(double ms)
-		{
-			mEnvelopeDetectorRelease.setTc(ms);
-		}
-
-		//-------------------------------------------------------------
-		void AttRelEnvelope::setSampleRate(double sampleRate)
-		{
-			mEnvelopeDetectorAttack.setSampleRate(sampleRate);
-			mEnvelopeDetectorRelease.setSampleRate(sampleRate);
-		}
+      setCoef();
+    }
 
 
 
-		//-------------------------------------------------------------
-		// simple compressor
-		//-------------------------------------------------------------
-		SRCompressor::SRCompressor()
-			: AttRelEnvelope(10.0, 100.0)
-			, mThreshDb(0.0)
-			, mRatio(1.0)
-			, currentOvershootDb(DC_OFFSET)
-			, mSidechainFc(0.0)
-			, mGrLin(1.0)
-			, mGrDb(0.0)
-			, mTopologyFeedback(false)
-			, mKneeWidthDb(0.0)
-			, mMaxGr(0.0)
-			, sidechainSignal1(0.0)
-			, sidechainSignal2(0.0)
-		{
-		}
+    //-------------------------------------------------------------
+    void EnvelopeDetector::setTc(double ms)
+    {
+      assert(ms > 0.0);
+      mTimeConstantMs = (ms > 1000. / mSampleRate) ? ms : 1000. / mSampleRate;
+      setCoef();
+    }
 
-		void SRCompressor::initCompressor(double dB, double ratio, double attackMs, double releaseMs, double sidechainFc, double kneeDb, bool feedback, double samplerate) {
-			setThresh(dB);
-			setRatio(ratio);
-			setAttack(attackMs);
-			setRelease(releaseMs);
-			initSidechainFilter(sidechainFc);
-			setSampleRate(samplerate);
-			setKnee(kneeDb);
-			setTopologyFeedback(feedback);
-			fSidechainFilter1.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
-			fSidechainFilter2.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
-		}
+    //-------------------------------------------------------------
+    void EnvelopeDetector::setSampleRate(double sampleRate)
+    {
+      assert(sampleRate > 0.0);
+      mSampleRate = sampleRate;
+      setCoef();
+    }
 
-		//-------------------------------------------------------------
-		void SRCompressor::setThresh(double dB)
-		{
-			mThreshDb = dB;
-		}
+    //-------------------------------------------------------------
+    void EnvelopeDetector::setCoef(void)
+    {
+      mRuntimeCoeff = exp(-1000.0 / (mTimeConstantMs * mSampleRate));
+    }
 
-		//-------------------------------------------------------------
-		void SRCompressor::setRatio(double ratio)
-		{
-			assert( ratio >= 0.0 );
-			mRatio = ratio;
-			mMaxGr = 73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1 / ratio)));
-		}
+    //-------------------------------------------------------------
+    // attack/release envelope
+    //-------------------------------------------------------------
+    AttRelEnvelope::AttRelEnvelope(double att_ms, double rel_ms, double sampleRate)
+      : mEnvelopeDetectorAttack(att_ms, sampleRate)
+      , mEnvelopeDetectorRelease(rel_ms, sampleRate)
+    {
+    }
 
-		void SRCompressor::setKnee(double kneeDb)
-		{
-			this->mKneeWidthDb = kneeDb;
-		}
+    //-------------------------------------------------------------
+    void AttRelEnvelope::setAttack(double ms)
+    {
+      mEnvelopeDetectorAttack.setTc(ms);
+    }
 
-		void SRCompressor::initSidechainFilter(double sidechainFc) {
-			this->mSidechainFc = sidechainFc;
-			fSidechainFilter1.setFilter(SRFilters::biquad_highpass, mSidechainFc, 0.7071, 0., getSampleRate());
-			fSidechainFilter2.setFilter(SRFilters::biquad_highpass, mSidechainFc, 0.7071, 0., getSampleRate());
-		}
+    //-------------------------------------------------------------
+    void AttRelEnvelope::setRelease(double ms)
+    {
+      mEnvelopeDetectorRelease.setTc(ms);
+    }
 
-		void SRCompressor::setSidechainFilterFreq(double sidechainFc)
-		{
-			this->mSidechainFc = sidechainFc;
-			fSidechainFilter1.setFc(mSidechainFc);
-			fSidechainFilter2.setFc(mSidechainFc);
-		}
-
-		void SRCompressor::setTopologyFeedback(bool feedback)
-		{
-			this->mTopologyFeedback = feedback;
-		}
-
-		//-------------------------------------------------------------
-		void SRCompressor::initRuntime(void)
-		{
-			this->currentOvershootDb = DC_OFFSET;
-		}
-
-		//-------------------------------------------------------------
-		// simple compressor with RMS detection
-		//-------------------------------------------------------------
-		SRCompressorRMS::SRCompressorRMS()
-			: mEnvelopeDetectorAverager(5.0)
-			, mAverageOfSquares(DC_OFFSET)
-		{
-		}
-
-		void SRCompressorRMS::initCompressor(double dB, double ratio, double attackMs, double releaseMs, double sidechainFc, double kneeDb, double rmsWindowMs, bool feedback, double samplerate) {
-			setThresh(dB);
-			setRatio(ratio);
-			setAttack(attackMs);
-			setRelease(releaseMs);
-			initSidechainFilter(sidechainFc);
-			setSampleRate(samplerate);
-			setKnee(kneeDb);
-			setTopologyFeedback(feedback);
-			mEnvelopeDetectorAverager.setTc(rmsWindowMs);
-			fSidechainFilter1.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
-			fSidechainFilter2.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
-		}
-
-		//-------------------------------------------------------------
-		void SRCompressorRMS::setSampleRate(double sampleRate)
-		{
-			SRCompressor::setSampleRate(sampleRate);
-			mEnvelopeDetectorAverager.setSampleRate(sampleRate);
-		}
-
-		//-------------------------------------------------------------
-		void SRCompressorRMS::setWindow(double ms)
-		{
-			mEnvelopeDetectorAverager.setTc(ms);
-		}
-
-		//-------------------------------------------------------------
-		void SRCompressorRMS::initRuntime(void)
-		{
-			SRCompressor::initRuntime();
-			mAverageOfSquares = DC_OFFSET;
-		}
-
-		//-------------------------------------------------------------
-		SRLimiter::SRLimiter()
-			: mThreshDb(0.0)
-			, mThreshLin(1.0)
-			, mPeakHoldSamples(0)
-			, mPeakHoldTimer(0)
-			, mMaxPeak(1.0)
-			, mEnvelopeDetectorAttack(1.0)
-			, mEnvelopeDetectorRelease(10.0)
-			, currentOvershootLin(1.0)
-			, mBufferMask(BUFFER_SIZE - 1)
-			, mCursor(0)
-		{
-			setAttack(1.0);
-			mOutputBuffer[0].resize(BUFFER_SIZE, 0.0);
-			mOutputBuffer[1].resize(BUFFER_SIZE, 0.0);
-		}
-
-		//-------------------------------------------------------------
-		void SRLimiter::setThresh(double dB)
-		{
-			mThreshDb = dB;
-			mThreshLin = SRPlugins::SRHelpers::DBToAmp(dB);
-		}
-
-		//-------------------------------------------------------------
-		void SRLimiter::setAttack(double ms)
-		{
-			unsigned int samp = int(0.001 * ms * mEnvelopeDetectorAttack.getSampleRate());
-
-			assert(samp < BUFFER_SIZE);
-
-			mPeakHoldSamples = samp;
-			mEnvelopeDetectorAttack.setTc(ms);
-		}
-
-		//-------------------------------------------------------------
-		void SRLimiter::setRelease(double ms)
-		{
-			mEnvelopeDetectorRelease.setTc(ms);
-		}
-
-		//-------------------------------------------------------------
-		void SRLimiter::setSampleRate(double sampleRate)
-		{
-			mEnvelopeDetectorAttack.setSampleRate(sampleRate);
-			mEnvelopeDetectorRelease.setSampleRate(sampleRate);
-		}
-
-		//-------------------------------------------------------------
-		void SRLimiter::initRuntime(void)
-		{
-			mPeakHoldTimer = 0;
-			mMaxPeak = mThreshLin;
-			currentOvershootLin = mThreshLin;
-			mCursor = 0;
-			mOutputBuffer[0].assign(BUFFER_SIZE, 0.0);
-			mOutputBuffer[1].assign(BUFFER_SIZE, 0.0);
-		}
-
-		//-------------------------------------------------------------
-		void SRLimiter::FastEnvelope::setCoef(void)
-		{
-			// rises to 99% of in value over duration of time constant
-			mRuntimeCoeff = pow(0.01, (1000.0 / (mTimeConstantMs * mSampleRate)));
-		}
+    //-------------------------------------------------------------
+    void AttRelEnvelope::setSampleRate(double sampleRate)
+    {
+      mEnvelopeDetectorAttack.setSampleRate(sampleRate);
+      mEnvelopeDetectorRelease.setSampleRate(sampleRate);
+    }
 
 
 
-		//-------------------------------------------------------------
-		SRGate::SRGate()
-			: AttRelEnvelope(1.0, 100.0)
-			, mThreshDb(0.0)
-			, mThreshLin(1.0)
-			, currentOvershootLin(DC_OFFSET)
-		{
-		}
+    //-------------------------------------------------------------
+    // simple compressor
+    //-------------------------------------------------------------
+    SRCompressor::SRCompressor()
+      : AttRelEnvelope(10.0, 100.0)
+      , mThreshDb(0.0)
+      , mRatio(1.0)
+      , currentOvershootDb(DC_OFFSET)
+      , mSidechainFc(0.0)
+      , mGrLin(1.0)
+      , mGrDb(0.0)
+      , mTopologyFeedback(false)
+      , mKneeWidthDb(0.0)
+      , mMaxGr(0.0)
+      , sidechainSignal1(0.0)
+      , sidechainSignal2(0.0)
+    {
+    }
 
-		//-------------------------------------------------------------
-		void SRGate::setThresh(double dB)
-		{
-			mThreshDb = dB;
-			mThreshLin = SRPlugins::SRHelpers::DBToAmp(dB);
-		}
+    void SRCompressor::initCompressor(double dB, double ratio, double attackMs, double releaseMs, double sidechainFc, double kneeDb, bool feedback, double samplerate) {
+      setThresh(dB);
+      setRatio(ratio);
+      setAttack(attackMs);
+      setRelease(releaseMs);
+      initSidechainFilter(sidechainFc);
+      setSampleRate(samplerate);
+      setKnee(kneeDb);
+      setTopologyFeedback(feedback);
+      fSidechainFilter1.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
+      fSidechainFilter2.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
+    }
 
-		//-------------------------------------------------------------
-		void SRGate::initRuntime(void)
-		{
-			currentOvershootLin = DC_OFFSET;
-		}
+    //-------------------------------------------------------------
+    void SRCompressor::setThresh(double dB)
+    {
+      mThreshDb = dB;
+    }
 
-		//-------------------------------------------------------------
-		// simple gate with RMS detection
-		//-------------------------------------------------------------
-		SRGateRms::SRGateRms()
-			: mEnvelopeDetectorAverager(5.0)
-			, mAverageOfSquares(DC_OFFSET)
-		{
-		}
+    //-------------------------------------------------------------
+    void SRCompressor::setRatio(double ratio)
+    {
+      assert(ratio >= 0.0);
+      mRatio = ratio;
+      mMaxGr = 73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1 / ratio)));
+    }
 
-		//-------------------------------------------------------------
-		void SRGateRms::setSampleRate(double sampleRate)
-		{
-			SRGate::setSampleRate(sampleRate);
-			mEnvelopeDetectorAverager.setSampleRate(sampleRate);
-		}
+    void SRCompressor::setKnee(double kneeDb)
+    {
+      this->mKneeWidthDb = kneeDb;
+    }
 
-		//-------------------------------------------------------------
-		void SRGateRms::setWindow(double ms)
-		{
-			mEnvelopeDetectorAverager.setTc(ms);
-		}
+    void SRCompressor::initSidechainFilter(double sidechainFc) {
+      this->mSidechainFc = sidechainFc;
+      fSidechainFilter1.setFilter(SRFilters::biquad_highpass, mSidechainFc, 0.7071, 0., getSampleRate());
+      fSidechainFilter2.setFilter(SRFilters::biquad_highpass, mSidechainFc, 0.7071, 0., getSampleRate());
+    }
 
-		//-------------------------------------------------------------
-		void SRGateRms::initRuntime(void)
-		{
-			SRGate::initRuntime();
-			mAverageOfSquares = DC_OFFSET;
-		}
+    void SRCompressor::setSidechainFilterFreq(double sidechainFc)
+    {
+      this->mSidechainFc = sidechainFc;
+      fSidechainFilter1.setFc(mSidechainFc);
+      fSidechainFilter2.setFc(mSidechainFc);
+    }
+
+    void SRCompressor::setTopologyFeedback(bool feedback)
+    {
+      this->mTopologyFeedback = feedback;
+    }
+
+    //-------------------------------------------------------------
+    void SRCompressor::initRuntime(void)
+    {
+      this->currentOvershootDb = DC_OFFSET;
+    }
+
+    //-------------------------------------------------------------
+    // simple compressor with RMS detection
+    //-------------------------------------------------------------
+    SRCompressorRMS::SRCompressorRMS()
+      : mEnvelopeDetectorAverager(5.0)
+      , mAverageOfSquares(DC_OFFSET)
+    {
+    }
+
+    void SRCompressorRMS::initCompressor(double dB, double ratio, double attackMs, double releaseMs, double sidechainFc, double kneeDb, double rmsWindowMs, bool feedback, double samplerate) {
+      setThresh(dB);
+      setRatio(ratio);
+      setAttack(attackMs);
+      setRelease(releaseMs);
+      initSidechainFilter(sidechainFc);
+      setSampleRate(samplerate);
+      setKnee(kneeDb);
+      setTopologyFeedback(feedback);
+      mEnvelopeDetectorAverager.setTc(rmsWindowMs);
+      fSidechainFilter1.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
+      fSidechainFilter2.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
+    }
+
+    //-------------------------------------------------------------
+    void SRCompressorRMS::setSampleRate(double sampleRate)
+    {
+      SRCompressor::setSampleRate(sampleRate);
+      mEnvelopeDetectorAverager.setSampleRate(sampleRate);
+    }
+
+    //-------------------------------------------------------------
+    void SRCompressorRMS::setWindow(double ms)
+    {
+      mEnvelopeDetectorAverager.setTc(ms);
+    }
+
+    //-------------------------------------------------------------
+    void SRCompressorRMS::initRuntime(void)
+    {
+      SRCompressor::initRuntime();
+      mAverageOfSquares = DC_OFFSET;
+    }
+
+    //-------------------------------------------------------------
+    SRLimiter::SRLimiter()
+      : mThreshDb(0.0)
+      , mThreshLin(1.0)
+      , mPeakHoldSamples(0)
+      , mPeakHoldTimer(0)
+      , mMaxPeak(1.0)
+      , mEnvelopeDetectorAttack(1.0)
+      , mEnvelopeDetectorRelease(10.0)
+      , currentOvershootLin(1.0)
+      , mBufferMask(BUFFER_SIZE - 1)
+      , mCursor(0)
+    {
+      setAttack(1.0);
+      mOutputBuffer[0].resize(BUFFER_SIZE, 0.0);
+      mOutputBuffer[1].resize(BUFFER_SIZE, 0.0);
+    }
+
+    //-------------------------------------------------------------
+    void SRLimiter::setThresh(double dB)
+    {
+      mThreshDb = dB;
+      mThreshLin = SRPlugins::SRHelpers::DBToAmp(dB);
+    }
+
+    //-------------------------------------------------------------
+    void SRLimiter::setAttack(double ms)
+    {
+      unsigned int samp = int(0.001 * ms * mEnvelopeDetectorAttack.getSampleRate());
+
+      assert(samp < BUFFER_SIZE);
+
+      mPeakHoldSamples = samp;
+      mEnvelopeDetectorAttack.setTc(ms);
+    }
+
+    //-------------------------------------------------------------
+    void SRLimiter::setRelease(double ms)
+    {
+      mEnvelopeDetectorRelease.setTc(ms);
+    }
+
+    //-------------------------------------------------------------
+    void SRLimiter::setSampleRate(double sampleRate)
+    {
+      mEnvelopeDetectorAttack.setSampleRate(sampleRate);
+      mEnvelopeDetectorRelease.setSampleRate(sampleRate);
+    }
+
+    //-------------------------------------------------------------
+    void SRLimiter::initRuntime(void)
+    {
+      mPeakHoldTimer = 0;
+      mMaxPeak = mThreshLin;
+      currentOvershootLin = mThreshLin;
+      mCursor = 0;
+      mOutputBuffer[0].assign(BUFFER_SIZE, 0.0);
+      mOutputBuffer[1].assign(BUFFER_SIZE, 0.0);
+    }
+
+    //-------------------------------------------------------------
+    void SRLimiter::FastEnvelope::setCoef(void)
+    {
+      // rises to 99% of in value over duration of time constant
+      mRuntimeCoeff = pow(0.01, (1000.0 / (mTimeConstantMs * mSampleRate)));
+    }
 
 
-		//-------------------------------------------------------------
-		// DEESSER
-		//-------------------------------------------------------------
-		SRDeesser::SRDeesser()
-			: AttRelEnvelope(10.0, 100.0)
-			, mThreshDb(0.0)
-			, mRatio(1.0)
-			, currentOvershootDb(DC_OFFSET)
-			, mFilterFreq(0.5)
-			, mFilterQ(0.707)
-			, mFilterGain(0.0)
-			, mGrLin(1.0)
-			, mGrDb(0.0)
-			, mKneeWidthDb(0.0)
-		{
-		}
 
-		void SRDeesser::setDeesser(double threshDb, double ratio, double attackMs, double releaseMs, double freqNormalized, double q, double kneeDb, double samplerate) {
-			setThresh(threshDb);
-			setRatio(ratio);
-			setAttack(attackMs);
-			setRelease(releaseMs);
-			initFilter(freqNormalized, q);
-			setSampleRate(samplerate);
-			setKnee(kneeDb);
-		}
+    //-------------------------------------------------------------
+    SRGate::SRGate()
+      : AttRelEnvelope(1.0, 100.0)
+      , mThreshDb(0.0)
+      , mThreshLin(1.0)
+      , currentOvershootLin(DC_OFFSET)
+    {
+    }
 
-		//-------------------------------------------------------------
-		void SRDeesser::setThresh(double dB)
-		{
-			mThreshDb = dB;
-		}
+    //-------------------------------------------------------------
+    void SRGate::setThresh(double dB)
+    {
+      mThreshDb = dB;
+      mThreshLin = SRPlugins::SRHelpers::DBToAmp(dB);
+    }
 
-		//-------------------------------------------------------------
-		void SRDeesser::setRatio(double ratio)
-		{
-			assert(ratio >= 0.0);
-			mRatio = ratio;
-		}
+    //-------------------------------------------------------------
+    void SRGate::initRuntime(void)
+    {
+      currentOvershootLin = DC_OFFSET;
+    }
 
-		void SRDeesser::setKnee(double kneeDb)
-		{
-			mKneeWidthDb = kneeDb;
-		}
+    //-------------------------------------------------------------
+    // simple gate with RMS detection
+    //-------------------------------------------------------------
+    SRGateRms::SRGateRms()
+      : mEnvelopeDetectorAverager(5.0)
+      , mAverageOfSquares(DC_OFFSET)
+    {
+    }
 
-		void SRDeesser::initFilter(double freq, double q)
-		{
-			this->mFilterFreq = freq;
-			this->mFilterQ = q;
-			this->fSidechainBandpass1.setFilter(SRPlugins::SRFilters::biquad_bandpass, mFilterFreq, mFilterQ, 0.0, getSampleRate());
-			this->fSidechainBandpass2.setFilter(SRPlugins::SRFilters::biquad_bandpass, mFilterFreq, mFilterQ, 0.0, getSampleRate());
-			this->fDynamicEqFilter1.setFilter(SRPlugins::SRFilters::biquad_peak, mFilterFreq, mFilterQ, 0.0, getSampleRate());
-			this->fDynamicEqFilter2.setFilter(SRPlugins::SRFilters::biquad_peak, mFilterFreq, mFilterQ, 0.0, getSampleRate());
-		}
+    //-------------------------------------------------------------
+    void SRGateRms::setSampleRate(double sampleRate)
+    {
+      SRGate::setSampleRate(sampleRate);
+      mEnvelopeDetectorAverager.setSampleRate(sampleRate);
+    }
 
-		void SRDeesser::setFrequency(double freq)
-		{
-			this->mFilterFreq = freq;
-			this->fSidechainBandpass1.setFc(mFilterFreq);
-			this->fSidechainBandpass2.setFc(mFilterFreq);
-			this->fDynamicEqFilter1.setFc(mFilterFreq);
-			this->fDynamicEqFilter2.setFc(mFilterFreq);
-		}
+    //-------------------------------------------------------------
+    void SRGateRms::setWindow(double ms)
+    {
+      mEnvelopeDetectorAverager.setTc(ms);
+    }
 
-		void SRDeesser::setQ(double q)
-		{
-			this->mFilterQ = q;
-			this->fSidechainBandpass1.setQ(mFilterQ);
-			this->fSidechainBandpass2.setQ(mFilterQ);
-			this->fDynamicEqFilter1.setQ(mFilterQ);
-			this->fDynamicEqFilter2.setQ(mFilterQ);
-		}
+    //-------------------------------------------------------------
+    void SRGateRms::initRuntime(void)
+    {
+      SRGate::initRuntime();
+      mAverageOfSquares = DC_OFFSET;
+    }
 
-		//-------------------------------------------------------------
-		void SRDeesser::initRuntime(void)
-		{
-			currentOvershootDb = DC_OFFSET;
-		}
 
-	}
+    //-------------------------------------------------------------
+    // DEESSER
+    //-------------------------------------------------------------
+    SRDeesser::SRDeesser()
+      : AttRelEnvelope(10.0, 100.0)
+      , mThreshDb(0.0)
+      , mRatio(1.0)
+      , currentOvershootDb(DC_OFFSET)
+      , mFilterFreq(0.5)
+      , mFilterQ(0.707)
+      , mFilterGain(0.0)
+      , mGrLin(1.0)
+      , mGrDb(0.0)
+      , mKneeWidthDb(0.0)
+    {
+    }
+
+    void SRDeesser::setDeesser(double threshDb, double ratio, double attackMs, double releaseMs, double freqNormalized, double q, double kneeDb, double samplerate) {
+      setThresh(threshDb);
+      setRatio(ratio);
+      setAttack(attackMs);
+      setRelease(releaseMs);
+      initFilter(freqNormalized, q);
+      setSampleRate(samplerate);
+      setKnee(kneeDb);
+    }
+
+    //-------------------------------------------------------------
+    void SRDeesser::setThresh(double dB)
+    {
+      mThreshDb = dB;
+    }
+
+    //-------------------------------------------------------------
+    void SRDeesser::setRatio(double ratio)
+    {
+      assert(ratio >= 0.0);
+      mRatio = ratio;
+    }
+
+    void SRDeesser::setKnee(double kneeDb)
+    {
+      mKneeWidthDb = kneeDb;
+    }
+
+    void SRDeesser::initFilter(double freq, double q)
+    {
+      this->mFilterFreq = freq;
+      this->mFilterQ = q;
+      this->fSidechainBandpass1.setFilter(SRPlugins::SRFilters::biquad_bandpass, mFilterFreq, mFilterQ, 0.0, getSampleRate());
+      this->fSidechainBandpass2.setFilter(SRPlugins::SRFilters::biquad_bandpass, mFilterFreq, mFilterQ, 0.0, getSampleRate());
+      this->fDynamicEqFilter1.setFilter(SRPlugins::SRFilters::biquad_peak, mFilterFreq, mFilterQ, 0.0, getSampleRate());
+      this->fDynamicEqFilter2.setFilter(SRPlugins::SRFilters::biquad_peak, mFilterFreq, mFilterQ, 0.0, getSampleRate());
+    }
+
+    void SRDeesser::setFrequency(double freq)
+    {
+      this->mFilterFreq = freq;
+      this->fSidechainBandpass1.setFc(mFilterFreq);
+      this->fSidechainBandpass2.setFc(mFilterFreq);
+      this->fDynamicEqFilter1.setFc(mFilterFreq);
+      this->fDynamicEqFilter2.setFc(mFilterFreq);
+    }
+
+    void SRDeesser::setQ(double q)
+    {
+      this->mFilterQ = q;
+      this->fSidechainBandpass1.setQ(mFilterQ);
+      this->fSidechainBandpass2.setQ(mFilterQ);
+      this->fDynamicEqFilter1.setQ(mFilterQ);
+      this->fDynamicEqFilter2.setQ(mFilterQ);
+    }
+
+    //-------------------------------------------------------------
+    void SRDeesser::initRuntime(void)
+    {
+      currentOvershootDb = DC_OFFSET;
+    }
+
+  }
 } // end namespace

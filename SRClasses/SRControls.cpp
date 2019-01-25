@@ -127,8 +127,8 @@ namespace SRPlugins {
 
       // Text Label
       if (mLabelBounds.H()) {
-        if (!mMouseIsOver)
-          g.DrawText(mLabelText, mLabel.Get(), mValueBounds);
+        if (!mMouseIsOver && !mGrayed)
+          g.DrawText(mLabelText, mLabel.Get(), mLabelBounds);
         else {
           // Text Value
           if (mDisplayParamValue)

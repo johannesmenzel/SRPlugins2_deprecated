@@ -4,15 +4,6 @@
 // PLUG ELEMENTS
 // -------------
 
-// All parameters possible data types listed here
-enum EParamDataType {
-  typeDouble = 0,
-  typeBool,
-  typeInt,
-  typeEnum,
-  kNumDataType
-};
-
 //inline double SetShapeCentered(double cMinValue, double cMaxValue, double cCenteredValue, double cControlPosition) {
 //  return log((cCenteredValue - cMinValue) / (cMaxValue - cMinValue)) / log(cControlPosition);
 //}
@@ -21,25 +12,58 @@ enum EParamDataType {
 //  plug->GetParam(paramIdx)->InitDouble(name, defaultVal, minVal, maxVal, step, label, flags, group, new IParam::ShapePowCurve(SetShapeCentered(minVal, maxVal, centerVal, centerPoint)), unit, displayFunc);
 //}
 
+
+  /** custom parameter shaping from middle position */
+struct ShapeFromMiddle : public IParam::Shape
+{
+  ShapeFromMiddle(double minVal = 0.0, double maxVal = 1.0, double centeredVal = 0.5, double pos = 0.5) : mShape(log((centeredVal - minVal) / (maxVal - minVal)) / log(pos))
+  {
+  };
+  Shape* Clone() const override { return new ShapeFromMiddle(); };
+  IParam::EDisplayType GetDisplayType() const override
+  {
+    if (mShape > 2.5) return IParam::EDisplayType::kDisplayCubeRoot;
+    if (mShape > 1.5) return IParam::EDisplayType::kDisplaySquareRoot;
+    if (mShape < (2.0 / 5.0)) return IParam::EDisplayType::kDisplayCubed;
+    if (mShape < (2.0 / 3.0)) return IParam::EDisplayType::kDisplaySquared;
+
+    return IParam::kDisplayLinear;
+  }
+  double NormalizedToValue(double value, const IParam& param) const override {
+    return param.GetMin() + std::pow(value, mShape) * (param.GetMax() - param.GetMin());
+  };
+  double ValueToNormalized(double value, const IParam& param) const override {
+    return std::pow((value - param.GetMin()) / (param.GetMax() - param.GetMin()), 1.0 / mShape);
+  };
+
+  double mShape;
+};
+
 // Struct object containing possible parameters properties
 struct SRParamProperties {
-  const int paramIdx;
-  const int ctrlTag;
-  const char* name; // Name of parameter displayed in host
-  const char* shortName; // Short name for GUI display
-  const double defaultVal; // Plugin loads in this state, return by double click
-  const double minVal; // Minimum value of parameter
-  const double maxVal; // Maximum value of parameter
-  const double stepValue; // Controls dial steps / accuracy
-  const double centerVal; // Value that void setShapeCentered() will center (knobs middle position)
-  const double centerPoint = .5; // Value WHERE void setShapeCentered() will center centerVal (0.5 means: real middle position)
-  const char* label; // Measuring unit of parameter
-  const char* group; // Parameter group, not supported by every host
-  const int Type; // Data type of parameter
+  const int paramIdx = -1;
+  const int ctrlTag = -1;
+  const char* name = ""; // Name of parameter displayed in host
+  const char* label = ""; // Short name for GUI display
+  const double defaultVal = 0.0; // Plugin loads in this state, return by double click
+  const double minVal = 0.0; // Minimum value of parameter
+  const double maxVal = 1.0; // Maximum value of parameter
+  const double stepValue = 0.001; // Controls dial steps / accuracy
+  const double centerVal = 0.5; // Value that void setShapeCentered() will center (knobs middle position)
+  const double centerPoint = 0.5; // Value WHERE void setShapeCentered() will center centerVal (0.5 means: real middle position)
+  const char* unit = ""; // Measuring unit of parameter
+  const char* group = ""; // Parameter group, not supported by every host
+  const IParam::EParamType Type = IParam::EParamType::kTypeNone; // Data type of parameter
+  const IParam::EFlags Flags = IParam::EFlags::kFlagsNone;
   const int Knobs; // Used control bitmap
-  const int AttachToControlPanel; // Panel where control should appear
-  const int x; // Controls horizontal position within panel
-  const int y; // Controls vertical position within panel
+  const struct Position
+  {
+    const int AttachToControlPanel = 0; // Panel where control should appear
+    const int x = 0; // Controls horizontal position within panel
+    const int y = 0; // Controls vertical position within panel
+    const int w = 2; // Controls horizontal position within panel
+    const int h = 2; // Controls vertical position within panel
+  } position;
   const char* labelMin = ""; // GUI display string of minimum
   const char* labelMax = ""; // GUI display string of maximum
   const char* labelCtr = ""; // GUI display string of middle position

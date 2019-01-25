@@ -19,24 +19,24 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
     switch (p.Type)
     {
-    case typeDouble:
-      //InitDoubleShapeFromMiddlePosition(this, paramIdx, p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.label, 0, p.group, p.centerVal, p.centerPoint, IParam::kUnitCustom);
-      GetParam(paramIdx)->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.label, 0, p.group, new IParam::ShapePowCurve(SRPlugins::SRHelpers::SetShapeCentered(p.minVal, p.maxVal, p.centerVal, p.centerPoint)), IParam::kUnitCustom);
+    case IParam::EParamType::kTypeDouble:
+      //InitDoubleShapeFromMiddlePosition(this, paramIdx, p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, 0, p.group, p.centerVal, p.centerPoint, IParam::kUnitCustom);
+      GetParam(paramIdx)->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, p.Flags, p.group, new ShapeFromMiddle(p.minVal, p.maxVal, p.centerVal, p.centerPoint), IParam::kUnitCustom);
       break;
-    case typeInt:
-      GetParam(paramIdx)->InitInt(p.name, (int)p.defaultVal, (int)p.minVal, (int)p.maxVal, p.label, 0, p.group);
+    case IParam::EParamType::kTypeInt:
+      GetParam(paramIdx)->InitInt(p.name, (int)p.defaultVal, (int)p.minVal, (int)p.maxVal, p.unit, 0, p.group);
       break;
-    case typeBool:
-      GetParam(paramIdx)->InitBool(p.name, (bool)p.defaultVal, p.label, 0, p.group, p.labelMin, p.labelMax);
+    case IParam::EParamType::kTypeBool:
+      GetParam(paramIdx)->InitBool(p.name, (bool)p.defaultVal, p.unit, 0, p.group, p.labelMin, p.labelMax);
       break;
-    case typeEnum:
+    case IParam::EParamType::kTypeEnum:
       switch (paramIdx) {
       case kEqHpOrder: /*case kEqLpOrder:*/
         GetParam(paramIdx)->InitEnum(
           p.name,
           (int)p.defaultVal,
           EFilterSlope::kNumOrders,
-          p.label,
+          p.unit,
           0,
           p.group,
           "6 dB/oct",
@@ -54,7 +54,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         GetParam(paramIdx)->InitEnum(p.name,
           (int)p.defaultVal,
           SRPlugins::SRSaturation::SaturationTypes::numTypes,
-          p.label,
+          p.unit,
           0,
           p.group,
           "MusicDSP",
@@ -69,7 +69,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           p.name,
           (int)p.defaultVal,
           OverSampler<double>::kNumFactors,
-          p.label,
+          p.unit,
           0,
           p.group,
           "OS OFF",
@@ -160,7 +160,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         const SRParamProperties& p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
         const int ctrlIdx = p.ctrlTag;
 
-        switch (p.AttachToControlPanel) {
+        switch (p.position.AttachToControlPanel) {
         case RectHeader: rect = &rectHeader; break;
         case RectInput: rect = &rectInput; break;
         case RectEq: rect = &rectEq; break;
@@ -171,27 +171,30 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         default: break;
         }
 
+        const IRECT rectCurrentControl = rect->GetGridCell(p.position.y, p.position.x, sectionRectGridCells[p.position.AttachToControlPanel][0], sectionRectGridCells[p.position.AttachToControlPanel][1]).FracRectHorizontal(p.position.w, false).FracRectVertical(p.position.h, true).GetPadded((p.Knobs == Button) ? -5.0f : 0.0f);
+
+
         switch (p.Type)
         {
-        case typeInt: // No int ctrl...
-        case typeDouble:
+        case IParam::EParamType::kTypeInt: // No int ctrl...
+        case IParam::EParamType::kTypeDouble:
           switch (paramIdx)
           {
           case kInputGain:
           case kOutputGain:
             // Resize faders
-            pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false));
+            pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rectCurrentControl);
             break;
           default:
             // Resize knobs
-            pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false));
+            pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rectCurrentControl);
             break;
           }
           break;
-          // Attach switches
-        case typeEnum:
-        case typeBool:
-          pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectHorizontal(2.f, false).GetPadded(-5.f));
+          // Resize switches
+        case IParam::EParamType::kTypeEnum:
+        case IParam::EParamType::kTypeBool:
+          pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rectCurrentControl);
           break;
         default:
           break;
@@ -242,7 +245,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
       const int ctrlIdx = p.ctrlTag;
 
-      switch (p.AttachToControlPanel) {
+      switch (p.position.AttachToControlPanel) {
       case RectHeader: rect = &rectHeader; break;
       case RectInput: rect = &rectInput; break;
       case RectEq: rect = &rectEq; break;
@@ -252,6 +255,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       case RectFooter: rect = &rectFooter; break;
       default: break;
       }
+      const IRECT rectCurrentControl = rect->GetGridCell(p.position.y, p.position.x, sectionRectGridCells[p.position.AttachToControlPanel][0], sectionRectGridCells[p.position.AttachToControlPanel][1]).FracRectHorizontal(p.position.w, false).FracRectVertical(p.position.h, true).GetPadded((p.Knobs == Button) ? -5.0f : 0.0f);
 
       IColor knobColor;									// We're pointing at the type of knob we want to add
 
@@ -268,21 +272,21 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
       switch (p.Type)
       {
-      case typeInt: // No int ctrl...
-      case typeDouble:
+      case IParam::EParamType::kTypeInt: // No int ctrl...
+      case IParam::EParamType::kTypeDouble:
         switch (paramIdx)
         {
         case kInputGain:
         case kOutputGain:
           // Attach faders
-          pGraphics->AttachControl(new IVSliderControl(rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(18.f, true).FracRectHorizontal(2.f, false), paramIdx, SR_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
+          pGraphics->AttachControl(new IVSliderControl(rectCurrentControl, paramIdx, SR_SPEC, kVertical, true, 32.f, 2.f), ctrlIdx);
           break;
         default:
           // Attach knobs
           pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorKnobText(
-            rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectVertical(2.f, true).FracRectHorizontal(2.f, false),
+            rectCurrentControl,
             paramIdx,
-            p.shortName,
+            p.label,
             p.labelMin,
             p.labelMax,
             p.labelCtr,
@@ -303,13 +307,13 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         }
         break;
         // Attach switches
-      case typeEnum:
-      case typeBool:
+      case IParam::EParamType::kTypeEnum:
+      case IParam::EParamType::kTypeBool:
         pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorSwitch(
-          rect->GetGridCell(p.y, p.x, sectionRectGridCells[p.AttachToControlPanel][0], sectionRectGridCells[p.AttachToControlPanel][1]).FracRectHorizontal(2.f, false).GetPadded(-5.f),
+          rectCurrentControl,
           paramIdx,
           FlashCircleClickActionFunc,
-          p.shortName,
+          p.label,
           DEFAULT_SPEC,
           GetParam(paramIdx)->NDisplayTexts()
         ), ctrlIdx);
@@ -356,7 +360,7 @@ void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
 {
   switch (paramIdx)
   {
-  case kCompPeakRmsRatio:
+  case kCompIsParallel:
   case kEqBypass: 
   case kCompBypass: 
   case kInputBypass: 
@@ -857,12 +861,12 @@ void SRChannel::OnParamChange(int paramIdx) {
     fInputSaturation[1].setSkew(mSaturationSkew);
     break;
   case kSaturationType:
-    mSaturationType = int(GetParam(paramIdx)->Value());
+    mSaturationType = int(GetParam(paramIdx)->Int());
     fInputSaturation[0].setType(mSaturationType);
     fInputSaturation[1].setType(mSaturationType);
     break;
   case kOversamplingRate:
-    mOversamplingRate = int(GetParam(paramIdx)->Value());
+    mOversamplingRate = int(GetParam(paramIdx)->Int());
     mOverSampler[0].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
     mOverSampler[1].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
     break;
@@ -879,7 +883,7 @@ void SRChannel::OnParamChange(int paramIdx) {
     fSafePanLp[0].setFc(mSafePanFreq / mSampleRate);
     fSafePanLp[1].setFc(mSafePanFreq / mSampleRate);
     break;
-  case kIsPanMonoLow: mIsPanMonoLow = GetParam(paramIdx)->Value(); break;
+  case kIsPanMonoLow: mIsPanMonoLow = GetParam(paramIdx)->Bool(); break;
 
 
     // FILTER
@@ -918,7 +922,7 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
 
   case kEqHpOrder:
-    mEqHpOrder = int(GetParam(paramIdx)->Value());
+    mEqHpOrder = int(GetParam(paramIdx)->Int());
     switch (mEqHpOrder) {
     case EFilterSlope::dbo6:									// 1st order, 6 dB/Oct
       break;
@@ -1009,27 +1013,25 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
 
     // Low Pass
-  //case kEqLpOrder:
-  //  break;
-
   case kEqLpFreq:
     mEqLpFreq = GetParam(paramIdx)->Value();
     fEqLpFilter1[0].setFc(mEqLpFreq / mSampleRate);
     fEqLpFilter1[1].setFc(mEqLpFreq / mSampleRate);
     break;
-
+    //case kEqLpOrder:
+//  break;
 
     // EQUALIZER
     // ---------
 
   case kEqHfBell:
-    mEqHfIsBell = GetParam(paramIdx)->Value();
+    mEqHfIsBell = GetParam(paramIdx)->Bool();
     if (mEqHfIsBell == 1) { fEqHfFilter[0].setType(SRPlugins::SRFilters::biquad_peak); fEqHfFilter[1].setType(SRPlugins::SRFilters::biquad_peak); }
     else { fEqHfFilter[0].setType(SRPlugins::SRFilters::biquad_highshelf); fEqHfFilter[1].setType(SRPlugins::SRFilters::biquad_highshelf); }
     break;
 
   case kEqLfBell:
-    mEqLfIsBell = GetParam(paramIdx)->Value();
+    mEqLfIsBell = GetParam(paramIdx)->Bool();
     if (mEqLfIsBell == 1) { fEqLfFilter[0].setType(SRPlugins::SRFilters::biquad_peak); fEqLfFilter[1].setType(SRPlugins::SRFilters::biquad_peak); }
     else { fEqLfFilter[0].setType(SRPlugins::SRFilters::biquad_lowshelf); fEqLfFilter[1].setType(SRPlugins::SRFilters::biquad_lowshelf); }
     break;
@@ -1131,21 +1133,21 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kCompDryWet: mCompDryWet = GetParam(paramIdx)->Value() / 100; break;
 
     // Bool Switches
-  case kCompIsParallel: mCompIsParallel = GetParam(paramIdx)->Value(); break;
-  case kCompPeakIsExtSc: mCompPeakIsExtSc = GetParam(paramIdx)->Value(); break;
-  case kCompRmsIsExrSc: mCompRmsIsExtSc = GetParam(paramIdx)->Value(); break;
-  case kCompPeakIsFeedback: mCompPeakIsFeedback = GetParam(paramIdx)->Value(); fCompressorPeak.setTopologyFeedback(mCompPeakIsFeedback); break;
-  case kCompRmsIsFeedback: mCompRmsIsFeedback = GetParam(paramIdx)->Value(); fCompressorRms.setTopologyFeedback(mCompRmsIsFeedback); break;
+  case kCompIsParallel: mCompIsParallel = GetParam(paramIdx)->Bool(); break;
+  case kCompPeakIsExtSc: mCompPeakIsExtSc = GetParam(paramIdx)->Bool(); break;
+  case kCompRmsIsExrSc: mCompRmsIsExtSc = GetParam(paramIdx)->Bool(); break;
+  case kCompPeakIsFeedback: mCompPeakIsFeedback = GetParam(paramIdx)->Bool(); fCompressorPeak.setTopologyFeedback(mCompPeakIsFeedback); break;
+  case kCompRmsIsFeedback: mCompRmsIsFeedback = GetParam(paramIdx)->Bool(); fCompressorRms.setTopologyFeedback(mCompRmsIsFeedback); break;
 
 
     // GLOBAL BYPASS
     // -------------
 
-  case kEqBypass: mEqBypass = GetParam(paramIdx)->Value(); break;
-  case kCompBypass: mCompBypass = GetParam(paramIdx)->Value(); break;
-  case kInputBypass: mInputBypass = GetParam(paramIdx)->Value(); break;
-  case kOutputBypass: mOutputBypass = GetParam(paramIdx)->Value(); break;
-  case kBypass: mBypass = GetParam(paramIdx)->Value(); break;
+  case kEqBypass: mEqBypass = GetParam(paramIdx)->Bool(); break;
+  case kCompBypass: mCompBypass = GetParam(paramIdx)->Bool(); break;
+  case kInputBypass: mInputBypass = GetParam(paramIdx)->Bool(); break;
+  case kOutputBypass: mOutputBypass = GetParam(paramIdx)->Bool(); break;
+  case kBypass: mBypass = GetParam(paramIdx)->Bool(); break;
 
 
     // AUTOMATIC GAIN CONTROL
@@ -1190,19 +1192,7 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kDeesserRelease: mDeesserRelease = GetParam(paramIdx)->Value(); fDeesser.setRelease(mDeesserRelease); break;
   case kDeesserMakeup: mDeesserMakeup = DBToAmp(GetParam(paramIdx)->Value()); break;
 
-    // TEST PARAMS
-    // -----------
-
-  //case kTestParam1: mTestParam1 = GetParam(paramIdx)->Value(); break;
-  //case kTestParam2: mTestParam2 = GetParam(paramIdx)->Value(); break;
-  //case kTestParam3: mTestParam3 = GetParam(paramIdx)->Value(); break;
-  //case kTestParam4: mTestParam4 = GetParam(paramIdx)->Value(); break;
-  //case kTestParam5: mTestParam5 = GetParam(paramIdx)->Value(); break;
-
   default: break;
   }
-
 }
-
-
 #endif

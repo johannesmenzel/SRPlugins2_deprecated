@@ -1,5 +1,5 @@
 #define PLUG_NAME "SRChannel"
-#define PLUG_MFR "SRPlugins"
+#define PLUG_MFR "SR"
 #define PLUG_VERSION_HEX 0x00000201
 #define PLUG_VERSION_STR "0.2.1"
 #define PLUG_UNIQUE_ID 'SrCn'
@@ -10,7 +10,7 @@
 #define PLUG_CLASS_NAME SRChannel
 
 #define BUNDLE_NAME "SRChannel"
-#define BUNDLE_MFR "SRPlugins"
+#define BUNDLE_MFR "SR"
 #define BUNDLE_DOMAIN "com"
 
 #define PLUG_CHANNEL_IO "2-2 4-2"
@@ -36,7 +36,7 @@
 
 #define AAX_TYPE_IDS 'EFN1', 'EFN2'
 #define AAX_TYPE_IDS_AUDIOSUITE 'EFA1', 'EFA2'
-#define AAX_PLUG_MFR_STR "SRPlugins"
+#define AAX_PLUG_MFR_STR "SR"
 #define AAX_PLUG_NAME_STR "SRChannel\nIPEF"
 #define AAX_PLUG_CATEGORY_STR "Effect"
 #define AAX_DOES_AUDIOSUITE 1
@@ -52,5 +52,7 @@
 
 #define ROBOTTO_FN "Roboto-Regular.ttf"
 #define CENTURY_FN "GOTHIC.TTF"
-#define LOGO_FN	"../SRImages/Logo.png"
+//#define LOGO_FN	"../SRImages/Logo.png"
 #define PANEL_FN	"../SRImages/SrChannel-Background.png"
+#define SRCHANNELLOGO_FN "../SRImages/SRChannel_Logo.png"
+#define SRPLUGINSLOGO_FN "../SRImages/SRPlugins_Logo.png"

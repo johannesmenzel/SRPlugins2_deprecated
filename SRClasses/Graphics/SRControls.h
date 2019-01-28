@@ -1,15 +1,15 @@
 #pragma once
 #include "IPlug_include_in_plug_hdr.h"
 #include "IControl.h"
-#include "SRHelpers.h"
+#include "../Utils/SRHelpers.h"
 // For meter, see IVMeterControl.h
 #include "IPlugQueue.h"
 #include "IPlugStructs.h"
 #include "IVMeterControl.h"
 //#include <string>
 
-namespace SRPlugins {
-  namespace SRControls {
+namespace SR {
+  namespace Graphics {
 
 
     /** A vector knob control drawn using graphics primitves */

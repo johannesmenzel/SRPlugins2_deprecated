@@ -27,8 +27,8 @@
 #include <cmath>
 #include "SRFilters.h"
 //#include "../SRChannel/SRChannel.h"
-namespace SRPlugins {
-	namespace SRFilters {
+namespace SR {
+	namespace DSP {
 
 		SRFiltersTwoPole::SRFiltersTwoPole() {
 			type = biquad_lowpass;

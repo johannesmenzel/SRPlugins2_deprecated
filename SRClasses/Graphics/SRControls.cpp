@@ -2,8 +2,8 @@
 //#include "IPlug_include_in_plug_src.h"
 //#include "IControls.h"
 
-namespace SRPlugins {
-  namespace SRControls {
+namespace SR {
+  namespace Graphics {
 
 
 
@@ -548,4 +548,4 @@ namespace SRPlugins {
 
 
   } // End namespace SRControls
-} // End namespace SRPlugins
+} // End namespace SR

@@ -71,23 +71,23 @@
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRControls.cpp">
-      <Filter>SRClasses</Filter>
+    <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp">
+      <Filter>SRClasses\DSP</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRDynamics.cpp">
-      <Filter>SRClasses</Filter>
+    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp">
+      <Filter>SRClasses\DSP</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRFilters.cpp">
-      <Filter>SRClasses</Filter>
+    <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp">
+      <Filter>SRClasses\DSP</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRGain.cpp">
-      <Filter>SRClasses</Filter>
+    <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp">
+      <Filter>SRClasses\DSP</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRHelpers.cpp">
-      <Filter>SRClasses</Filter>
+    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp">
+      <Filter>SRClasses\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRSaturation.cpp">
-      <Filter>SRClasses</Filter>
+    <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
+      <Filter>SRClasses\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -249,28 +249,28 @@
     <ClInclude Include="..\..\..\IPlug\IPlugUtilities.h">
       <Filter>IPlug</Filter>
     </ClInclude>
+    <ClInclude Include="..\SRChannelConstants.h" />
     <ClInclude Include="..\..\SRClasses\SRConstants.h">
       <Filter>SRClasses</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRControls.h">
-      <Filter>SRClasses</Filter>
+    <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h">
+      <Filter>SRClasses\DSP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRDynamics.h">
-      <Filter>SRClasses</Filter>
+    <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h">
+      <Filter>SRClasses\DSP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRFilters.h">
-      <Filter>SRClasses</Filter>
+    <ClInclude Include="..\..\SRClasses\DSP\SRGain.h">
+      <Filter>SRClasses\DSP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRGain.h">
-      <Filter>SRClasses</Filter>
+    <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h">
+      <Filter>SRClasses\DSP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRHelpers.h">
-      <Filter>SRClasses</Filter>
+    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h">
+      <Filter>SRClasses\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRSaturation.h">
-      <Filter>SRClasses</Filter>
+    <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h">
+      <Filter>SRClasses\Utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -298,7 +298,16 @@
       <UniqueIdentifier>{3c740de7-2371-4065-bf3d-5af9193c7b7d}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{8db5e617-a7b0-453a-b2fd-b79b1d88cb98}</UniqueIdentifier>
+      <UniqueIdentifier>{28d587a0-c836-4ec2-9537-0dcddb3af90c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRClasses\DSP">
+      <UniqueIdentifier>{ee23551c-61e8-4d8c-a350-af23120729e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRClasses\Graphics">
+      <UniqueIdentifier>{5aff3371-b71d-4b2f-a142-78e1415ae7c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRClasses\Utils">
+      <UniqueIdentifier>{0a522a90-bc19-4569-8b69-1fa43b109afb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

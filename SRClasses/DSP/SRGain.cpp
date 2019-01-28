@@ -2,9 +2,9 @@
 //#include this and that
 //#include <math.h>
 
-namespace SRPlugins
+namespace SR
 {
-	namespace SRGain
+	namespace DSP
 	{
 
 
@@ -23,8 +23,8 @@ namespace SRPlugins
 		SRGain::~SRGain() {}
 
 		void SRGain::initGainDb(double pGainDb1, double pGainDb2, double pRampNumSamples, bool pBypassed) {
-			this->mGainLin1 = SRPlugins::SRHelpers::DBToAmp(pGainDb1);
-			this->mGainLin2 = SRPlugins::SRHelpers::DBToAmp(pGainDb2);
+			this->mGainLin1 = SR::Utils::DBToAmp(pGainDb1);
+			this->mGainLin2 = SR::Utils::DBToAmp(pGainDb2);
 			this->mRampNumSamples = pRampNumSamples;
 			this->mBypassed = pBypassed;
 			calcGain();
@@ -51,14 +51,14 @@ namespace SRPlugins
 		}
 		void SRGain::setGainDb(double pGainDb)
 		{
-			this->mGainLin1 = SRPlugins::SRHelpers::DBToAmp(pGainDb);
-			this->mGainLin2 = SRPlugins::SRHelpers::DBToAmp(pGainDb);
+			this->mGainLin1 = SR::Utils::DBToAmp(pGainDb);
+			this->mGainLin2 = SR::Utils::DBToAmp(pGainDb);
 			calcGain();
 		}
 		void SRGain::setGainDb(double pGainDb1, double pGainDb2)
 		{
-			this->mGainLin1 = SRPlugins::SRHelpers::DBToAmp(pGainDb1);
-			this->mGainLin2 = SRPlugins::SRHelpers::DBToAmp(pGainDb2);
+			this->mGainLin1 = SR::Utils::DBToAmp(pGainDb1);
+			this->mGainLin2 = SR::Utils::DBToAmp(pGainDb2);
 			calcGain();
 		}
 		void SRGain::setRamp(double pRampNumSamples)
@@ -193,4 +193,4 @@ namespace SRPlugins
 		}
 
 	} // namespace SRGain
-} // namespace SRPlugins
+} // namespace SR

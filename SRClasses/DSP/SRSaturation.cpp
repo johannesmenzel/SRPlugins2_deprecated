@@ -3,8 +3,8 @@
 //#include <math.h>
 
 
-namespace SRPlugins {
-	namespace SRSaturation {
+namespace SR {
+	namespace DSP {
 
 
 
@@ -40,7 +40,7 @@ namespace SRPlugins {
 		}
 
 		void SRSaturation::setDrive(double pDriveDb) {
-			this->mDriveNormalized = SRPlugins::SRHelpers::DBToAmp(pDriveDb);
+			this->mDriveNormalized = SR::Utils::DBToAmp(pDriveDb);
 		}
 
 		void SRSaturation::setAmount(double pAmountNormalized) {
@@ -70,7 +70,7 @@ namespace SRPlugins {
 
 		void SRSaturation::setSaturation(int pType, double pDriveDb, double pAmountNormalized, double pHarmonicsNormalized, bool pPositive, double pSkewNormalized, double pWetNormalized, double pSamplerate) {
 			this->mType = pType;
-			this->mDriveNormalized = SRPlugins::SRHelpers::DBToAmp(pDriveDb);
+			this->mDriveNormalized = SR::Utils::DBToAmp(pDriveDb);
 			this->mAmountNormalized = pAmountNormalized;
 			this->mHarmonicsNormalized = pHarmonicsNormalized;
 			this->mPositive = pPositive;

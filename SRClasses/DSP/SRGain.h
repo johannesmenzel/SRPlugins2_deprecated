@@ -27,12 +27,12 @@
 #pragma once
 
 // #include this and that
-#include "SRHelpers.h" // optional
+#include "../Utils/SRHelpers.h" // optional
 #include <cassert>
 
-namespace SRPlugins
+namespace SR
 {
-	namespace SRGain
+	namespace DSP
 	{
 
 
@@ -50,7 +50,7 @@ namespace SRPlugins
 			void setRamp(double pRampNumSamples);
 			void setBypassed(bool pBypassed);
 			double getGain() { return mGainLin1 * 0.5 + mGainLin2 * 0.5; }
-			double getGainDb() { return SRPlugins::SRHelpers::AmpToDB(mGainLin1 * 0.5 + mGainLin2 * 0.5); }
+			double getGainDb() { return SR::Utils::AmpToDB(mGainLin1 * 0.5 + mGainLin2 * 0.5); }
 			bool getBypassed() { return mBypassed; }
 
 
@@ -143,4 +143,4 @@ namespace SRPlugins
 		}
 
 	} // namespace SRGain
-} // namespace SRPlugins
+} // namespace SR

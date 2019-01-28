@@ -26,30 +26,31 @@
 
 #pragma once
 
-#include "SRHelpers.h"
+#include "../Utils/SRHelpers.h"
 #include <functional>
 //#include "Oversampler.h"
 // #include this and that
 
 
-namespace SRPlugins {
-	namespace SRSaturation {
+namespace SR {
+	namespace DSP {
 
 
-		// If type definitions of type int needed:
-		enum SaturationTypes {
-			typeMusicDSP = 0,
-			typeZoelzer,
-			typePirkle,
-			typePirkleModified,
-			typeRectHalf,
-			typeRectFull,
-			numTypes
-			// ...
-		};
 
 		class SRSaturation {
 		public:
+      // If type definitions of type int needed:
+      enum SaturationTypes {
+        typeMusicDSP = 0,
+        typeZoelzer,
+        typePirkle,
+        typePirkleModified,
+        typeRectHalf,
+        typeRectFull,
+        numTypes
+        // ...
+      };
+
 			// constructor
 			SRSaturation();
 			// class initializer

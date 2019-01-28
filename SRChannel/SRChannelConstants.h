@@ -189,7 +189,8 @@ enum ECtrlTags {
   cBypass,
 
   // UI Controls
-  cBitmapLogo,
+  cSRPluginsLogo,
+  cSRChannelLogo,
   cPanelHeader,
   cPanelFooter,
   cPanelInput,

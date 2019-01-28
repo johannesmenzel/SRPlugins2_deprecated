@@ -7,12 +7,12 @@
 #include "IVScopeControl.h"
 // SRClasses
 #include "../SRClasses/SRConstants.h"
-#include "../SRClasses/SRGain.h"
-#include "../SRClasses/SRFilters.h"
-#include "../SRClasses/SRDynamics.h"
-#include "../SRClasses/SRSaturation.h"
-#include "../SRClasses/SRHelpers.h"
-#include "../SRClasses/SRControls.h"
+#include "../SRClasses/DSP/SRGain.h"
+#include "../SRClasses/DSP/SRFilters.h"
+#include "../SRClasses/DSP/SRDynamics.h"
+#include "../SRClasses/DSP/SRSaturation.h"
+#include "../SRClasses/Utils/SRHelpers.h"
+#include "../SRClasses/Graphics/SRControls.h"
 // Plugin constants
 #include "SRChannelConstants.h"
 // ... Commented out until implementation of oversampling
@@ -86,31 +86,31 @@ private:
 
   // FILTERS
     // Gain Filters
-  SRPlugins::SRGain::SRGain fInputGain, fOutputGain;
-  SRPlugins::SRGain::SRPan fPan;
+  SR::DSP::SRGain fInputGain, fOutputGain;
+  SR::DSP::SRPan fPan;
 
   // Spectral Filters
-  SRPlugins::SRFilters::SRFiltersTwoPole fEqHpFilter1[2], fEqHpFilter2[2], fEqHpFilter3[2], fEqHpFilter4[2], fEqHpFilter5[2], fEqHpFilter6[2], fEqHpFilter7[2], fEqHpFilter8[2], fEqHpFilter9[2], fEqHpFilter10[2],
+  SR::DSP::SRFiltersTwoPole fEqHpFilter1[2], fEqHpFilter2[2], fEqHpFilter3[2], fEqHpFilter4[2], fEqHpFilter5[2], fEqHpFilter6[2], fEqHpFilter7[2], fEqHpFilter8[2], fEqHpFilter9[2], fEqHpFilter10[2],
     fEqLpFilter1[2],
     fEqLfFilter[2], fEqLmfFilter[2], fEqHmfFilter[2], fEqHfFilter[2];
   // Safe-Pan
-  SRPlugins::SRFilters::SRFiltersTwoPole fSafePanHp[2], fSafePanLp[2];
+  SR::DSP::SRFiltersTwoPole fSafePanHp[2], fSafePanLp[2];
   // Deesser
-  SRPlugins::SRFilters::SRFiltersTwoPole fDeesserSidechainBandpassFilter[2], fDeesserReductionPeakFilter[2];
+  SR::DSP::SRFiltersTwoPole fDeesserSidechainBandpassFilter[2], fDeesserReductionPeakFilter[2];
   // Extra Filters
-  SRPlugins::SRFilters::SRFiltersOnePole fDcBlocker[2], fEqHpFilterOnepole[2], fEqLpFilterOnepole[2];
+  SR::DSP::SRFiltersOnePole fDcBlocker[2], fEqHpFilterOnepole[2], fEqLpFilterOnepole[2];
 
   // Dynamic Filters
-  SRPlugins::SRDynamics::SRCompressor fCompressorPeak;
-  SRPlugins::SRDynamics::SRCompressorRMS fCompressorRms;
-  SRPlugins::SRDynamics::SRLimiter fLimiter;
-  SRPlugins::SRDynamics::SRDeesser fDeesser;
+  SR::DSP::SRCompressor fCompressorPeak;
+  SR::DSP::SRCompressorRMS fCompressorRms;
+  SR::DSP::SRLimiter fLimiter;
+  SR::DSP::SRDeesser fDeesser;
 
-  //SRPlugins::SRDynamics::EnvelopeDetector fOutputVuMeterEnvelopeDetector1, fOutputVuMeterEnvelopeDetector2;
-  //SRPlugins::SRDynamics::AttRelEnvelope fOutputVuMeterEnvelope1, fOutputVuMeterEnvelope2;
+  //SR::DSP::EnvelopeDetector fOutputVuMeterEnvelopeDetector1, fOutputVuMeterEnvelopeDetector2;
+  //SR::DSP::AttRelEnvelope fOutputVuMeterEnvelope1, fOutputVuMeterEnvelope2;
 
   // Saturation
-  SRPlugins::SRSaturation::SRSaturation fInputSaturation[2];
+  SR::DSP::SRSaturation fInputSaturation[2];
   OverSampler<sample> mOverSampler[2]{ OverSampler<sample>::kNone };
 
 
@@ -121,8 +121,8 @@ private:
   double aveOut;
   double diffInOut;
 
-  SRPlugins::SRControls::SRMeter<2>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
-  SRPlugins::SRControls::SRMeter<3>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
-  SRPlugins::SRControls::SRMeter<2>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
+  SR::Graphics::SRMeter<2>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
+  SR::Graphics::SRMeter<3>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
+  SR::Graphics::SRMeter<2>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
   IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
 };

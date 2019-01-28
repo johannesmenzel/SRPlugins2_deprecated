@@ -5,8 +5,8 @@
 #include <cmath>
 #include <string>
 
-namespace SRPlugins {
-  namespace SRHelpers {
+namespace SR {
+  namespace Utils {
 
     // CONVERSION
     // ----------

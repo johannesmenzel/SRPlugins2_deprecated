@@ -53,7 +53,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       case kSaturationType:
         GetParam(paramIdx)->InitEnum(p.name,
           (int)p.defaultVal,
-          SRPlugins::SRSaturation::SaturationTypes::numTypes,
+          SR::DSP::SRSaturation::SaturationTypes::numTypes,
           p.unit,
           0,
           p.group,
@@ -134,8 +134,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
       pGraphics->GetBackgroundControl()->SetTargetAndDrawRECTs(rectPlugin);
       // Resize logo
-      pGraphics->GetControlWithTag(cBitmapLogo)->SetTargetAndDrawRECTs(rectHeader.GetFromRight(300.f));
-      pGraphics->GetControlWithTag(cVersion)->SetTargetAndDrawRECTs(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize));
+      //pGraphics->GetControlWithTag(cBitmapLogo)->SetTargetAndDrawRECTs(rectHeader.GetFromRight(300.f));
+      pGraphics->GetControlWithTag(cSRPluginsLogo)->SetTargetAndDrawRECTs(rectHeader.SubRectVertical(2, 0).GetFromLeft(pGraphics->GetControlWithTag(cSRPluginsLogo)->GetRECT().W()));
+      pGraphics->GetControlWithTag(cSRChannelLogo)->SetTargetAndDrawRECTs(rectHeader.SubRectVertical(2, 0).GetFromRight(pGraphics->GetControlWithTag(cSRChannelLogo)->GetRECT().W()));
+      //pGraphics->GetControlWithTag(cVersion)->SetTargetAndDrawRECTs(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize));
       // Resize section rect PANELS
       pGraphics->GetControlWithTag(cPanelInput)->SetTargetAndDrawRECTs(rectInput);
       pGraphics->GetControlWithTag(cPanelEq)->SetTargetAndDrawRECTs(rectEq);
@@ -206,7 +208,9 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     // LOAD
     pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
     //pGraphics->LoadFont(CENTURY_FN);
-    IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
+    //IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
+    IBitmap bmpSRPluginsLogo = pGraphics->LoadBitmap(SRPLUGINSLOGO_FN);                       // Load logo bitmap
+    IBitmap bmpSRChannelLogo = pGraphics->LoadBitmap(SRCHANNELLOGO_FN);                       // Load logo bitmap
     //IBitmap bmpPanel = pGraphics->LoadBitmap(PANEL_FN);
     // SETUP
     if (!pGraphics->CanHandleMouseOver()) pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
@@ -219,8 +223,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachCornerResizer(kUIResizerSize, true);                 // Attach Resizer
 
     // Attach logo
-    pGraphics->AttachControl(new IBitmapControl(rectHeader.GetFromRight(bmpLogo.W()), bmpLogo, -1, kBlendNone), cBitmapLogo);
-    pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", SRLayout.textVersionString), cVersion, "UI");
+    //pGraphics->AttachControl(new IBitmapControl(rectHeader.GetFromRight(bmpLogo.W()), bmpLogo, -1, kBlendNone), cBitmapLogo);
+    pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromLeft(bmpSRPluginsLogo.W()), bmpSRPluginsLogo, -1, EBlendType::kBlendNone), cSRPluginsLogo, "UI");
+    pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromRight(bmpSRChannelLogo.W()), bmpSRChannelLogo, -1, EBlendType::kBlendNone), cSRChannelLogo, "UI");
+    //pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", SRLayout.textVersionString), cVersion, "UI");
     // Attach section rect PANELS
     pGraphics->AttachControl(new IPanelControl(rectInput, patternPanel, true), cPanelInput, "UI");
     pGraphics->AttachControl(new IPanelControl(rectEq, patternPanel, true), cPanelEq, "UI");
@@ -230,9 +236,9 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new IPanelControl(rectMeter, patternPanel, true), cPanelMeter, "UI");
 
     // METERS peak and gain reduction
-    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 0), false, false, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
-    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, -18., 0., SRPlugins::SRHelpers::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
-    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 2), false, false, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRMeter<2>(rectMeter.SubRectHorizontal(3, 0), false, false, -60., 12., SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, -18., 0., SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRMeter<2>(rectMeter.SubRectHorizontal(3, 2), false, false, -60., 12., SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
     // Set Tooltip for these
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
@@ -283,7 +289,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           break;
         default:
           // Attach knobs
-          pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorKnobText(
+          pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(
             rectCurrentControl,
             paramIdx,
             p.label,
@@ -309,7 +315,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         // Attach switches
       case IParam::EParamType::kTypeEnum:
       case IParam::EParamType::kTypeBool:
-        pGraphics->AttachControl(new SRPlugins::SRControls::SRVectorSwitch(
+        pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(
           rectCurrentControl,
           paramIdx,
           FlashCircleClickActionFunc,
@@ -385,38 +391,38 @@ void SRChannel::InitEffects() {
   // Init gain and pan
   fInputGain.initGain(mInputGain, mInputGain, double(mSampleRate) / 10., false);
   fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate) / 10., false);
-  fPan.initPan(SRPlugins::SRGain::typeSinusodial, mPan, true);
+  fPan.initPan(SR::DSP::typeSinusodial, mPan, true);
 
   for (int i = 0; i < NChannelsConnected(kOutput); i++) {
     // Init EQ
     fEqHpFilterOnepole[i].setFc(mEqHpFreq);
-    fEqHpFilter1[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter2[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter3[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter4[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter5[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter6[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter7[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter8[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter9[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHpFilter10[i].setFilter(SRPlugins::SRFilters::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqLpFilter1[i].setFilter(SRPlugins::SRFilters::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fEqHfFilter[i].setFilter(SRPlugins::SRFilters::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
-    fEqHmfFilter[i].setFilter(SRPlugins::SRFilters::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
-    fEqLmfFilter[i].setFilter(SRPlugins::SRFilters::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
-    fEqLfFilter[i].setFilter(SRPlugins::SRFilters::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
+    fEqHpFilter1[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter2[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter3[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter4[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter5[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter6[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter7[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter8[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter9[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHpFilter10[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqLpFilter1[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_lowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fEqHfFilter[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
+    fEqHmfFilter[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
+    fEqLmfFilter[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
+    fEqLfFilter[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::biquad_lowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
     fDcBlocker[i].setFc(10. / mSampleRate);
 
     // Init safe pan filter
-    fSafePanHp[i].setFilter(SRPlugins::SRFilters::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-    fSafePanLp[i].setFilter(SRPlugins::SRFilters::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+    fSafePanHp[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::iir_linkwitz_highpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+    fSafePanLp[i].setFilter(SR::DSP::SRFiltersTwoPole::FilterType::iir_linkwitz_lowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
 
     // Init saturation
-    fInputSaturation[i].setSaturation(SRPlugins::SRSaturation::SaturationTypes::typeMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
+    fInputSaturation[i].setSaturation(SR::DSP::SRSaturation::SaturationTypes::typeMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
 
     //... Commented out until implementation of oversampling
-    //fOverSamplerProcessL = std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturation[0].process, std::placeholders::_1);
-    //fOverSamplerProcessR = std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturation[1].process, std::placeholders::_1);
+    //fOverSamplerProcessL = std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[0].process, std::placeholders::_1);
+    //fOverSamplerProcessR = std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[1].process, std::placeholders::_1);
 
     // Oversampling
     mOverSampler[i].Reset();
@@ -540,8 +546,8 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
           // oversampled saturation processing
           //using namespace std::placeholders;
-          *out1 = mOverSampler[0].Process(*out1, std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturation[0], std::placeholders::_1));
-          *out2 = mOverSampler[1].Process(*out2, std::bind(&SRPlugins::SRSaturation::SRSaturation::process, fInputSaturation[1], std::placeholders::_1));
+          *out1 = mOverSampler[0].Process(*out1, std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[0], std::placeholders::_1));
+          *out2 = mOverSampler[1].Process(*out2, std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[1], std::placeholders::_1));
 
           // oversampled saturation processing if std::function<double(double)> is at hand
           //*out1 = mOverSamplerL.Process(*out1 * mSaturationDrive, [](sample input) {return std::tanh(input);});
@@ -1027,14 +1033,14 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kEqHfBell:
     mEqHfIsBell = GetParam(paramIdx)->Bool();
-    if (mEqHfIsBell == 1) { fEqHfFilter[0].setType(SRPlugins::SRFilters::biquad_peak); fEqHfFilter[1].setType(SRPlugins::SRFilters::biquad_peak); }
-    else { fEqHfFilter[0].setType(SRPlugins::SRFilters::biquad_highshelf); fEqHfFilter[1].setType(SRPlugins::SRFilters::biquad_highshelf); }
+    if (mEqHfIsBell == 1) { fEqHfFilter[0].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak); fEqHfFilter[1].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak); }
+    else { fEqHfFilter[0].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highshelf); fEqHfFilter[1].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highshelf); }
     break;
 
   case kEqLfBell:
     mEqLfIsBell = GetParam(paramIdx)->Bool();
-    if (mEqLfIsBell == 1) { fEqLfFilter[0].setType(SRPlugins::SRFilters::biquad_peak); fEqLfFilter[1].setType(SRPlugins::SRFilters::biquad_peak); }
-    else { fEqLfFilter[0].setType(SRPlugins::SRFilters::biquad_lowshelf); fEqLfFilter[1].setType(SRPlugins::SRFilters::biquad_lowshelf); }
+    if (mEqLfIsBell == 1) { fEqLfFilter[0].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak); fEqLfFilter[1].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak); }
+    else { fEqLfFilter[0].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_lowshelf); fEqLfFilter[1].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_lowshelf); }
     break;
 
   case kEqLfGain: mEqLfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLfFilter[0].setPeakGain(mEqLfGain); fEqLfFilter[1].setPeakGain(mEqLfGain); break;
@@ -1066,25 +1072,25 @@ void SRChannel::OnParamChange(int paramIdx) {
       mCompPeakRatio = 0.;
     }
     fCompressorPeak.setRatio(mCompPeakRatio);
-    mCompPeakAutoMakeup = SRPlugins::SRHelpers::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
+    mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakThresh:
     mCompPeakThresh = GetParam(paramIdx)->Value();
     fCompressorPeak.setThresh(mCompPeakThresh);
-    mCompPeakAutoMakeup = SRPlugins::SRHelpers::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
+    mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakAttack:
     mCompPeakAttack = GetParam(paramIdx)->Value();
     fCompressorPeak.setAttack(mCompPeakAttack);
-    mCompPeakAutoMakeup = SRPlugins::SRHelpers::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
+    mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakRelease:
     mCompPeakRelease = GetParam(paramIdx)->Value();
     fCompressorPeak.setRelease(mCompPeakRelease);
-    mCompPeakAutoMakeup = SRPlugins::SRHelpers::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
+    mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakKneeWidthDb:
@@ -1105,25 +1111,25 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kCompRmsRatio:
     mCompRmsRatio = (1 / GetParam(paramIdx)->Value());
     fCompressorRms.setRatio(mCompRmsRatio);
-    mCompRmsAutoMakeup = SRPlugins::SRHelpers::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
+    mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsThresh:
     mCompRmsThresh = GetParam(paramIdx)->Value();
     fCompressorRms.setThresh(mCompRmsThresh);
-    mCompRmsAutoMakeup = SRPlugins::SRHelpers::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
+    mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsAttack:
     mCompRmsAttack = GetParam(paramIdx)->Value();
     fCompressorRms.setAttack(mCompRmsAttack);
-    mCompRmsAutoMakeup = SRPlugins::SRHelpers::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
+    mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsRelease:
     mCompRmsRelease = GetParam(paramIdx)->Value();
     fCompressorRms.setRelease(mCompRmsRelease);
-    mCompRmsAutoMakeup = SRPlugins::SRHelpers::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
+    mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsKneeWidthDb: mCompRmsKneeWidthDb = GetParam(paramIdx)->Value(); fCompressorRms.setKnee(mCompRmsKneeWidthDb); break;

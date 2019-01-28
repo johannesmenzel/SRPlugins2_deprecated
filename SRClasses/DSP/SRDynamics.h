@@ -43,11 +43,11 @@
 #include <cmath>
 #include <vector>
 #include "SRFilters.h"
-#include "SRHelpers.h"
+#include "../Utils/SRHelpers.h"
 
 
-namespace SRPlugins {
-	namespace SRDynamics {
+namespace SR {
+	namespace DSP {
 
 
 		//-------------------------------------------------------------
@@ -183,7 +183,7 @@ namespace SRPlugins {
 			void process(double &in1, double &in2, double &extSC1, double &extSC2); // if eternal sidechain
 			void process(double &in1, double &in2, double sidechain);	// with stereo-linked key in
 		protected:
-			SRFilters::SRFiltersTwoPole fSidechainFilter1, fSidechainFilter2;
+			SRFiltersTwoPole fSidechainFilter1, fSidechainFilter2;
 		// private:
 
 			// transfer function
@@ -348,7 +348,7 @@ namespace SRPlugins {
 
 												// convert key to dB
 			sidechain += DC_OFFSET;				// add DC offset to avoid log( 0 )
-			double sidechainDb = SRPlugins::SRHelpers::AmpToDB(sidechain);	// convert linear -> dB
+			double sidechainDb = SR::Utils::AmpToDB(sidechain);	// convert linear -> dB
 
 												// threshold
 			double sampleOvershootDb = sidechainDb - mThreshDb;	// delta over threshold
@@ -391,7 +391,7 @@ namespace SRPlugins {
 			grRaw = (1 - grlimitsqrt < 0.) ? grRaw + ((1 - grlimitsqrt) * (grRaw - (mMaxGr*0.5))) / grlimit : grRaw;
 
 			mGrDb = grRaw;
-			grRaw = SRPlugins::SRHelpers::DBToAmp(grRaw);
+			grRaw = SR::Utils::DBToAmp(grRaw);
 			mGrLin = grRaw;
 			// output gain
 			in1 *= grRaw;	// apply gain reduction to input
@@ -780,7 +780,7 @@ namespace SRPlugins {
 			// runtime variables
 			double currentOvershootDb;			// over-threshold envelope (dB)
 
-			SRFilters::SRFiltersTwoPole fSidechainBandpass1, fSidechainBandpass2, fDynamicEqFilter1, fDynamicEqFilter2;
+			SRFiltersTwoPole fSidechainBandpass1, fSidechainBandpass2, fDynamicEqFilter1, fDynamicEqFilter2;
 
 		};
 		//-------------------------------------------------------------
@@ -817,7 +817,7 @@ namespace SRPlugins {
 
 												// convert key to dB
 			sidechain += DC_OFFSET;				// add DC offset to avoid log( 0 )
-			double sidechainDb = SRPlugins::SRHelpers::AmpToDB(sidechain);	// convert linear -> dB
+			double sidechainDb = SR::Utils::AmpToDB(sidechain);	// convert linear -> dB
 
 																			// threshold
 			double sampleOvershootDb = sidechainDb - mThreshDb;	// delta over threshold
@@ -854,7 +854,7 @@ namespace SRPlugins {
 
 
 			mGrDb = grRaw;
-			mGrLin = SRPlugins::SRHelpers::DBToAmp(grRaw);
+			mGrLin = SR::Utils::DBToAmp(grRaw);
 			fDynamicEqFilter1.setPeakGain(grRaw);
 			fDynamicEqFilter2.setPeakGain(grRaw);
 			in1 = fDynamicEqFilter1.process(in1);
@@ -868,4 +868,4 @@ namespace SRPlugins {
 
 
 	}	// end namespace SRDynamics
-}	// end namespace SRPlugins
+}	// end namespace SR

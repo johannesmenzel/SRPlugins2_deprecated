@@ -28,9 +28,9 @@
 */
 
 #include "SRDynamics.h"
-namespace SRPlugins {
+namespace SR {
 
-  namespace SRDynamics {
+  namespace DSP {
 
     //-------------------------------------------------------------
     // envelope detector
@@ -126,8 +126,8 @@ namespace SRPlugins {
       setSampleRate(samplerate);
       setKnee(kneeDb);
       setTopologyFeedback(feedback);
-      fSidechainFilter1.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
-      fSidechainFilter2.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
+      fSidechainFilter1.setFilter(SRFiltersTwoPole::FilterType::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
+      fSidechainFilter2.setFilter(SRFiltersTwoPole::FilterType::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
     }
 
     //-------------------------------------------------------------
@@ -151,8 +151,8 @@ namespace SRPlugins {
 
     void SRCompressor::initSidechainFilter(double sidechainFc) {
       this->mSidechainFc = sidechainFc;
-      fSidechainFilter1.setFilter(SRFilters::biquad_highpass, mSidechainFc, 0.7071, 0., getSampleRate());
-      fSidechainFilter2.setFilter(SRFilters::biquad_highpass, mSidechainFc, 0.7071, 0., getSampleRate());
+      fSidechainFilter1.setFilter(SRFiltersTwoPole::FilterType::biquad_highpass, mSidechainFc, 0.7071, 0., getSampleRate());
+      fSidechainFilter2.setFilter(SRFiltersTwoPole::FilterType::biquad_highpass, mSidechainFc, 0.7071, 0., getSampleRate());
     }
 
     void SRCompressor::setSidechainFilterFreq(double sidechainFc)
@@ -192,8 +192,8 @@ namespace SRPlugins {
       setKnee(kneeDb);
       setTopologyFeedback(feedback);
       mEnvelopeDetectorAverager.setTc(rmsWindowMs);
-      fSidechainFilter1.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
-      fSidechainFilter2.setFilter(SRFilters::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
+      fSidechainFilter1.setFilter(SRFiltersTwoPole::FilterType::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
+      fSidechainFilter2.setFilter(SRFiltersTwoPole::FilterType::biquad_highpass, sidechainFc, 0.7071, 0., samplerate);
     }
 
     //-------------------------------------------------------------
@@ -238,7 +238,7 @@ namespace SRPlugins {
     void SRLimiter::setThresh(double dB)
     {
       mThreshDb = dB;
-      mThreshLin = SRPlugins::SRHelpers::DBToAmp(dB);
+      mThreshLin = SR::Utils::DBToAmp(dB);
     }
 
     //-------------------------------------------------------------
@@ -298,7 +298,7 @@ namespace SRPlugins {
     void SRGate::setThresh(double dB)
     {
       mThreshDb = dB;
-      mThreshLin = SRPlugins::SRHelpers::DBToAmp(dB);
+      mThreshLin = SR::Utils::DBToAmp(dB);
     }
 
     //-------------------------------------------------------------
@@ -386,10 +386,10 @@ namespace SRPlugins {
     {
       this->mFilterFreq = freq;
       this->mFilterQ = q;
-      this->fSidechainBandpass1.setFilter(SRPlugins::SRFilters::biquad_bandpass, mFilterFreq, mFilterQ, 0.0, getSampleRate());
-      this->fSidechainBandpass2.setFilter(SRPlugins::SRFilters::biquad_bandpass, mFilterFreq, mFilterQ, 0.0, getSampleRate());
-      this->fDynamicEqFilter1.setFilter(SRPlugins::SRFilters::biquad_peak, mFilterFreq, mFilterQ, 0.0, getSampleRate());
-      this->fDynamicEqFilter2.setFilter(SRPlugins::SRFilters::biquad_peak, mFilterFreq, mFilterQ, 0.0, getSampleRate());
+      this->fSidechainBandpass1.setFilter(SRFiltersTwoPole::FilterType::biquad_bandpass, mFilterFreq, mFilterQ, 0.0, getSampleRate());
+      this->fSidechainBandpass2.setFilter(SRFiltersTwoPole::FilterType::biquad_bandpass, mFilterFreq, mFilterQ, 0.0, getSampleRate());
+      this->fDynamicEqFilter1.setFilter(SRFiltersTwoPole::FilterType::biquad_peak, mFilterFreq, mFilterQ, 0.0, getSampleRate());
+      this->fDynamicEqFilter2.setFilter(SRFiltersTwoPole::FilterType::biquad_peak, mFilterFreq, mFilterQ, 0.0, getSampleRate());
     }
 
     void SRDeesser::setFrequency(double freq)

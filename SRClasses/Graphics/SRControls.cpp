@@ -604,7 +604,9 @@ namespace SR {
           //for (int i = 0; i < mPlug->NParams(); i++) {
           //  enumNames[i] = mPlug->GetParamGroupName(i);
           //}
-          mPlug->DumpPresetSrcCode("preset.txt", mNamedParams);
+          WDL_String filename, path;
+          GetUI()->PromptForFile(filename, path, EFileAction::kFileSave, "txt");
+          mPlug->DumpPresetSrcCode(filename.Get(), mNamedParams);
         }
       }
     }

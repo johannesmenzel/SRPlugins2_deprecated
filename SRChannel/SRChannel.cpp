@@ -248,7 +248,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope fpr left and right channel");
 
     // Preset Menu
-    pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(bmpSRPluginsLogo.W()).GetReducedFromRight(bmpSRChannelLogo.W()), SRLayout.textPresetMenu), cPresetMenu, "UI");
+    pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(bmpSRPluginsLogo.W()).GetReducedFromRight(bmpSRChannelLogo.W()), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       const IRECT *rect;

@@ -337,7 +337,7 @@ namespace SR {
 
       // ----------------------------------------------------------------------------
 
- 
+
 
 
 
@@ -561,44 +561,50 @@ namespace SR {
         g.DrawText(mText, mDisp.Get(), mRECT);
       }
     }
+
     void SRPresetMenu::OnMouseDown(float x, float y, const IMouseMod& mod) {
       if (mod.R) {
         const char* pname = mPlug->GetPresetName(mPlug->GetCurrentPresetIdx());
         GetUI()->CreateTextEntry(*this, mText, mRECT, pname);
       }
       else {
-        doPopupMenu();
+        doPopupMenu(*GetUI());
       }
-
       //Redraw(); // seems to need this
       SetDirty();
     }
-    void SRPresetMenu::doPopupMenu() {
-      int numItems = mPlug->NPresets();
-      IPopupMenu menu;
 
-      IGraphics* gui = GetUI();
-
+    void SRPresetMenu::doPopupMenu(IGraphics& g) {
+      const int numPresets = mPlug->NPresets();
+      IPopupMenu menuMain;
       int currentPresetIdx = mPlug->GetCurrentPresetIdx();
 
-      for (int i = 0; i < numItems; i++) {
+      for (int i = 0; i < numPresets; i++) {
         const char* str = mPlug->GetPresetName(i);
         if (i == currentPresetIdx)
-          //menu.AddItem(str, -1, IPopupMenuItem::kChecked);
-          menu.AddItem(str, -1, IPopupMenu::Item::Flags::kChecked);
+          menuMain.AddItem(str, i, IPopupMenu::Item::Flags::kChecked);
         else
-          menu.AddItem(str);
+          menuMain.AddItem(str, i, IPopupMenu::Item::Flags::kNoFlags);
       }
+      menuMain.AddItem("Export Preset", numPresets);
 
-      menu.SetPrefix(2);
+      menuMain.SetPrefix(0);
 
-      if (gui->CreatePopupMenu(menu, mRECT)) {
-        int itemChosen = menu.GetChosenItemIdx();
+      if (g.CreatePopupMenu(menuMain, mRECT)) {
+        int itemChosen = menuMain.GetChosenItemIdx();
 
-        if (itemChosen > -1) {
+        if (itemChosen > -1 && itemChosen < numPresets) {
           mPlug->RestorePreset(itemChosen);
           mPlug->InformHostOfProgramChange();
           mPlug->DirtyParametersFromUI();
+        }
+        else {
+          //const int numParams = mPlug->NParams();
+          //const char** enumNames = new const char*[numParams];
+          //for (int i = 0; i < mPlug->NParams(); i++) {
+          //  enumNames[i] = mPlug->GetParamGroupName(i);
+          //}
+          mPlug->DumpPresetSrcCode("preset.txt", mNamedParams);
         }
       }
     }

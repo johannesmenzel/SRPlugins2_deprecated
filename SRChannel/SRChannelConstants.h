@@ -91,8 +91,89 @@ enum EParams
   kOutputBypass,
   kBypass,
   // Number of parameters
-  kNumParams,
+  kNumParams
 };
+
+// Plugin's parameters
+const char* paramIdxStr[kNumParams] = {
+  // Input Stage
+  "kInputGain",
+  "kSaturationDrive",
+  "kSaturationType",
+  "kSaturationAmount",
+  "kSaturationHarmonics",
+  "kSaturationSkew",
+  "kOversamplingRate",
+  // EQ Stage
+  // -- Filter
+  "kEqHpFreq",
+  "kEqLpFreq",
+  "kEqHpOrder",
+  //kEqLpOrder",
+  "kEqHfGain",
+  // -- EQ
+  "kEqHfFreq",
+  //kEqHfQ",
+  "kEqHfBell",
+  "kEqHmfGain",
+  "kEqHmfFreq",
+  "kEqHmfQ",
+  "kEqLmfGain",
+  "kEqLmfFreq",
+  "kEqLmfQ",
+  "kEqLfGain",
+  "kEqLfFreq",
+  //kEqLfQ",
+  "kEqLfBell",
+  "kEqAmount",
+  // RMS Compressor
+  "kCompRmsThresh",
+  "kCompRmsRatio",
+  "kCompRmsAttack",
+  "kCompRmsRelease",
+  "kCompRmsKneeWidthDb",
+  "kCompRmsMakeup",
+  "kCompRmsIsFeedback",
+  "kCompRmsIsExrSc",
+  // Peak Compressor
+  "kCompPeakThresh",
+  "kCompPeakRatio",
+  "kCompPeakAttack",
+  "kCompPeakRelease",
+  "kCompPeakKneeWidthDb",
+  "kCompPeakMakeup",
+  "kCompPeakSidechainFilterFreq",
+  "kCompPeakIsFeedback",
+  "kCompPeakIsExtSc",
+  // Compressor
+  "kCompIsParallel",
+  "kCompPeakRmsRatio",
+  "kCompDryWet",
+  // Deesser
+  "kDeesserFreq",
+  "kDeesserQ",
+  "kDeesserThresh",
+  "kDeesserRatio",
+  "kDeesserAttack",
+  "kDeesserRelease",
+  "kDeesserMakeup",
+  // Output Stage
+  "kPan",
+  "kPanFreq",
+  "kIsPanMonoLow",
+  "kLimiterThresh",
+  "kClipperThreshold",
+  "kAgc",
+  "kOutputGain",
+  // Bypasses
+  "kInputBypass",
+  "kEqBypass",
+  "kCompBypass",
+  "kOutputBypass",
+  "kBypass"
+};
+
+const char** namedParams = paramIdxStr;
 
 enum EAddParams {
   kPeakMeterValues = 0,

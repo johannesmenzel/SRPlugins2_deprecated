@@ -147,183 +147,128 @@ namespace SRPlugins {
     };
 
 
-    ///** Control to test drawing gradients with path based drawing backends
-    // *   @ingroup TestControls */
-    //class TestGradientControl : public IKnobControlBase
-    //{
-    //public:
-    //  TestGradientControl(IRECT rect, int paramIdx = kNoParameter)
-    //    : IKnobControlBase(rect, paramIdx)
-    //  {
-    //    SetTooltip("TestGradientControl");
-    //    RandomiseGradient();
-    //  }
 
-    //  void Draw(IGraphics& g) override
-    //  {
-    //    if (g.HasPathSupport())
-    //    {
-    //      double cr = mValue * (mRECT.H() / 2.0);
-    //      g.PathRoundRect(mRECT.GetPadded(-2), cr);
-    //      IFillOptions fillOptions;
-    //      IStrokeOptions strokeOptions;
-    //      fillOptions.mPreserve = true;
-    //      g.PathFill(mPattern, fillOptions);
-    //      g.PathStroke(IColor(255, 0, 0, 0), 3, strokeOptions);
-    //    }
-    //    else
-    //      g.DrawText(mText, "UNSUPPORTED", mRECT);
-    //  }
-
-    //  void OnMouseDown(float x, float y, const IMouseMod& mod) override
-    //  {
-    //    RandomiseGradient();
-    //    SetDirty(false);
-    //  }
-
-    //  void RandomiseGradient()
-    //  {
-    //    //IPattern tmp(kLinearPattern);
-    //    //tmp.SetTransform(1.0/mRECT.W(), 0, 0, 1.0/mRECT.W(), 1.0/mRECT.W()*-mRECT.L, 1.0/mRECT.W()*-mRECT.T);
-    //    IPattern tmp(kSolidPattern);
-
-    //    if (std::rand() & 0x100)
-    //      tmp = IPattern::CreateRadialGradient(mRECT.MW(), mRECT.MH(), mRECT.MH());
-    //    else
-    //      tmp = IPattern::CreateLinearGradient(mRECT.L, mRECT.MH(), mRECT.L + mRECT.W() * 0.5, mRECT.MH());
-
-    //    tmp.mExtend = (std::rand() & 0x10) ? ((std::rand() & 0x1000) ? kExtendNone : kExtendPad) : ((std::rand() & 0x1000) ? kExtendRepeat : kExtendReflect);
-
-    //    tmp.AddStop(IColor::GetRandomColor(), 0.0);
-    //    tmp.AddStop(IColor::GetRandomColor(), 0.1);
-    //    tmp.AddStop(IColor::GetRandomColor(), 0.4);
-    //    tmp.AddStop(IColor::GetRandomColor(), 0.6);
-    //    tmp.AddStop(IColor::GetRandomColor(), 1.0);
-
-    //    mPattern = tmp;
-    //  }
-
-    //private:
-    //  IPattern mPattern = IPattern(kLinearPattern);
-    //};
-
-
-
-    ///** A base class for mult-strip/track controls, such as multi-sliders, meters */
-    //class SRTrackControl : public IControl
-    //  , public IVectorBase
-    //{
-    //public:
-    //  SRTrackControl(IRECT bounds, int maxNTracks = 1, float minTrackValue = 0.f, float maxTrackValue = 1.f, const char* trackNames = 0, ...)
-    //    : IControl(bounds)
-    //    , mMaxNTracks(maxNTracks)
-    //    , mMinTrackValue(minTrackValue)
-    //    , mMaxTrackValue(maxTrackValue)
-    //  {
-    //    for (int i = 0; i < maxNTracks; i++)
-    //    {
-    //      mTrackData.Add(0.f);
-    //      mTrackBounds.Add(IRECT());
-    //    }
-
-    //    AttachIControl(this);
-    //  }
-
-    //  void MakeRects()
-    //  {
-    //    for (int ch = 0; ch < MaxNTracks(); ch++)
-    //    {
-    //      mTrackBounds.Get()[ch] = mRECT.GetPadded(-mOuterPadding).
-    //        SubRect(EDirection(!mDirection), MaxNTracks(), ch).
-    //        GetPadded(0, -mTrackPadding * (float)mDirection, -mTrackPadding * (float)!mDirection, -mTrackPadding);
-    //    }
-    //  }
-
-    //  void Draw(IGraphics& g) override
-    //  {
-    //    g.FillRect(GetColor(kBG), mRECT);
-
-    //    for (int ch = 0; ch < MaxNTracks(); ch++)
-    //    {
-    //      DrawTrack(g, mTrackBounds.Get()[ch], ch);
-    //    }
-
-    //    if (mDrawFrame)
-    //      DrawFrame(g);
-    //  }
-
-    //  int NTracks() { return mNTracks; }
-    //  int MaxNTracks() { return mMaxNTracks; }
-    //  void SetTrackData(int trackIdx, float val) { mTrackData.Get()[trackIdx] = Clip(val, mMinTrackValue, mMaxTrackValue); }
-    //  float* GetTrackData(int trackIdx) { return &mTrackData.Get()[trackIdx]; }
-    //  void SetAllTrackData(float val) { memset(mTrackData.Get(), (int)Clip(val, mMinTrackValue, mMaxTrackValue), mTrackData.GetSize() * sizeof(float)); }
-    //private:
-    //  virtual void DrawFrame(IGraphics& g)
-    //  {
-    //    g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
-    //  }
-
-    //  virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx)
-    //  {
-    //    DrawTrackBG(g, r, chIdx);
-    //    DrawTrackHandle(g, r, chIdx);
-
-    //    if (mDrawTrackFrame)
-    //      g.DrawRect(GetColor(kFR), r, nullptr, mFrameThickness);
-    //  }
-
-    //  virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx)
-    //  {
-    //    g.FillRect(GetColor(kSH), r);
-    //  }
-
-    //  virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
-    //  {
-    //    IRECT fillRect = r.FracRect(mDirection, *GetTrackData(chIdx));
-
-    //    g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
-
-    //    IRECT peakRect;
-
-    //    if (mDirection == kVertical)
-    //      peakRect = IRECT(fillRect.L, fillRect.T, fillRect.R, fillRect.T + mPeakSize);
-    //    else
-    //      peakRect = IRECT(fillRect.R - mPeakSize, fillRect.T, fillRect.R, fillRect.B);
-
-    //    DrawPeak(g, peakRect, chIdx);
-    //  }
-
-    //  virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
-    //  {
-    //    g.FillRect(GetColor(kHL), r);
-    //  }
-
-    //  void OnResize() override
-    //  {
-    //    MakeRects();
-    //  }
-
-    //protected:
-
-    //  EDirection mDirection = EDirection::kVertical;
-    //  int mMaxNTracks;
-    //  WDL_TypedBuf<float> mTrackData; // real values of sliders/meters
-    //  WDL_TypedBuf<IRECT> mTrackBounds;
-
-    //  int mNTracks = 1;
-
-    //  float mMinTrackValue;
-    //  float mMaxTrackValue;
-    //  float mOuterPadding = 10.;
-    //  float mTrackPadding = 2;
-    //  float mPeakSize = 5.;
-    //  bool mDrawTrackFrame = true;
-    //};
-
-    template <int MAXNC = 1, int QUEUE_SIZE = 1024>
-    class SRMeter : public IVTrackControlBase
+    /** A base class for mult-strip/track controls, such as multi-sliders, meters */
+    class SRTrackControlBase : public IControl
+      , public IVectorBase
     {
     public:
+      SRTrackControlBase(IRECT bounds, int maxNTracks = 1, float minTrackValue = 0.f, float maxTrackValue = 4.f, const char* trackNames = 0, ...)
+        : IControl(bounds)
+        , mMaxNTracks(maxNTracks)
+        , mMinTrackValue(minTrackValue)
+        , mMaxTrackValue(maxTrackValue)
+      {
+        for (int i = 0; i < maxNTracks; i++)
+        {
+          mTrackData.Add(0.f);
+          mTrackBounds.Add(IRECT());
+        }
+
+        AttachIControl(this);
+      }
+
+      void MakeRects()
+      {
+        for (int ch = 0; ch < MaxNTracks(); ch++)
+        {
+          mTrackBounds.Get()[ch] = mRECT.GetPadded(-mOuterPadding).
+            SubRect(EDirection(!mDirection), MaxNTracks(), ch).
+            GetPadded(0, -mTrackPadding * (float)mDirection, -mTrackPadding * (float)!mDirection, -mTrackPadding);
+        }
+      }
+
+      void Draw(IGraphics& g) override
+      {
+        g.FillRect(GetColor(kBG), mRECT);
+
+        for (int ch = 0; ch < MaxNTracks(); ch++)
+        {
+          DrawTrack(g, mTrackBounds.Get()[ch], ch);
+        }
+
+        if (mDrawFrame)
+          DrawFrame(g);
+      }
+
+      int NTracks() { return mNTracks; }
+      int MaxNTracks() { return mMaxNTracks; }
+      void SetTrackData(int trackIdx, float val) { mTrackData.Get()[trackIdx] = Clip(val, mMinTrackValue, mMaxTrackValue); }
+      float* GetTrackData(int trackIdx) { return &mTrackData.Get()[trackIdx]; }
+      void SetAllTrackData(float val) { memset(mTrackData.Get(), (int)Clip(val, mMinTrackValue, mMaxTrackValue), mTrackData.GetSize() * sizeof(float)); }
+    private:
+      virtual void DrawFrame(IGraphics& g)
+      {
+        g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
+      }
+
+      virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx)
+      {
+        DrawTrackBG(g, r, chIdx);
+        DrawTrackHandle(g, r, chIdx);
+
+        if (mDrawTrackFrame)
+          g.DrawRect(GetColor(kFR), r, nullptr, mFrameThickness);
+      }
+
+      virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx)
+      {
+        g.FillRect(GetColor(kSH), r);
+      }
+
+      virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
+      {
+        IRECT fillRect = r.FracRect(mDirection, *GetTrackData(chIdx));
+
+        g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
+
+        IRECT peakRect;
+
+        if (mDirection == kVertical)
+          peakRect = IRECT(fillRect.L, fillRect.T, fillRect.R, fillRect.T + mPeakSize);
+        else
+          peakRect = IRECT(fillRect.R - mPeakSize, fillRect.T, fillRect.R, fillRect.B);
+
+        DrawPeak(g, peakRect, chIdx);
+      }
+
+      virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
+      {
+        g.FillRect(GetColor(kHL), r);
+      }
+
+      void OnResize() override
+      {
+        MakeRects();
+      }
+
+    protected:
+
+      EDirection mDirection = EDirection::kVertical;
+      int mMaxNTracks;
+      WDL_TypedBuf<float> mTrackData; // real values of sliders/meters
+      WDL_TypedBuf<IRECT> mTrackBounds;
+
+      int mNTracks = 1;
+
+      float mMinTrackValue;
+      float mMaxTrackValue;
+      float mOuterPadding = 10.;
+      float mTrackPadding = 2;
+      float mPeakSize = 5.;
+      bool mDrawTrackFrame = true;
+    };
+
+    // End TrackControl class
+
+
+    // METER CLASS
+    // ------------
+
+    template <int MAXNC = 1, int QUEUE_SIZE = 1024>
+    class SRMeter : public SRTrackControlBase {
+    public:
+
       static constexpr int kUpdateMessage = 0;
 
       /** Data packet */
@@ -331,25 +276,21 @@ namespace SRPlugins {
       {
         int nchans = MAXNC;
         float vals[MAXNC] = {};
-
-        bool AboveThreshold()
-        {
+        bool AboveThreshold() {
           static const float threshold = (float)DBToAmp(-90.);
-
           float sum = 0.f;
-
-          for (int i = 0; i < MAXNC; i++)
-          {
+          for (int i = 0; i < MAXNC; i++) {
             sum += vals[i];
           }
-
           return std::abs(sum) > threshold;
         }
       };
 
       /** Used on the DSP side in order to queue sample values and transfer data to low priority thread. */
-      class SRMeterBallistics
-      {
+      class SRMeterBallistics {
+
+
+
       public:
         SRMeterBallistics(int controlTag)
           : mControlTag(controlTag)
@@ -360,16 +301,13 @@ namespace SRPlugins {
         {
           Data d;
 
-          for (auto s = 0; s < nFrames; s++)
-          {
-            for (auto c = 0; c < MAXNC; c++)
-            {
+          for (auto s = 0; s < nFrames; s++) {
+            for (auto c = 0; c < MAXNC; c++) {
               d.vals[c] += std::fabs((float)inputs[c][s]);
             }
           }
 
-          for (auto c = 0; c < MAXNC; c++)
-          {
+          for (auto c = 0; c < MAXNC; c++) {
             d.vals[c] /= (float)nFrames;
           }
 
@@ -380,8 +318,7 @@ namespace SRPlugins {
         }
 
         // this must be called on the main thread - typically in MyPlugin::OnIdle()
-        void TransmitData(IEditorDelegate& dlg)
-        {
+        void TransmitData(IEditorDelegate& dlg) {
           while (mQueue.ElementsAvailable())
           {
             Data d;
@@ -396,59 +333,105 @@ namespace SRPlugins {
         IPlugQueue<Data> mQueue{ QUEUE_SIZE };
       };
 
-      SRMeter(IRECT bounds, bool drawFromTop = false, bool drawInverted = false, bool drawDb = true, double minDb = 90., double maxDb = 0., double shape = 1.0, int numLabelSteps = 9, const char* trackNames = 0, ...)
-        : IVTrackControlBase(bounds, MAXNC, 0, 1., trackNames)
+      struct LabelFrames
+      {
+        IRECT rectLabel = IRECT();
+        WDL_String str = WDL_String();
+        void setLabelFrame(IRECT r, float val) {
+          str.SetFormatted(MAX_PARAM_DISPLAY_LEN, "%d", static_cast<int>(roundf(val)));
+          rectLabel = r;
+        }
+      };
+
+      // If you want to create a meter with decibel values
+      SRMeter(IRECT bounds, bool drawFromTop = false, bool drawInverted = false, double minDb = 90., double maxDb = 0., double shape = 1.0, int markStep = 1, int labelStep = 6, const char* trackNames = 0, ...)
+        : SRTrackControlBase(bounds, MAXNC, 0, 1., trackNames)
         , mDrawFromTop(drawFromTop)
         , mDrawInverted(drawInverted)
-        , mDrawDb(drawDb)
         , mMinDb(minDb)
         , mMaxDb(maxDb)
         , mShape(shape)
-        , mNumLabelSteps(numLabelSteps)
+        , mMarkStep(markStep)
+        , mLabelStep(labelStep)
         , mText(IText(14, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignMiddle, 0, IText::kQualityClearType))
+        , mNumLines(int(maxDb - minDb))
+        , mNumLabels(int((maxDb - minDb) / labelStep))
+        , rectLabelFrame(IRECT())
+        //, mPattern(kLinearPattern)
+        , mDrawDb(true)
+      {
+        mLabelFrames = new LabelFrames[mNumLabels + 1];
+        mLineCoord = new float[mNumLines + 1];
+      }
 
+      // If you want to create a meter with normalized values 0..1
+      SRMeter(IRECT bounds, bool drawFromTop = false, bool drawInverted = false, const char* trackNames = 0, ...)
+        : IVTrackControlBase(bounds, MAXNC, 0, 1., trackNames)
+        , mDrawFromTop(drawFromTop)
+        , mDrawInverted(drawInverted)
+        , mText(IText(14, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignMiddle, 0, IText::kQualityClearType))
+        //, mPattern(kLinearPattern)
+        , mDrawDb(false)
       {
       }
+
+
 
       void OnResize() override {
         MakeRects();
-        mText.mSize = mRECT.W() * 0.25f;
+        mText.mSize = int(mRECT.W() * 0.22f);
       };
+
       //  void OnMouseDblClick(float x, float y, const IMouseMod& mod) override;
       //  void OnMouseDown(float x, float y, const IMouseMod& mod) override;
 
-      void Draw(IGraphics& g) override
-      {
-        g.FillRect(GetColor(kBG), mRECT);
-
-        for (int ch = 0; ch < MaxNTracks(); ch++)
-        {
-          DrawTrack(g, mTrackBounds.Get()[ch], ch);
-        }
-
-        //if (mDrawFrame)
-        //  DrawFrame(g);
-
-        const IRECT rectLabelFrame = mRECT.GetPadded(-mOuterPadding - mTrackPadding);
-        for (int i = 0; i <= mNumLabelSteps; i++) {
-          const float val = mMinDb + ((float)i / (float)mNumLabelSteps) * (mMaxDb - mMinDb);
-          const float vPosition = std::pow((val - mMinDb) / (mMaxDb - mMinDb), 1.0 / mShape);
-          const IRECT labelRECT = IRECT(rectLabelFrame.L, -mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H(), rectLabelFrame.R, mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H());
-          WDL_String str;
-          str.SetFormatted(MAX_PARAM_DISPLAY_LEN, "%d", static_cast<int>(roundf(val)));
-          //str.SetFormatted(MAX_PARAM_DISPLAY_LEN, "%.*f", 0, val);
-          g.DrawText(mText, str.Get(), labelRECT);
-        }
-      }
-
-      void MakeRects()
-      {
-        for (int ch = 0; ch < MaxNTracks(); ch++)
-        {
+      void MakeRects() {
+        for (int ch = 0; ch < MaxNTracks(); ch++) {
           mTrackBounds.Get()[ch] = mRECT.GetPadded(-mOuterPadding).
             SubRect(EDirection(!mDirection), MaxNTracks(), ch).
             GetPadded(0, -mTrackPadding, -mTrackPadding * (float)!mDirection, -mTrackPadding * (float)mDirection);
         }
+
+        if (mDrawDb) {
+          rectLabelFrame = mRECT.GetPadded(-mOuterPadding);
+          for (int i = 0; i <= mNumLabels; i++) {
+            const float val = std::roundf(mMinDb + ((float)i / (float)mNumLabels) * (mMaxDb - mMinDb));
+            const float vPosition = std::pow((val - mMinDb) / (mMaxDb - mMinDb), 1.0f / mShape);
+            mLabelFrames[i].setLabelFrame(
+              IRECT(rectLabelFrame.L, -mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H(), rectLabelFrame.R, mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H()),
+              val
+            );
+          }
+          for (int i = 0; i <= mNumLines; i++) {
+            const float val = std::roundf(mMinDb + ((float)i / (float)mNumLines) * (mMaxDb - mMinDb));
+            const float vPosition = std::pow((val - mMinDb) / (mMaxDb - mMinDb), 1.0f / mShape);
+            mLineCoord[i] = rectLabelFrame.B - rectLabelFrame.H() * vPosition;
+          }
+        }
+
+      }
+
+      void Draw(IGraphics& g) override {
+        // Don't want to fill with transparent IColor
+        // g.FillRect(GetColor(kBG), mRECT);
+
+        for (int ch = 0; ch < MaxNTracks(); ch++) {
+          DrawTrack(g, mTrackBounds.Get()[ch], ch);
+        }
+
+        // Don't want to draw a Frame
+        //if (mDrawFrame)
+        //  DrawFrame(g);
+
+        if (mDrawDb) {
+          for (int i = 0; i <= mNumLabels; i++) {
+            g.DrawText(mText, mLabelFrames[i].str.Get(), mLabelFrames[i].rectLabel);
+          }
+          for (int i = 0; i <= mNumLines; i++) {
+            g.DrawLine(GetColor(kHL), rectLabelFrame.L, mLineCoord[i], rectLabelFrame.R, mLineCoord[i]);
+          }
+        }
+
       }
 
       //virtual void DrawFrame(IGraphics& g)
@@ -456,61 +439,46 @@ namespace SRPlugins {
       //  //g.DrawRect(GetColor(kFR), mRECT, nullptr, mFrameThickness);
       //}
 
-      virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx)
-      {
+      virtual void DrawTrack(IGraphics& g, IRECT& r, int chIdx) {
         DrawTrackBG(g, r, chIdx);
         DrawTrackHandle(g, r, chIdx);
-
         //if (mDrawTrackFrame)
         //  g.DrawRect(GetColor(kBG), r, nullptr, mFrameThickness);
       }
 
-      virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx)
-      {
+      virtual void DrawTrackBG(IGraphics& g, IRECT& r, int chIdx) {
         g.FillRect(GetColor(kHL), r);
       }
 
-      virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx)
-      {
+      virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx) {
         IRECT fillRect;
         double value = *GetTrackData(chIdx);
         if (mDrawDb) value = std::pow((AmpToDB(value) - mMinDb) / (mMaxDb - mMinDb), 1.0 / mShape);
-        if (!mDrawInverted) {
-          fillRect = r.FracRect(mDirection, value, mDrawFromTop); // HERE the value rect is drawn!
-        }
-        else {
-          fillRect = r.FracRect(mDirection, (1. - value), mDrawFromTop); // HERE the value rect is drawn!
-        }
-
+        fillRect = r.FracRect(mDirection, (!mDrawInverted) ? value : 1. - value, mDrawFromTop); // HERE the value rect is drawn!
         g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
 
         IRECT peakRect;
-
         if (mDirection == kVertical)
-          peakRect = IRECT(fillRect.L, fillRect.T, fillRect.R, fillRect.T + mPeakSize);
+          peakRect = (!mDrawFromTop) ? fillRect.GetFromTop(mPeakSize) : fillRect.GetFromBottom(mPeakSize);
         else
-          peakRect = IRECT(fillRect.R - mPeakSize, fillRect.T, fillRect.R, fillRect.B);
-
+          peakRect = (!mDrawFromTop) ? fillRect.GetFromRight(mPeakSize) : fillRect.GetFromLeft(mPeakSize);
         DrawPeak(g, peakRect, chIdx);
 
 
       }
 
-      virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx)
-      {
+      virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx) {
         g.FillRect(GetColor(kX1), r);
       }
 
-      void OnMsgFromDelegate(int messageTag, int dataSize, const void* pData) override
-      {
+      void OnMsgFromDelegate(int messageTag, int dataSize, const void* pData) override {
         IByteStream stream(pData, dataSize);
 
         int pos = 0;
         Data data;
         pos = stream.Get(&data.nchans, pos);
 
-        while (pos < stream.Size())
-        {
+        while (pos < stream.Size()) {
           for (auto i = 0; i < data.nchans; i++) {
             pos = stream.Get(&data.vals[i], pos);
             float* pVal = GetTrackData(i);
@@ -520,20 +488,30 @@ namespace SRPlugins {
 
         SetDirty(false);
       }
+
+
+
+
     protected:
       bool mDrawFromTop;
       bool mDrawInverted;
       bool mDrawDb;
       double mMinDb;
       double mMaxDb;
-      int mNumLabelSteps;
+      int mLabelStep;
+      int mMarkStep;
+      int mNumLabels;
+      int mNumLines;
       double mShape;
       IText mText;
+      LabelFrames* mLabelFrames;
+      float* mLineCoord;
+      IRECT rectLabelFrame;
+      //IPattern mPattern;
     };
 
     /** A basic control to fill a rectangle with a color or gradient */
-    class SRPanel : public IControl
-    {
+    class SRPanel : public IControl {
     public:
       SRPanel(IRECT bounds, const IColor& color, bool drawFrame = false)
         : IControl(bounds, kNoParameter)
@@ -551,22 +529,21 @@ namespace SRPlugins {
         mIgnoreMouse = true;
       }
 
-      void Draw(IGraphics& g) override
-      {
-        if (g.HasPathSupport())
-        {
+      void Draw(IGraphics& g) override {
+        if (g.HasPathSupport()) {
           g.PathRect(mRECT);
           g.PathFill(mPattern);
         }
-        else
+        else {
           g.FillRect(mPattern.GetStop(0).mColor, mRECT);
+        }
 
-        if (mDrawFrame)
+        if (mDrawFrame) {
           g.DrawRect(COLOR_LIGHT_GRAY, mRECT);
+        }
       }
 
-      void SetPattern(const IPattern& pattern)
-      {
+      void SetPattern(const IPattern& pattern) {
         mPattern = pattern;
         SetDirty(false);
       }

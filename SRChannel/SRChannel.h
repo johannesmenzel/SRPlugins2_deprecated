@@ -43,6 +43,7 @@ private:
 
   // GLOBAL members
   double mSampleRate;
+  int mNumInChannels, mNumOutChannels;
   // GAIN members
   double mInputGain, mOutputGain;
   // SAT members
@@ -120,8 +121,8 @@ private:
   double aveOut;
   double diffInOut;
 
-  IVMeterControl<2>::IVMeterBallistics mInputMeterBallistics{ cInputMeter };
+  SRPlugins::SRControls::SRMeter<2>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
   SRPlugins::SRControls::SRMeter<3>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
-  IVMeterControl<2>::IVMeterBallistics mOutputMeterBallistics{ cOutputMeter };
+  SRPlugins::SRControls::SRMeter<2>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
   IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
 };

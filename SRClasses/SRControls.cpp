@@ -544,5 +544,8 @@ namespace SRPlugins {
         g.DrawText(mText, mStr.Get(), mRECT);
     }
 
+
+
+
   } // End namespace SRControls
 } // End namespace SRPlugins

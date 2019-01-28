@@ -230,9 +230,9 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new IPanelControl(rectMeter, patternPanel, true), cPanelMeter, "UI");
 
     // METERS peak and gain reduction
-    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 0), false, false, true, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 12, "In Left", "In Right"), cInputMeter, "Meter");
-    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, true, -18., 0., SRPlugins::SRHelpers::SetShapeCentered(-18., 0., -9., .5), 6, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
-    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 2), false, false, true, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 12, "Out Left", "Out Right"), cOutputMeter, "Meter");
+    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 0), false, false, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
+    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, -18., 0., SRPlugins::SRHelpers::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
+    pGraphics->AttachControl(new SRPlugins::SRControls::SRMeter<2>(rectMeter.SubRectHorizontal(3, 2), false, false, -60., 12., SRPlugins::SRHelpers::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
     // Set Tooltip for these
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
@@ -441,7 +441,7 @@ void SRChannel::InitEffects() {
   fDeesser.setDeesser(mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserFreq / mSampleRate, mDeesserQ, 10., mSampleRate);
   fDeesser.initRuntime();
 
-
+  // Meter
 
   // Name channels
   //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
@@ -818,7 +818,8 @@ void SRChannel::OnIdle() {
 
 void SRChannel::OnReset() {
   mSampleRate = GetSampleRate();
-  const int nChans = NChannelsConnected(kOutput);
+  mNumInChannels = NChannelsConnected(kInput);
+  mNumOutChannels = NChannelsConnected(kOutput);
   InitEffects();
   circularBufferPointer = 0;
 }

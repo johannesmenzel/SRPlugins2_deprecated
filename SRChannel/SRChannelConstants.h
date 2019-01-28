@@ -199,6 +199,7 @@ enum ECtrlTags {
   cPanelPost,
   cPanelOutput,
   cPanelMeter,
+  cPresetMenu,
   cInputMeter,
   cGrMeter,
   cOutputMeter,

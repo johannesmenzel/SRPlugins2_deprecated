@@ -1,6 +1,7 @@
 #pragma once
 #include "IPlug_include_in_plug_hdr.h"
 #include "IControl.h"
+#include "IPlugPluginBase.h"
 #include "../Utils/SRHelpers.h"
 // For meter, see IVMeterControl.h
 #include "IPlugQueue.h"
@@ -551,6 +552,28 @@ namespace SR {
     private:
       IPattern mPattern;
       bool mDrawFrame;
+    };
+
+
+
+    // Preset Menu
+// -----------------------------------
+
+    class SRPresetMenu : public IControl {
+    public:
+      SRPresetMenu(IPlug *pPlug, IRECT bounds, IText pText)
+        : IControl(bounds, -1) {
+        mTextEntryLength = MAX_PRESET_NAME_LEN - 3;
+        mText = pText;
+        mPlug = pPlug;
+      }
+      void Draw(IGraphics& g) override;
+      void OnMouseDown(float x, float y, const IMouseMod& mod) override;
+      void doPopupMenu();
+      void TextFromTextEntry(const char* txt);
+    private:
+      WDL_String mDisp;
+      IPlug* mPlug;
     };
 
   }

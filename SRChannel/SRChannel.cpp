@@ -235,6 +235,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new IPanelControl(rectOutput, patternPanel, true), cPanelOutput, "UI");
     pGraphics->AttachControl(new IPanelControl(rectMeter, patternPanel, true), cPanelMeter, "UI");
 
+
     // METERS peak and gain reduction
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2>(rectMeter.SubRectHorizontal(3, 0), false, false, -60., 12., SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRMeter<3>(rectMeter.SubRectHorizontal(3, 1), true, true, -18., 0., SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
@@ -245,6 +246,9 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->GetControlWithTag(cGrMeter)->SetTooltip("Gain reduction meter for RMS, peak and deessing compressors");
     pGraphics->GetControlWithTag(cOutputMeter)->SetTooltip("Output peak meter for left and right channel");
     pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope fpr left and right channel");
+
+    // Preset Menu
+    pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(bmpSRPluginsLogo.W()).GetReducedFromRight(bmpSRChannelLogo.W()), SRLayout.textPresetMenu), cPresetMenu, "UI");
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       const IRECT *rect;

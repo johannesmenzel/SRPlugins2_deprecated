@@ -547,5 +547,71 @@ namespace SR {
 
 
 
+
+    void SRPresetMenu::Draw(IGraphics& g) {
+      int pNumber = mPlug->GetCurrentPresetIdx();
+
+      mDisp.SetFormatted(32, "%02d: %s", pNumber + 1, mPlug->GetPresetName(pNumber));
+
+      IColor colorBg = IColor(50, 0, 0, 0);
+      g.FillRect(colorBg, mRECT);
+
+      if (mDisp.Get())
+      {
+        g.DrawText(mText, mDisp.Get(), mRECT);
+      }
+    }
+    void SRPresetMenu::OnMouseDown(float x, float y, const IMouseMod& mod) {
+      if (mod.R) {
+        const char* pname = mPlug->GetPresetName(mPlug->GetCurrentPresetIdx());
+        GetUI()->CreateTextEntry(*this, mText, mRECT, pname);
+      }
+      else {
+        doPopupMenu();
+      }
+
+      //Redraw(); // seems to need this
+      SetDirty();
+    }
+    void SRPresetMenu::doPopupMenu() {
+      int numItems = mPlug->NPresets();
+      IPopupMenu menu;
+
+      IGraphics* gui = GetUI();
+
+      int currentPresetIdx = mPlug->GetCurrentPresetIdx();
+
+      for (int i = 0; i < numItems; i++) {
+        const char* str = mPlug->GetPresetName(i);
+        if (i == currentPresetIdx)
+          //menu.AddItem(str, -1, IPopupMenuItem::kChecked);
+          menu.AddItem(str, -1, IPopupMenu::Item::Flags::kChecked);
+        else
+          menu.AddItem(str);
+      }
+
+      menu.SetPrefix(2);
+
+      if (gui->CreatePopupMenu(menu, mRECT)) {
+        int itemChosen = menu.GetChosenItemIdx();
+
+        if (itemChosen > -1) {
+          mPlug->RestorePreset(itemChosen);
+          mPlug->InformHostOfProgramChange();
+          mPlug->DirtyParametersFromUI();
+        }
+      }
+    }
+    void SRPresetMenu::TextFromTextEntry(const char * txt) {
+      WDL_String safeName;
+      safeName.Set(txt, MAX_PRESET_NAME_LEN);
+
+      mPlug->ModifyCurrentPreset(safeName.Get());
+      mPlug->InformHostOfProgramChange();
+      mPlug->DirtyParametersFromUI();
+      SetDirty(false);
+    }
+
+
   } // End namespace SRControls
 } // End namespace SR

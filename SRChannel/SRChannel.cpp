@@ -1,4 +1,7 @@
+//#ifndef SRCHANNEL_H
 #include "SRChannel.h"
+//#endif // !SRCHANNEL_H
+
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
 #define _USE_MATH_DEFINES
@@ -8,10 +11,14 @@
 #include <functional>
 
 SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
-  : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo),
-  mEqHfQ(stQ),
-  mEqLfQ(stQ),
-  mEqAmount(1.)
+  : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
+  , mEqHfQ(stQ)
+  , mEqLfQ(stQ)
+  , mEqAmount(1.)
+  , mAutoGain(1.)
+  , mCompPeakAutoMakeup(1.)
+  , mCompRmsAutoMakeup(1.)
+  , mAgcTrigger(false)
 {
   // Initialize Parameters
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
@@ -97,13 +104,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   }
   OnReset();
 
-  // Make Presets
-  MakeDefaultPreset("Default", 1);
-  MakePresetFromNamedParams("Kick", 3,
-    kEqLfFreq, 60.,
-    kEqLfBell, true,
-    kEqLfGain, 5.0
-  );
+  MakePresets();
 
 
   // GRAPHICS func
@@ -371,10 +372,10 @@ void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
   switch (paramIdx)
   {
   case kCompIsParallel:
-  case kEqBypass: 
-  case kCompBypass: 
-  case kInputBypass: 
-  case kOutputBypass: 
+  case kEqBypass:
+  case kCompBypass:
+  case kInputBypass:
+  case kOutputBypass:
   case kBypass:
     GrayOutControls();
     break;
@@ -395,6 +396,7 @@ void SRChannel::InitEffects() {
   // Init gain and pan
   fInputGain.initGain(mInputGain, mInputGain, double(mSampleRate) / 10., false);
   fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate) / 10., false);
+  fAutoGain.initGain(mAutoGain, mAutoGain, double(mSampleRate) / 10., false);
   fPan.initPan(SR::DSP::typeSinusodial, mPan, true);
 
   for (int i = 0; i < NChannelsConnected(kOutput); i++) {
@@ -453,6 +455,22 @@ void SRChannel::InitEffects() {
 
   // Meter
 
+  // Circular Buffer
+
+  //circularBufferInL = new IPlugQueue<sample>(circularBufferLenght);
+  //circularBufferInR = new IPlugQueue<sample>(circularBufferLenght);
+  //circularBufferOutL = new IPlugQueue<sample>(circularBufferLenght);
+  //circularBufferOutR = new IPlugQueue<sample>(circularBufferLenght);
+  //circularBufferInL->WasEmpty();
+  //circularBufferInR->WasEmpty();
+  //circularBufferOutL->WasEmpty();
+  //circularBufferOutR->WasEmpty();
+
+  //mCircularBuffer[0].Resize(circularBufferLenght, false);
+  //mCircularBuffer[1].Resize(circularBufferLenght, false);
+  //mCircularBuffer[2].Resize(circularBufferLenght, false);
+  //mCircularBuffer[3].Resize(circularBufferLenght, false);
+
   // Name channels
   //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
   //{
@@ -473,8 +491,6 @@ void SRChannel::InitEffects() {
 
 void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
-  const int nChans = NOutChansConnected();
-
   //for (int s = 0; s < nFrames; s++) {
   //  for (int c = 0; c < nChans; c++) {
   //    outputs[c][s] = inputs[c][s];
@@ -488,17 +504,21 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   sample* out1 = outputs[0];
   sample* out2 = outputs[1];
 
-  sample *peakGrMeterValue = new sample[nFrames]; // Should be nFrames
-  sample *rmsGrMeterValue = new sample[nFrames];
-  sample *deesserGrMeterValue = new sample[nFrames];
+  sample* in1MeterValue = new sample[nFrames];
+  sample* in2MeterValue = new sample[nFrames];
+  sample* out1MeterValue = new sample[nFrames];
+  sample* out2MeterValue = new sample[nFrames];
+  sample* grPeakMeterValue = new sample[nFrames];
+  sample* grRmsMeterValue = new sample[nFrames];
+  sample* grDeessMeterValue = new sample[nFrames];
 
-  sample* peakGrMeterValues = peakGrMeterValue;
-  sample* rmsGrMeterValues = rmsGrMeterValue;
-  sample* deesserGrMeterValues = deesserGrMeterValue;
-  sample* grMeterValue[3] = { peakGrMeterValues, rmsGrMeterValues, deesserGrMeterValues };
-  sample** grMeterValues = grMeterValue;
+  sample* inMeterChannel[2] = { in1MeterValue, in2MeterValue };
+  sample* outMeterChannel[2] = { out1MeterValue, out2MeterValue };
+  sample* grMeterChannel[3] = { grPeakMeterValue, grRmsMeterValue, grDeessMeterValue };
 
-
+  sample** inMeterValues = inMeterChannel;
+  sample** outMeterValues = outMeterChannel;
+  sample** grMeterValues = grMeterChannel;
 
 
   // Begin Processing per Frame
@@ -529,13 +549,17 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       }
       fInputGain.process(*out1, *out2);
 
+      // Fill circular buffer with input gain values
+      //circularBufferInL[circularBufferPointer] = *out1;
+      //circularBufferInR[circularBufferPointer] = *out2;
 
-      circularBufferInL[circularBufferPointer] = *out1; // Fill circular buffer with input gain values
-      circularBufferInR[circularBufferPointer] = *out2;
+
 
       // ----------------
       // End Pre Sections
 
+      in1MeterValue[s] = *out1;
+      in2MeterValue[s] = *out2;
 
 
       // INPUT SECTION
@@ -771,11 +795,13 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       // -------------
 
       // Fill circular buffer with output gain values
-      circularBufferOutL[circularBufferPointer] = *out1;
-      circularBufferOutR[circularBufferPointer] = *out2;
+      //circularBufferOutL[circularBufferPointer] = *out1;
+      //circularBufferOutR[circularBufferPointer] = *out2;
+
 
       // Output Gain
       fOutputGain.process(*out1, *out2);
+      fAutoGain.process(*out1, *out2);
       //if (mOutputGain != 1.) {
       //	*out1 *= mOutputGain;
       //	*out2 *= mOutputGain;
@@ -794,11 +820,14 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // -------------------------
     // End of global bypass test
 
-    peakGrMeterValue[s] = fCompressorPeak.getGrLin();
-    rmsGrMeterValue[s] = fCompressorRms.getGrLin();
-    deesserGrMeterValue[s] = fDeesser.getGrLin();
+    out1MeterValue[s] = *out1;
+    out2MeterValue[s] = *out2;
+    grPeakMeterValue[s] = fCompressorPeak.getGrLin();
+    grRmsMeterValue[s] = fCompressorRms.getGrLin();
+    grDeessMeterValue[s] = fDeesser.getGrLin();
 
     (circularBufferPointer >= circularBufferLenght - 1) ? circularBufferPointer = 0 : circularBufferPointer++;
+
 
   }
   // ----------------------------------------------------------------
@@ -806,16 +835,30 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
 
 
+  if (mAgc && mAgcTrigger) {
+    double sumIn = 0.; double sumOut = 0.;
+    for (int s = 0; s < nFrames; s++) {
+      sumIn += std::fabs(inMeterValues[0][s]) + std::fabs(inMeterValues[1][s]);
+      sumOut += std::fabs(outMeterValues[0][s]) + std::fabs(outMeterValues[1][s]);
+    }
+    double diff = sumIn / sumOut;
+    if (mAgc) fAutoGain.setGain(diff);
+    mAgcTrigger = false;
+  }
 
-
-  mInputMeterBallistics.ProcessBlock(inputs, nFrames);
+  mInputMeterBallistics.ProcessBlock(inMeterValues, nFrames);
   mGrMeterBallistics.ProcessBlock(grMeterValues, nFrames);
-  mOutputMeterBallistics.ProcessBlock(outputs, nFrames);
-  mScopeBallistics.ProcessBlock(outputs, nFrames);
+  mOutputMeterBallistics.ProcessBlock(outMeterValues, nFrames);
+  mScopeBallistics.ProcessBlock(outMeterValues, nFrames);
 
-  delete[] peakGrMeterValue;
-  delete[] rmsGrMeterValue;
-  delete[] deesserGrMeterValue;
+  delete[] grPeakMeterValue;
+  delete[] grRmsMeterValue;
+  delete[] grDeessMeterValue;
+  delete[] in1MeterValue;
+  delete[] in2MeterValue;
+  delete[] out1MeterValue;
+  delete[] out2MeterValue;
+
 }
 
 
@@ -836,6 +879,8 @@ void SRChannel::OnReset() {
 
 void SRChannel::OnParamChange(int paramIdx) {
   mSampleRate = GetSampleRate();
+
+  if (mAgc) mAgcTrigger = true;
 
   switch (paramIdx)
   {
@@ -1076,25 +1121,25 @@ void SRChannel::OnParamChange(int paramIdx) {
       mCompPeakRatio = 0.;
     }
     fCompressorPeak.setRatio(mCompPeakRatio);
-    mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
+    //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakThresh:
     mCompPeakThresh = GetParam(paramIdx)->Value();
     fCompressorPeak.setThresh(mCompPeakThresh);
-    mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
+    //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakAttack:
     mCompPeakAttack = GetParam(paramIdx)->Value();
     fCompressorPeak.setAttack(mCompPeakAttack);
-    mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
+    //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakRelease:
     mCompPeakRelease = GetParam(paramIdx)->Value();
     fCompressorPeak.setRelease(mCompPeakRelease);
-    mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
+    //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakKneeWidthDb:
@@ -1115,25 +1160,25 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kCompRmsRatio:
     mCompRmsRatio = (1 / GetParam(paramIdx)->Value());
     fCompressorRms.setRatio(mCompRmsRatio);
-    mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
+    //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsThresh:
     mCompRmsThresh = GetParam(paramIdx)->Value();
     fCompressorRms.setThresh(mCompRmsThresh);
-    mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
+    //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsAttack:
     mCompRmsAttack = GetParam(paramIdx)->Value();
     fCompressorRms.setAttack(mCompRmsAttack);
-    mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
+    //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsRelease:
     mCompRmsRelease = GetParam(paramIdx)->Value();
     fCompressorRms.setRelease(mCompRmsRelease);
-    mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
+    //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsKneeWidthDb: mCompRmsKneeWidthDb = GetParam(paramIdx)->Value(); fCompressorRms.setKnee(mCompRmsKneeWidthDb); break;
@@ -1165,30 +1210,25 @@ void SRChannel::OnParamChange(int paramIdx) {
     // ----------------------
 
   case kAgc:
-    //if (circularBufferInL[circularBufferLenght - 1]) {
-    //  sumIn = 0.;
-    //  sumOut = 0.;
-    //  aveIn = 0.;
-    //  aveOut = 0.;
-    //  diffInOut = 0.;
-    //  for (int i = 0; i <= circularBufferLenght - 1; i++) {
-    //    sumIn += fabs(circularBufferInL[i]) + fabs(circularBufferInR[i]);
-    //    sumOut += fabs(circularBufferOutL[i]) + fabs(circularBufferOutR[i]);
+    mAgc = GetParam(paramIdx)->Bool();
+    //if (mCircularBuffer) {
+    //  double sumIn = 0.;
+    //  double sumOut = 0.;
+    //  double aveIn = 0.;
+    //  double aveOut = 0.;
+    //  double diffInOut = 0.;
+    //  for (int i = 0; i < circularBufferLenght; i++) {
+    //    sumIn += fabs(mCircularBuffer[0][i]) + fabs(mCircularBuffer[1][i]);
+    //    sumOut += fabs(mCircularBuffer[2][i]) + fabs(mCircularBuffer[3][i]);
     //  }
     //  aveIn = sumIn / (2. * (double(circularBufferLenght)));
     //  aveOut = sumOut / (2. * (double(circularBufferLenght)));
-    //  diffInOut = sumIn / sumOut;
-    //  if (GetUI()) {
-    //    if (diffInOut > 4.) {
-    //      GetUI()->SetParameterFromGUI(kOutputGain, ToNormalizedParam(AmpToDB(4.), GetParam(kOutputGain)->GetMin(), GetParam(kOutputGain)->GetMax(), GetParam(kOutputGain)->GetShape()));
-    //    }
-    //    else if (diffInOut < .125) {
-    //      GetUI()->SetParameterFromGUI(kOutputGain, ToNormalizedParam(AmpToDB(.125), GetParam(kOutputGain)->GetMin(), GetParam(kOutputGain)->GetMax(), GetParam(kOutputGain)->GetShape()));
-    //    }
-    //    else {
-    //      GetUI()->SetParameterFromGUI(kOutputGain, ToNormalizedParam(AmpToDB(diffInOut), GetParam(kOutputGain)->GetMin(), GetParam(kOutputGain)->GetMax(), GetParam(kOutputGain)->GetShape()));
-    //    }
-    //  }
+    //  diffInOut = aveIn / aveOut;
+
+    //  SetParameterValue(kOutputGain, GetParam(kOutputGain)->ToNormalized(AmpToDB(diffInOut)));
+    //  //GetParam(paramIdx)->Set(0.);
+    //  //if (GetUI()) GetUI()->SetAllControlsDirty();
+    //  //DirtyParametersFromUI();
     //}
     break;
 
@@ -1205,5 +1245,77 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   default: break;
   }
+}
+
+void SRChannel::MakePresets() {
+  // Make Presets
+  MakeDefaultPreset("Default", 1);
+  MakePresetFromNamedParams("Kick", 3,
+    kEqLfFreq, 60.,
+    kEqLfBell, true,
+    kEqLfGain, 5.0);
+  MakePresetFromNamedParams("Vocals Female", 62,
+    kInputGain, 0.000000,
+    kSaturationType, 3,
+    kSaturationDrive, 20.434783,
+    kSaturationAmount, 26.364001,
+    kSaturationHarmonics, 26.811594,
+    kSaturationSkew, 0.000000,
+    kOversamplingRate, 0,
+    kEqHpFreq, 79.560642,
+    kEqLpFreq, 22000.000000,
+    kEqHpOrder, 1,
+    kEqHfGain, 3.043478,
+    kEqHfFreq, 10511.467275,
+    kEqHfBell, false,
+    kEqHmfGain, 1.217391,
+    kEqHmfFreq, 4628.704364,
+    kEqHmfQ, 0.317899,
+    kEqLmfGain, -1.652174,
+    kEqLmfFreq, 846.566303,
+    kEqLmfQ, 3.456853,
+    kEqLfGain, 3.391304,
+    kEqLfFreq, 143.126882,
+    kEqLfBell, false,
+    kEqAmount, 100.000000,
+    kCompRmsThresh, -29.855072,
+    kCompRmsRatio, 4.978269,
+    kCompRmsAttack, 20.000000,
+    kCompRmsRelease, 382.138638,
+    kCompRmsKneeWidthDb, 10.115096,
+    kCompRmsMakeup, 0.000000,
+    kCompRmsIsFeedback, false,
+    kCompRmsIsExrSc, false,
+    kCompPeakThresh, -16.376812,
+    kCompPeakRatio, 10.192125,
+    kCompPeakAttack, 5.591731,
+    kCompPeakRelease, 399.390679,
+    kCompPeakKneeWidthDb, 11.654997,
+    kCompPeakMakeup, 0.000000,
+    kCompPeakSidechainFilterFreq, 156.069760,
+    kCompPeakIsFeedback, false,
+    kCompPeakIsExtSc, false,
+    kCompIsParallel, false,
+    kCompPeakRmsRatio, 50.000000,
+    kCompDryWet, 82.246377,
+    kDeesserFreq, 6024.196487,
+    kDeesserQ, 2.164105,
+    kDeesserThresh, -30.072464,
+    kDeesserRatio, 7.050087,
+    kDeesserAttack, 0.741868,
+    kDeesserRelease, 16.422551,
+    kDeesserMakeup, 0.000000,
+    kPan, 0.000000,
+    kPanFreq, 161.288652,
+    kIsPanMonoLow, true,
+    kLimiterThresh, 10.000000,
+    kClipperThreshold, 0.000000,
+    kAgc, false,
+    kOutputGain, -6.720000,
+    kInputBypass, false,
+    kEqBypass, false,
+    kCompBypass, false,
+    kOutputBypass, false,
+    kBypass, false);
 }
 #endif

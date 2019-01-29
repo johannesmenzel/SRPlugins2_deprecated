@@ -1,16 +1,20 @@
-#pragma once
+#ifndef SRCHANNELCONSTANTS_H
+#define SRCHANNELCONSTANTS_H
 #include "../SRClasses/SRConstants.h"
 #include <stddef.h>
+
 
 enum EPrograms {
   defaultProgram = 0,
   kick,
+  vocalsfemale,
   kNumPrograms
 };
 
 //const int kNumPrograms = 1;
 const double METER_ATTACK = .6, METER_DECAY = .05; // This is the global attack and release constants for meters
-const int circularBufferLenght = 65536; // should be replaced with a queue somewhen
+const int circularBufferLenght = 48000; // should be replaced with a queue somewhen
+//const int circularBufferLenght = 65536; // should be replaced with a queue somewhen
 
 // Plugin's parameters
 enum EParams
@@ -98,8 +102,8 @@ enum EParams
 const char* paramIdxStr[kNumParams] = {
   // Input Stage
   "kInputGain",
-  "kSaturationDrive",
   "kSaturationType",
+  "kSaturationDrive",
   "kSaturationAmount",
   "kSaturationHarmonics",
   "kSaturationSkew",
@@ -175,11 +179,11 @@ const char* paramIdxStr[kNumParams] = {
 
 const char** namedParams = paramIdxStr;
 
-enum EAddParams {
-  kPeakMeterValues = 0,
-  kGrMeterValues,
-  kNumAddParams
-};
+//enum EAddParams {
+//  kPeakMeterValues = 0,
+//  kGrMeterValues,
+//  kNumAddParams
+//};
 
 // Plugins control tags
 enum ECtrlTags {
@@ -506,4 +510,5 @@ protected:
 };
 */
 
+#endif
 

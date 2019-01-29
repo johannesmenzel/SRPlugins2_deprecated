@@ -80,6 +80,7 @@
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
       <Filter>SRClasses\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />

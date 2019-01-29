@@ -384,6 +384,7 @@
     <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp" />
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRChannel.cpp" />
+    <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc" />

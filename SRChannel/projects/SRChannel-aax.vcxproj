@@ -478,6 +478,7 @@
     <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp" />
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRChannel.cpp" />
+    <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuildStep Include="..\..\AAX_SDK\Libs\Release\AAXLibrary.lib">

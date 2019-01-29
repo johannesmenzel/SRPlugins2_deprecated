@@ -1,10 +1,13 @@
-#pragma once
+#ifndef SRCHANNEL_H
+#define SRCHANNEL_H
 
 // IPlug2 source
 #include "IPlug_include_in_plug_hdr.h"
 // Extra IPlug2 libs
 #include "IVMeterControl.h"
 #include "IVScopeControl.h"
+#include "IPlugQueue.h"
+
 // SRClasses
 #include "../SRClasses/SRConstants.h"
 #include "../SRClasses/DSP/SRGain.h"
@@ -14,10 +17,15 @@
 #include "../SRClasses/Utils/SRHelpers.h"
 #include "../SRClasses/Graphics/SRControls.h"
 // Plugin constants
+#ifndef SRCHANNELCONSTANTS_H
 #include "SRChannelConstants.h"
+#endif // !SRCHANNELCONSTANTS_H
+
 // ... Commented out until implementation of oversampling
 #include "Oversampler.h"
 #include <functional>
+
+
 
 class SRChannel : public IPlug
 {
@@ -30,7 +38,7 @@ public:
   void OnReset() override;
   void OnParamChange(int paramIdx) override;
   void OnIdle() override;
-  double circularBufferInL[circularBufferLenght], circularBufferInR[circularBufferLenght], circularBufferOutL[circularBufferLenght], circularBufferOutR[circularBufferLenght];
+  //double circularBufferInL[circularBufferLenght], circularBufferInR[circularBufferLenght], circularBufferOutL[circularBufferLenght], circularBufferOutR[circularBufferLenght];
 #endif
 #if IPLUG_EDITOR
   void OnParamChangeUI(int paramIdx, EParamSource source = kUnknown) override;
@@ -38,6 +46,7 @@ public:
 
 private:
   // User Functions
+  void MakePresets();
   void InitEffects();
   void GrayOutControls();
 
@@ -79,14 +88,16 @@ private:
   double mLimiterThresh;
   // BYPASS members
   bool mInputBypass, mEqBypass, mCompBypass, mOutputBypass, mBypass;
-  bool mAgc;
+  // AGC Members
+  double mAutoGain;
+  bool mAgc, mAgcTrigger;
 
   // CIRCULAR BUFFER
   unsigned short int circularBufferPointer;
 
   // FILTERS
     // Gain Filters
-  SR::DSP::SRGain fInputGain, fOutputGain;
+  SR::DSP::SRGain fInputGain, fOutputGain, fAutoGain;
   SR::DSP::SRPan fPan;
 
   // Spectral Filters
@@ -114,15 +125,24 @@ private:
   OverSampler<sample> mOverSampler[2]{ OverSampler<sample>::kNone };
 
 
-  // TESTVARS
-  double sumIn;
-  double sumOut;
-  double aveIn;
-  double aveOut;
-  double diffInOut;
+  //// TESTVARS
+  //double sumIn;
+  //double sumOut;
+  //double aveIn;
+  //double aveOut;
+  //double diffInOut;
 
   SR::Graphics::SRMeter<2>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
   SR::Graphics::SRMeter<3>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
   SR::Graphics::SRMeter<2>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
   IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
+
+  //IPlugQueue<sample> *circularBufferInL, *circularBufferInR, *circularBufferOutL, *circularBufferOutR;
+  //WDL_TypedBuf<sample> mCircularBuffer[4];
+
+  //sample circularBufferInL[circularBufferLenght], circularBufferInR[circularBufferLenght], circularBufferOutL[circularBufferLenght], circularBufferOutR[circularBufferLenght];
+  //sample* circularBuffer[4] = { circularBufferInL, circularBufferInR, circularBufferOutL, circularBufferOutR };
+  //sample** mCircularBuffer = circularBuffer;
 };
+
+#endif // SRCHANNEL_H

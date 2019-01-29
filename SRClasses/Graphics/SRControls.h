@@ -561,12 +561,12 @@ namespace SR {
 
     class SRPresetMenu : public IControl {
     public:
-      SRPresetMenu(IPlug *pPlug, IRECT bounds, IText pText, const char** namedParams)
+      SRPresetMenu(IPlug *pPlug, IRECT bounds, IText pText, const char** pNamedParams)
         : IControl(bounds, -1) {
         mTextEntryLength = MAX_PRESET_NAME_LEN - 3;
         mText = pText;
         mPlug = pPlug;
-        mNamedParams = namedParams;
+        mNamedParams = pNamedParams;
       }
       void Draw(IGraphics& g) override;
       void OnMouseDown(float x, float y, const IMouseMod& mod) override;

@@ -25,6 +25,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <cmath>
+#include <cstdint>
+#include <assert.h>
 #include "SRFilters.h"
 //#include "../SRChannel/SRChannel.h"
 namespace SR {
@@ -69,40 +71,44 @@ namespace SR {
       calcBiquad();
     }
 
-    void SRFiltersTwoPole::GetFrequencyResponse(double* values, int points) {
+    void SRFiltersTwoPole::GetFrequencyResponse(double* values, int points, double rangeDb, bool returnPhase) {
       for (int i = 0; i < points; ++i) {
-        values[i] = GetFrequencyResponse(double(i) / double(points) * samplerate);
+        values[i] = GetFrequencyResponse(0.5 * double(i) / double(points), rangeDb, returnPhase);
       }
     }
 
-    double SRFiltersTwoPole::GetFrequencyResponse(double atFrequency) {
-        double w = 2. * M_PI * atFrequency / samplerate;
+    double SRFiltersTwoPole::GetFrequencyResponse(double atNormalizedFrequency, double rangeDb, bool returnPhase) {
+      assert(atNormalizedFrequency <= 0.5);
+      double w = 2. * M_PI * atNormalizedFrequency;
 
-        double cos1 = cos(-1. * w);
-        double cos2 = cos(-2. * w);
+      double cos1 = cos(-1. * w);
+      double cos2 = cos(-2. * w);
 
-        double sin1 = sin(-1. * w);
-        double sin2 = sin(-2. * w);
+      double sin1 = sin(-1. * w);
+      double sin2 = sin(-2. * w);
 
-        double realZeros = a0 + a1 * cos1 + a2 * cos2;
-        double imagZeros = a1 * sin1 + a2 * sin2;
+      double realZeros = a0 + a1 * cos1 + a2 * cos2;
+      double imagZeros = a1 * sin1 + a2 * sin2;
 
-        double realPoles = 1. + b1 * cos1 + b2 * cos2;
-        double imagPoles = b1 * sin1 + b2 * sin2;
+      double realPoles = 1. + b1 * cos1 + b2 * cos2;
+      double imagPoles = b1 * sin1 + b2 * sin2;
 
-        double divider = realPoles * realPoles + imagPoles * imagPoles;
+      double divider = realPoles * realPoles + imagPoles * imagPoles;
 
-        double realHw = (realZeros * realPoles + imagZeros * imagPoles) / divider;
-        double imagHw = (imagZeros * realPoles - realZeros * imagPoles) / divider;
+      double realHw = (realZeros * realPoles + imagZeros * imagPoles) / divider;
+      double imagHw = (imagZeros * realPoles - realZeros * imagPoles) / divider;
 
-        double magnitude = sqrt(realHw * realHw + imagHw * imagHw);
-        //double phase = atan2(imagHw, realHw); // Not needed yet
+      if (returnPhase) {
+        double phase = atan2(imagHw, realHw); // Not needed yet
+        return phase;                   //phase
+      }
 
-        //return magnitude;               //gain in Au
-        return 20. * log10(magnitude);    // gain in dB
-        //return phase;                   //phase
-      
+      double magnitude = sqrt(realHw * realHw + imagHw * imagHw);   // magnitude linear
+      magnitude = 20. * log10(magnitude);    // gain in dB
+      magnitude = magnitude / rangeDb;    // GetNormal
+      //magnitude = std::fmin(std::fmax(magnitude, -1.), 1.);
 
+      return magnitude;
     }
     //const int mPoints = points;
 ////double* values = new double[mPoints];

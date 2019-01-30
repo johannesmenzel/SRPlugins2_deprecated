@@ -764,6 +764,7 @@ namespace SR {
 			// call before runtime (in resume())
 			void process(double &in1, double &in2); // compressor runtime process if internal sidechain 
 			void process(double &in1, double &in2, double sidechain);	// with stereo-linked key in
+			SRFiltersTwoPole fSidechainBandpass1, fSidechainBandpass2, fDynamicEqFilter1, fDynamicEqFilter2;
 
 		private:
 
@@ -780,7 +781,6 @@ namespace SR {
 			// runtime variables
 			double currentOvershootDb;			// over-threshold envelope (dB)
 
-			SRFiltersTwoPole fSidechainBandpass1, fSidechainBandpass2, fDynamicEqFilter1, fDynamicEqFilter2;
 
 		};
 		//-------------------------------------------------------------

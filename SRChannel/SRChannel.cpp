@@ -21,24 +21,39 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mAgcTrigger(false)
 {
   // Name channels
-  //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
-  //{
+  if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
+  {
     SetChannelLabel(ERoute::kInput, 0, "In 1", true);
     SetChannelLabel(ERoute::kInput, 1, "In 2", true);
     SetChannelLabel(ERoute::kInput, 2, "SC 1", true);
     SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
     SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
     SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
-  //}
-  //else {
-  //  GetIOConfig(0)->mBusInfo->Empty();
-  //  GetIOConfig(1)->mBusInfo->Empty();
-  //  GetIOConfig(0)->AddBusInfo(ERoute::kInput, 2, "In");
-  //  GetIOConfig(0)->AddBusInfo(ERoute::kOutput, 2, "Out");
-  //  GetIOConfig(1)->AddBusInfo(ERoute::kInput, 2, "In");
-  //  GetIOConfig(1)->AddBusInfo(ERoute::kInput, 2, "SC");
-  //  GetIOConfig(1)->AddBusInfo(ERoute::kOutput, 2, "Out");
-  //}
+    //SetChannelLabel(ERoute::kOutput, 2, "SC Out 1", true);
+    //SetChannelLabel(ERoute::kOutput, 3, "SC Out 2", true);
+
+  }
+  else {
+    //GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
+    //GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+    //GetIOConfig(1)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
+    //GetIOConfig(1)->GetBusInfo(ERoute::kInput, 1)->mLabel.Set("SC", MAX_CHAN_NAME_LEN);
+    //GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+    //GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 1)->mLabel.Set("SC Out", MAX_CHAN_NAME_LEN);
+    SetChannelLabel(ERoute::kInput, 0, "In 1", true);
+    SetChannelLabel(ERoute::kInput, 1, "In 2", true);
+    SetChannelLabel(ERoute::kInput, 2, "SC 1", true);
+    SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
+    SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
+    SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
+
+    //GetIOConfig(1)->mBusInfo->Empty();
+    //GetIOConfig(0)->AddBusInfo(ERoute::kInput, 2, "In");
+    //GetIOConfig(0)->AddBusInfo(ERoute::kOutput, 2, "Out");
+    //GetIOConfig(1)->AddBusInfo(ERoute::kInput, 2, "In");
+    //GetIOConfig(1)->AddBusInfo(ERoute::kInput, 2, "SC");
+    //GetIOConfig(1)->AddBusInfo(ERoute::kOutput, 2, "Out");
+  }
 
   // Initialize Parameters
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
@@ -179,7 +194,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader);
 
       pGraphics->GetControlWithTag(cPresetMenu)->SetTargetAndDrawRECTs(rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(pGraphics->GetControlWithTag(cSRPluginsLogo)->GetRECT().W()).GetReducedFromRight(pGraphics->GetControlWithTag(cSRChannelLogo)->GetRECT().W()));
-      pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectEq);
+      pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectEq.SubRectVertical(5, 4));
 
 
       for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
@@ -274,7 +289,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     // Preset Menu
     pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(float(bmpSRPluginsLogo.W())).GetReducedFromRight(float(bmpSRChannelLogo.W())), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
-    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectEq, FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0.,22000., 1000., .5)), cFreqMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectEq.SubRectVertical(5, 4), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5)), cFreqMeter, "Meter");
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       const IRECT *rect;
@@ -393,20 +408,22 @@ void SRChannel::GrayOutControls()
 }
 
 void SRChannel::SetFreqMeterValues() {
-  //if (GetUI()->GetControl(cFreqMeter)) {
-      /*if (fEqHmfFilter) */
-  const double shape = log(0.5 * mSampleRate);
+  const double shape = log10(mSampleRate);
   for (int i = 0; i < FREQUENCYRESPONSE; i++) {
-    //double freq = 0.5 * mSampleRate * double(i) / double(FREQUENCYRESPONSE); // Linear shape
-    double freq = std::pow((double(i) / double(FREQUENCYRESPONSE)), shape) * (0.5 * mSampleRate); // Pow shape
+    // If linear shape
+    //double freq = 0.5 * mSampleRate * double(i) / double(FREQUENCYRESPONSE);
+    // If pow shape
+    double freq = std::pow((double(i) / double(FREQUENCYRESPONSE)), shape) * (0.5 * mSampleRate);
     mFreqMeterValue[i] = 0.;
-    if (mEqLfGain != 0.0) mFreqMeterValues[i] += fEqLfFilter[0].GetFrequencyResponse(freq);
-    if (mEqLmfGain != 0.0) mFreqMeterValues[i] += fEqLmfFilter[0].GetFrequencyResponse(freq);
-    if (mEqHmfGain != 0.0) mFreqMeterValues[i] += fEqHmfFilter[0].GetFrequencyResponse(freq);
-    if (mEqHfGain != 0.0) mFreqMeterValues[i] += fEqHfFilter[0].GetFrequencyResponse(freq);
+    if (mEqHpFreq > 16.) mFreqMeterValues[i] += fEqHpFilter1[0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+    if (mEqLfGain != 0.0) mFreqMeterValues[i] += fEqLfFilter[0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+    if (mEqLmfGain != 0.0) mFreqMeterValues[i] += fEqLmfFilter[0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+    if (mEqHmfGain != 0.0) mFreqMeterValues[i] += fEqHmfFilter[0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+    if (mEqHfGain != 0.0) mFreqMeterValues[i] += fEqHfFilter[0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+    if (mEqLpFreq < 22000.) mFreqMeterValues[i] += fEqLpFilter1[0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+    if (mDeesserThresh < 0.) mFreqMeterValues[i] += fDeesser.fDynamicEqFilter1.GetFrequencyResponse(freq / mSampleRate, 12., false);
   }
   if (GetUI()) dynamic_cast<SR::Graphics::SRFrequencyResponseMeter*>(GetUI()->GetControlWithTag(cFreqMeter))->UpdateValues(mFreqMeterValues);
-  //}
 }
 
 void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
@@ -420,20 +437,22 @@ void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
   case kOutputBypass:
   case kBypass:
     GrayOutControls(); break;
-  case kEqHfBell:
-  case kEqLfBell:
-  case kEqLfGain:
-  case kEqLfFreq: 
-  case kEqLmfGain:
-  case kEqLmfFreq:
-  case kEqLmfQ: 
-  case kEqHmfGain: 
-  case kEqHmfFreq:
-  case kEqHmfQ: 
-  case kEqHfGain: 
-  case kEqHfFreq:
-  case kEqAmount:
-    SetFreqMeterValues(); break;
+    //case kEqHpFreq:
+    //case kEqLpFreq:
+    //case kEqHfBell:
+    //case kEqLfBell:
+    //case kEqLfGain:
+    //case kEqLfFreq:
+    //case kEqLmfGain:
+    //case kEqLmfFreq:
+    //case kEqLmfQ:
+    //case kEqHmfGain:
+    //case kEqHmfFreq:
+    //case kEqHmfQ:
+    //case kEqHfGain:
+    //case kEqHfFreq:
+    //case kEqAmount:
+    //  SetFreqMeterValues(); break;
   default:
     break;
   }
@@ -887,7 +906,6 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   delete[] in2MeterValue;
   delete[] out1MeterValue;
   delete[] out2MeterValue;
-
 }
 
 
@@ -896,6 +914,7 @@ void SRChannel::OnIdle() {
   mGrMeterBallistics.TransmitData(*this);
   mOutputMeterBallistics.TransmitData(*this);
   mScopeBallistics.TransmitData(*this);
+  SetFreqMeterValues();
 }
 
 void SRChannel::OnReset() {

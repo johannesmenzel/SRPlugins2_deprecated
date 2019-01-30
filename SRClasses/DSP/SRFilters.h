@@ -55,8 +55,8 @@ namespace SR {
       void setPeakGain(double peakGainDB);
       void setFilter(int type, double Fc, double Q, double peakGain, double samplerate);
       double process(double in);
-      void GetFrequencyResponse(double* values, int points);
-      double GetFrequencyResponse(double atFrequency);
+      void GetFrequencyResponse(double* values, int points, double rangeDb, bool returnPhase);
+      double GetFrequencyResponse(double atNormalizedFrequency, double rangeDb, bool returnPhase);
 
     protected:
       void calcBiquad(void);

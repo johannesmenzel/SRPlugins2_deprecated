@@ -599,38 +599,65 @@ namespace SR {
         , mValues(values)
         , mNumValues(numValues)
         , mShape(shape)
+        , mPatternFill(IPattern(EPatternType::kSolidPattern))
+        //, mPatternFill(IPattern(EPatternType::kLinearPattern))
+        , mPatternStroke(IPattern(EPatternType::kSolidPattern))
       {
+        mStrokeOptions.mPreserve = true;
+        mFillOptions.mPreserve = true;
+        mPatternStroke = IPattern(COLOR_LIGHT_GRAY);
+        //mPatternFill.CreateLinearGradient(mRECT, EDirection::kVertical,
+        //  {
+        //           IColorStop(IColor(255, 255, 255, 255), 0.0f),
+        //          IColorStop(IColor(255, 150, 150, 150), 0.5f),
+        //          IColorStop(IColor(255, 255, 255, 255), 1.0f)
+        //  }
+        //);
+        mPatternFill = IPattern(COLOR_DARK_GRAY);
       }
       void Draw(IGraphics& g) override {
-        const IPattern patternFill = IPattern(IColor(50, 255, 255, 255));
-        const IPattern patternStroke = IPattern(COLOR_WHITE);
-
         g.PathClear();
         g.PathMoveTo(mRECT.L, mRECT.MH());
-        for (int i = 0; i < mNumValues; i++) {
-          const float y = mRECT.MH() - (mValues[i] * mRECT.H() / 24.);
-          const float x = mRECT.L + ((float)i / ((float)mNumValues - 1.f)) * mRECT.W();
-          //const float x = mRECT.L + std::powf((float)i / (float)mNumValues, mShape) * mRECT.W();
-          //const float x = std::pow(((mRECT.L + ((float)i / (float)mNumValues)) - mRECT.L) / (mRECT.R - mRECT.L), 1.0 / mShape);
 
-          //g.DrawPoint(COLOR_WHITE, x, y);
+        for (int i = 0; i < mNumValues; i++) {
+          const float y = mRECT.MH() - (mValues[i] * 0.5 * mRECT.H());
+          const float x = mRECT.L + ((float)i / ((float)mNumValues - 1.f)) * mRECT.W();
           g.PathLineTo(x, y);
         }
+
         g.PathLineTo(mRECT.R, mRECT.MH());
-        //g.PathLineTo(mRECT.B, mRECT.R);
-        //g.PathLineTo(mRECT.B, mRECT.L);
-        g.PathClose();
-        //g.PathStroke(patternStroke, 2.f);
-        g.PathFill(patternFill);
+        //g.PathClose();
+        g.PathFill(mPatternFill, mFillOptions, 0);
+        g.PathStroke(mPatternStroke, 1.f, mStrokeOptions, 0);
       };
 
-      void UpdateValues(double* values) { mValues = values; SetDirty(false); };
+      //void OnResize() override {
+      //  mPatternFill = IPattern::CreateLinearGradient(mRECT, EDirection::kVertical,
+      //    {
+      //            IColorStop(IColor(255, 255, 255, 255), 0.0f),
+      //            IColorStop(IColor(255, 150, 150, 150), 0.5f),
+      //            IColorStop(IColor(255, 255, 255, 255), 1.0f)
+      //    }
+      //  );
+      //};
+
+      void UpdateValues(double* values) {
+        mValues = values;
+        for (int i = 0; i < mNumValues; i++) {
+          mValues[i] = Clip<double>(mValues[i], -1, 1);
+        }
+        SetDirty(false);
+      };
       //void OnMouseDown(float x, float y, const IMouseMod& mod) override;
     private:
       //WDL_String mDisp;
       double* mValues;
       int mNumValues;
       double mShape;
+      IStrokeOptions mStrokeOptions;
+      IFillOptions mFillOptions;
+      IPattern mPatternFill;
+      IPattern mPatternStroke;
     };
 
   }

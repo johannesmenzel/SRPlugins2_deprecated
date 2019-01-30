@@ -107,8 +107,8 @@ private:
     fEqLfFilter[2], fEqLmfFilter[2], fEqHmfFilter[2], fEqHfFilter[2];
   // Safe-Pan
   SR::DSP::SRFiltersTwoPole fSafePanHp[2], fSafePanLp[2];
-  // Deesser
-  SR::DSP::SRFiltersTwoPole fDeesserSidechainBandpassFilter[2], fDeesserReductionPeakFilter[2];
+  //// Deesser
+  //SR::DSP::SRFiltersTwoPole fDeesserSidechainBandpassFilter[2], fDeesserReductionPeakFilter[2];
   // Extra Filters
   SR::DSP::SRFiltersOnePole fDcBlocker[2], fEqHpFilterOnepole[2], fEqLpFilterOnepole[2];
 

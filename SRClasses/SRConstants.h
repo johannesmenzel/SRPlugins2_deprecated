@@ -61,8 +61,8 @@ struct SRParamProperties {
     const int AttachToControlPanel = 0; // Panel where control should appear
     const int x = 0; // Controls horizontal position within panel
     const int y = 0; // Controls vertical position within panel
-    const int w = 2; // Controls horizontal position within panel
-    const int h = 2; // Controls vertical position within panel
+    const float w = 2.f; // Controls horizontal position within panel
+    const float h = 2.f; // Controls vertical position within panel
   } position;
   const char* labelMin = ""; // GUI display string of minimum
   const char* labelMax = ""; // GUI display string of maximum

@@ -92,7 +92,7 @@ namespace SR {
 
     void SRVectorKnobText::Draw(IGraphics& g) {
       const float mAngleValue = mAngleMin + ((float)mValue * (mAngleMax - mAngleMin));
-      const float colorIntensity = fabs(mValue - mDefaultValue) / fmaxf(mDefaultValue, (1.f - mDefaultValue));
+      const float colorIntensity = fabsf((float)mValue - (float)mDefaultValue) / fmaxf((float)mDefaultValue, (1.f - (float)mDefaultValue));
       IColor arcColor;
       IColor::LinearInterpolateBetween(GetColor(kBG), mColor, arcColor, 0.5f + 0.5f * colorIntensity);
       IStrokeOptions strokeOptions;
@@ -306,7 +306,7 @@ namespace SR {
 
       // CIRCLE LABELS
       if (mDrawCircleLabels) {
-        mHandleBounds = mHandleBounds.GetReducedFromTop(mTextCircleLabelCtr.mSize);
+        mHandleBounds = mHandleBounds.GetReducedFromTop((float)mTextCircleLabelCtr.mSize);
       }
 
       mHandleBounds = mHandleBounds.GetMidHPadded(mHandleBounds.H() * 0.5f);

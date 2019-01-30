@@ -49,6 +49,7 @@ private:
   void MakePresets();
   void InitEffects();
   void GrayOutControls();
+  void SetFreqMeterValues();
 
   // GLOBAL members
   double mSampleRate;
@@ -122,7 +123,7 @@ private:
 
   // Saturation
   SR::DSP::SRSaturation fInputSaturation[2];
-  OverSampler<sample> mOverSampler[2]{ OverSampler<sample>::kNone };
+  OverSampler<sample> mOverSampler[2]{ OverSampler<sample>::EFactor::kNone };
 
 
   //// TESTVARS
@@ -132,9 +133,9 @@ private:
   //double aveOut;
   //double diffInOut;
 
-  SR::Graphics::SRMeter<2>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
-  SR::Graphics::SRMeter<3>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
-  SR::Graphics::SRMeter<2>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
+  SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
+  SR::Graphics::SRMeter<3, 1024>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
+  SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
   IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
 
   //IPlugQueue<sample> *circularBufferInL, *circularBufferInR, *circularBufferOutL, *circularBufferOutR;
@@ -143,6 +144,9 @@ private:
   //sample circularBufferInL[circularBufferLenght], circularBufferInR[circularBufferLenght], circularBufferOutL[circularBufferLenght], circularBufferOutR[circularBufferLenght];
   //sample* circularBuffer[4] = { circularBufferInL, circularBufferInR, circularBufferOutL, circularBufferOutR };
   //sample** mCircularBuffer = circularBuffer;
+
+  double mFreqMeterValue[FREQUENCYRESPONSE];
+  double* mFreqMeterValues = mFreqMeterValue;
 };
 
 #endif // SRCHANNEL_H

@@ -334,24 +334,33 @@ namespace SR {
         IPlugQueue<Data> mQueue{ QUEUE_SIZE };
       };
 
-      struct LabelFrames
-      {
+      struct LabelFrames {
         IRECT rectLabel = IRECT();
         WDL_String str = WDL_String();
-        void setLabelFrame(IRECT r, float val) {
+        void SetLabelFrame(IRECT r, float val) {
           str.SetFormatted(MAX_PARAM_DISPLAY_LEN, "%d", static_cast<int>(roundf(val)));
           rectLabel = r;
         }
       };
 
+      struct LinePos {
+        float position = 0.0f;
+        float thickness = 1.0f;
+        void SetLine(float pos, float thick) {
+          position = pos;
+          thickness = thick;
+        }
+      };
+
       // If you want to create a meter with decibel values
-      SRMeter(IRECT bounds, bool drawFromTop = false, bool drawInverted = false, double minDb = 90., double maxDb = 0., double shape = 1.0, int markStep = 1, int labelStep = 6, const char* trackNames = 0, ...)
+      SRMeter(IRECT bounds, bool drawFromTop = false, bool drawInverted = false, float minDb = 90., float maxDb = 0., float shape = 1.0, int markStep = 1, int labelStep = 6, const char* trackNames = 0, ...)
         : SRTrackControlBase(bounds, MAXNC, 0, 1., trackNames)
         , mDrawFromTop(drawFromTop)
         , mDrawInverted(drawInverted)
         , mMinDb(minDb)
         , mMaxDb(maxDb)
         , mShape(shape)
+        , mMaxTrackValue(4.f)
         , mMarkStep(markStep)
         , mLabelStep(labelStep)
         , mText(IText(14, COLOR_LIGHT_GRAY, DEFAULT_FONT, IText::kStyleNormal, IText::kAlignCenter, IText::kVAlignMiddle, 0, IText::kQualityClearType))
@@ -362,7 +371,7 @@ namespace SR {
         , mDrawDb(true)
       {
         mLabelFrames = new LabelFrames[mNumLabels + 1];
-        mLineCoord = new float[mNumLines + 1];
+        mLineCoord = new LinePos[mNumLines + 1];
       }
 
       // If you want to create a meter with normalized values 0..1
@@ -380,7 +389,7 @@ namespace SR {
 
       void OnResize() override {
         MakeRects();
-        mText.mSize = int(mRECT.W() * 0.22f);
+        mText.mSize = int(mRECT.W() * 0.25f);
       };
 
       //  void OnMouseDblClick(float x, float y, const IMouseMod& mod) override;
@@ -394,19 +403,21 @@ namespace SR {
         }
 
         if (mDrawDb) {
+
           rectLabelFrame = mRECT.GetPadded(-mOuterPadding);
-          for (int i = 0; i <= mNumLabels; i++) {
-            const float val = std::roundf(mMinDb + ((float)i / (float)mNumLabels) * (mMaxDb - mMinDb));
-            const float vPosition = std::pow((val - mMinDb) / (mMaxDb - mMinDb), 1.0f / mShape);
-            mLabelFrames[i].setLabelFrame(
-              IRECT(rectLabelFrame.L, -mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H(), rectLabelFrame.R, mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H()),
-              val
-            );
-          }
-          for (int i = 0; i <= mNumLines; i++) {
+
+          for (int i = 0, j = 0; i <= mNumLines; i++) {
             const float val = std::roundf(mMinDb + ((float)i / (float)mNumLines) * (mMaxDb - mMinDb));
-            const float vPosition = std::pow((val - mMinDb) / (mMaxDb - mMinDb), 1.0f / mShape);
-            mLineCoord[i] = rectLabelFrame.B - rectLabelFrame.H() * vPosition;
+            const float vPosition = std::pow<float>((val - mMinDb) / (mMaxDb - mMinDb), 1.0f / mShape);
+            mLineCoord[i].SetLine(rectLabelFrame.B - rectLabelFrame.H() * vPosition, 1.f);
+            if (i % mLabelStep == 0) {
+              mLineCoord[i].thickness = mFrameThickness;
+              mLabelFrames[j].SetLabelFrame(
+                IRECT(rectLabelFrame.L, -mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H(), rectLabelFrame.R, mText.mSize + rectLabelFrame.B - vPosition * rectLabelFrame.H()),
+                val
+              );
+              j++;
+            }
           }
         }
 
@@ -429,7 +440,7 @@ namespace SR {
             g.DrawText(mText, mLabelFrames[i].str.Get(), mLabelFrames[i].rectLabel);
           }
           for (int i = 0; i <= mNumLines; i++) {
-            g.DrawLine(GetColor(kHL), rectLabelFrame.L, mLineCoord[i], rectLabelFrame.R, mLineCoord[i]);
+            g.DrawLine(GetColor(kHL), rectLabelFrame.L, mLineCoord[i].position, rectLabelFrame.R, mLineCoord[i].position, 0, mLineCoord[i].thickness);
           }
         }
 
@@ -453,9 +464,9 @@ namespace SR {
 
       virtual void DrawTrackHandle(IGraphics& g, IRECT& r, int chIdx) {
         IRECT fillRect;
-        double value = *GetTrackData(chIdx);
-        if (mDrawDb) value = std::pow((AmpToDB(value) - mMinDb) / (mMaxDb - mMinDb), 1.0 / mShape);
-        fillRect = r.FracRect(mDirection, (!mDrawInverted) ? value : 1. - value, mDrawFromTop); // HERE the value rect is drawn!
+        float value = *GetTrackData(chIdx);
+        if (mDrawDb) value = std::pow<float>(((float)AmpToDB(value) - mMinDb) / (mMaxDb - mMinDb), 1.0f / mShape);
+        fillRect = r.FracRect(mDirection, (!mDrawInverted) ? value : 1.f - value, mDrawFromTop); // HERE the value rect is drawn!
         g.FillRect(GetColor(kFG), fillRect); // TODO: shadows!
 
         IRECT peakRect;
@@ -497,16 +508,17 @@ namespace SR {
       bool mDrawFromTop;
       bool mDrawInverted;
       bool mDrawDb;
-      double mMinDb;
-      double mMaxDb;
+      float mMinDb;
+      float mMaxDb;
+      float mMaxTrackValue;
       int mLabelStep;
       int mMarkStep;
       int mNumLabels;
       int mNumLines;
-      double mShape;
+      float mShape;
       IText mText;
       LabelFrames* mLabelFrames;
-      float* mLineCoord;
+      LinePos* mLineCoord;
       IRECT rectLabelFrame;
       //IPattern mPattern;
     };
@@ -576,6 +588,49 @@ namespace SR {
       WDL_String mDisp;
       IPlug* mPlug;
       const char** mNamedParams;
+    };
+
+
+
+    class SRFrequencyResponseMeter : public IControl {
+    public:
+      SRFrequencyResponseMeter(IRECT bounds, int numValues, double* values, double shape = 1.0)
+        : IControl(bounds, -1)
+        , mValues(values)
+        , mNumValues(numValues)
+        , mShape(shape)
+      {
+      }
+      void Draw(IGraphics& g) override {
+        const IPattern patternFill = IPattern(IColor(50, 255, 255, 255));
+        const IPattern patternStroke = IPattern(COLOR_WHITE);
+
+        g.PathClear();
+        g.PathMoveTo(mRECT.L, mRECT.MH());
+        for (int i = 0; i < mNumValues; i++) {
+          const float y = mRECT.MH() - (mValues[i] * mRECT.H() / 24.);
+          const float x = mRECT.L + ((float)i / ((float)mNumValues - 1.f)) * mRECT.W();
+          //const float x = mRECT.L + std::powf((float)i / (float)mNumValues, mShape) * mRECT.W();
+          //const float x = std::pow(((mRECT.L + ((float)i / (float)mNumValues)) - mRECT.L) / (mRECT.R - mRECT.L), 1.0 / mShape);
+
+          //g.DrawPoint(COLOR_WHITE, x, y);
+          g.PathLineTo(x, y);
+        }
+        g.PathLineTo(mRECT.R, mRECT.MH());
+        //g.PathLineTo(mRECT.B, mRECT.R);
+        //g.PathLineTo(mRECT.B, mRECT.L);
+        g.PathClose();
+        //g.PathStroke(patternStroke, 2.f);
+        g.PathFill(patternFill);
+      };
+
+      void UpdateValues(double* values) { mValues = values; SetDirty(false); };
+      //void OnMouseDown(float x, float y, const IMouseMod& mod) override;
+    private:
+      //WDL_String mDisp;
+      double* mValues;
+      int mNumValues;
+      double mShape;
     };
 
   }

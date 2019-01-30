@@ -87,7 +87,7 @@ namespace SR {
         double realZeros = a0 + a1 * cos1 + a2 * cos2;
         double imagZeros = a1 * sin1 + a2 * sin2;
 
-        double realPoles = 1 + b1 * cos1 + b2 * cos2;
+        double realPoles = 1. + b1 * cos1 + b2 * cos2;
         double imagPoles = b1 * sin1 + b2 * sin2;
 
         double divider = realPoles * realPoles + imagPoles * imagPoles;
@@ -96,7 +96,7 @@ namespace SR {
         double imagHw = (imagZeros * realPoles - realZeros * imagPoles) / divider;
 
         double magnitude = sqrt(realHw * realHw + imagHw * imagHw);
-        double phase = atan2(imagHw, realHw);
+        //double phase = atan2(imagHw, realHw); // Not needed yet
 
         //return magnitude;               //gain in Au
         return 20. * log10(magnitude);    // gain in dB

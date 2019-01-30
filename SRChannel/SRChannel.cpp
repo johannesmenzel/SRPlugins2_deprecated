@@ -395,9 +395,10 @@ void SRChannel::GrayOutControls()
 void SRChannel::SetFreqMeterValues() {
   //if (GetUI()->GetControl(cFreqMeter)) {
       /*if (fEqHmfFilter) */
+  const double shape = log(0.5 * mSampleRate);
   for (int i = 0; i < FREQUENCYRESPONSE; i++) {
     //double freq = 0.5 * mSampleRate * double(i) / double(FREQUENCYRESPONSE); // Linear shape
-    double freq = std::pow((double(i) / double(FREQUENCYRESPONSE)), log(0.5 * mSampleRate)) * (0.5 * mSampleRate); // Pow shape
+    double freq = std::pow((double(i) / double(FREQUENCYRESPONSE)), shape) * (0.5 * mSampleRate); // Pow shape
     mFreqMeterValue[i] = 0.;
     if (mEqLfGain != 0.0) mFreqMeterValues[i] += fEqLfFilter[0].GetFrequencyResponse(freq);
     if (mEqLmfGain != 0.0) mFreqMeterValues[i] += fEqLmfFilter[0].GetFrequencyResponse(freq);

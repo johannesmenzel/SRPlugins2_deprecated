@@ -1,5 +1,5 @@
 #define PLUG_NAME "SRChannel"
-#define PLUG_MFR "SR"
+#define PLUG_MFR "SRPlugins"
 #define PLUG_VERSION_HEX 0x00000201
 #define PLUG_VERSION_STR "0.2.1"
 #define PLUG_UNIQUE_ID 'SrCn'
@@ -9,11 +9,11 @@
 #define PLUG_COPYRIGHT_STR "Copyright 2019 Johannes Menzel"
 #define PLUG_CLASS_NAME SRChannel
 
-#define BUNDLE_NAME "SRChannel"
-#define BUNDLE_MFR "SR"
+#define BUNDLE_NAME "SREffects"
+#define BUNDLE_MFR "SRPlugins"
 #define BUNDLE_DOMAIN "com"
 
-#define PLUG_CHANNEL_IO "2-2 4-2"
+#define PLUG_CHANNEL_IO "2-2 2.2-2"  /*1-1 1.1-1*/
 #define PLUG_SC_CHANS 2
 
 #define PLUG_LATENCY 0

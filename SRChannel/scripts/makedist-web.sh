@@ -16,6 +16,13 @@ else
   emrunmode=1
 fi
 
+origin="/"
+
+if [ "$#" -eq 2 ]
+then
+  origin=${2}
+fi
+
 if [ -d build-web/.git ]
 then
   # trash only the scripts folder
@@ -103,7 +110,9 @@ cp ../../../../IPlug/WEB/Template/scripts/IPlugWAM-awn.js SRChannel-awn.js
 sed -i.bak s/NAME_PLACEHOLDER/SRChannel/g SRChannel-awn.js
 cp ../../../../IPlug/WEB/Template/scripts/IPlugWAM-awp.js SRChannel-awp.js
 sed -i.bak s/NAME_PLACEHOLDER/SRChannel/g SRChannel-awp.js
+sed -i.bak s,ORIGIN_PLACEHOLDER,$origin,g SRChannel-awn.js
 rm *.bak
+
 cd ..
 
 #copy in the template html - comment if you have customised the html

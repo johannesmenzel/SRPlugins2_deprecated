@@ -89,6 +89,7 @@
     <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
+    <ClCompile Include="..\SRChannelPresets.cpp" />
     <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp">
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
@@ -107,7 +108,6 @@
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
       <Filter>SRClasses\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SRChannel.h" />
@@ -350,16 +350,16 @@
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{f5011080-54d8-485d-822f-6be400c84686}</UniqueIdentifier>
+      <UniqueIdentifier>{aad689d4-4013-4abe-8e0f-5a6ca8645314}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{253370db-ed78-499b-af81-7d86efa5289f}</UniqueIdentifier>
+      <UniqueIdentifier>{32cc124a-568e-46ba-9de4-17a493b0a99c}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Graphics">
-      <UniqueIdentifier>{8a8983f8-daec-4165-b728-985b5b64e4f6}</UniqueIdentifier>
+      <UniqueIdentifier>{931e5f73-0983-496c-8516-3f83ce99191a}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Utils">
-      <UniqueIdentifier>{df61a55c-e74c-4b56-b8a1-aecc289319a4}</UniqueIdentifier>
+      <UniqueIdentifier>{eb6aa366-6e47-4a3b-9480-005befa5db79}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

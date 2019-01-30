@@ -274,7 +274,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     // Preset Menu
     pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(float(bmpSRPluginsLogo.W())).GetReducedFromRight(float(bmpSRChannelLogo.W())), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
-    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader, FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0.,22000., 1000., .5)), cFreqMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectEq, FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0.,22000., 1000., .5)), cFreqMeter, "Meter");
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       const IRECT *rect;
@@ -396,9 +396,13 @@ void SRChannel::SetFreqMeterValues() {
   //if (GetUI()->GetControl(cFreqMeter)) {
       /*if (fEqHmfFilter) */
   for (int i = 0; i < FREQUENCYRESPONSE; i++) {
-    //double freq = 0.5 * mSampleRate * double(i) / double(FREQUENCYRESPONSE);
-    double freq = std::pow((double(i) / double(FREQUENCYRESPONSE)), 4.5) * (0.5 * mSampleRate) ;
-    mFreqMeterValues[i] = fEqLfFilter[0].GetFrequencyResponse(freq) + fEqLmfFilter[0].GetFrequencyResponse(freq) + fEqHmfFilter[0].GetFrequencyResponse(freq) + fEqHfFilter[0].GetFrequencyResponse(freq);
+    //double freq = 0.5 * mSampleRate * double(i) / double(FREQUENCYRESPONSE); // Linear shape
+    double freq = std::pow((double(i) / double(FREQUENCYRESPONSE)), log(0.5 * mSampleRate)) * (0.5 * mSampleRate); // Pow shape
+    mFreqMeterValue[i] = 0.;
+    if (mEqLfGain != 0.0) mFreqMeterValues[i] += fEqLfFilter[0].GetFrequencyResponse(freq);
+    if (mEqLmfGain != 0.0) mFreqMeterValues[i] += fEqLmfFilter[0].GetFrequencyResponse(freq);
+    if (mEqHmfGain != 0.0) mFreqMeterValues[i] += fEqHmfFilter[0].GetFrequencyResponse(freq);
+    if (mEqHfGain != 0.0) mFreqMeterValues[i] += fEqHfFilter[0].GetFrequencyResponse(freq);
   }
   if (GetUI()) dynamic_cast<SR::Graphics::SRFrequencyResponseMeter*>(GetUI()->GetControlWithTag(cFreqMeter))->UpdateValues(mFreqMeterValues);
   //}
@@ -414,8 +418,21 @@ void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
   case kInputBypass:
   case kOutputBypass:
   case kBypass:
-    GrayOutControls();
-    break;
+    GrayOutControls(); break;
+  case kEqHfBell:
+  case kEqLfBell:
+  case kEqLfGain:
+  case kEqLfFreq: 
+  case kEqLmfGain:
+  case kEqLmfFreq:
+  case kEqLmfQ: 
+  case kEqHmfGain: 
+  case kEqHmfFreq:
+  case kEqHmfQ: 
+  case kEqHfGain: 
+  case kEqHfFreq:
+  case kEqAmount:
+    SetFreqMeterValues(); break;
   default:
     break;
   }
@@ -1095,32 +1112,30 @@ void SRChannel::OnParamChange(int paramIdx) {
     mEqHfIsBell = GetParam(paramIdx)->Bool();
     if (mEqHfIsBell == 1) { fEqHfFilter[0].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak); fEqHfFilter[1].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak); }
     else { fEqHfFilter[0].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highshelf); fEqHfFilter[1].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_highshelf); }
-    SetFreqMeterValues();
     break;
 
   case kEqLfBell:
     mEqLfIsBell = GetParam(paramIdx)->Bool();
     if (mEqLfIsBell == 1) { fEqLfFilter[0].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak); fEqLfFilter[1].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_peak); }
     else { fEqLfFilter[0].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_lowshelf); fEqLfFilter[1].setType(SR::DSP::SRFiltersTwoPole::FilterType::biquad_lowshelf); }
-    SetFreqMeterValues();
     break;
 
-  case kEqLfGain: mEqLfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLfFilter[0].setPeakGain(mEqLfGain); fEqLfFilter[1].setPeakGain(mEqLfGain);   SetFreqMeterValues();break;
-  case kEqLfFreq: mEqLfFreq = GetParam(paramIdx)->Value(); fEqLfFilter[0].setFc(mEqLfFreq / mSampleRate); fEqLfFilter[1].setFc(mEqLfFreq / mSampleRate);   SetFreqMeterValues();break;
+  case kEqLfGain: mEqLfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLfFilter[0].setPeakGain(mEqLfGain); fEqLfFilter[1].setPeakGain(mEqLfGain); break;
+  case kEqLfFreq: mEqLfFreq = GetParam(paramIdx)->Value(); fEqLfFilter[0].setFc(mEqLfFreq / mSampleRate); fEqLfFilter[1].setFc(mEqLfFreq / mSampleRate); break;
     //case kEqLfQ: mEqLfQ = GetParam(paramIdx)->Value(); fEqLfFilter[0].setQ(mEqLfQ); fEqLfFilter[1].setQ(mEqLfQ); break;
 
-  case kEqLmfGain: mEqLmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLmfFilter[0].setPeakGain(mEqLmfGain); fEqLmfFilter[1].setPeakGain(mEqLmfGain);   SetFreqMeterValues();break;
-  case kEqLmfFreq: mEqLmfFreq = GetParam(paramIdx)->Value(); fEqLmfFilter[0].setFc(mEqLmfFreq / mSampleRate); fEqLmfFilter[1].setFc(mEqLmfFreq / mSampleRate);   SetFreqMeterValues();break;
-  case kEqLmfQ: mEqLmfQ = GetParam(paramIdx)->Value(); fEqLmfFilter[0].setQ(mEqLmfQ); fEqLmfFilter[1].setQ(mEqLmfQ);   SetFreqMeterValues();break;
+  case kEqLmfGain: mEqLmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqLmfFilter[0].setPeakGain(mEqLmfGain); fEqLmfFilter[1].setPeakGain(mEqLmfGain); break;
+  case kEqLmfFreq: mEqLmfFreq = GetParam(paramIdx)->Value(); fEqLmfFilter[0].setFc(mEqLmfFreq / mSampleRate); fEqLmfFilter[1].setFc(mEqLmfFreq / mSampleRate); break;
+  case kEqLmfQ: mEqLmfQ = GetParam(paramIdx)->Value(); fEqLmfFilter[0].setQ(mEqLmfQ); fEqLmfFilter[1].setQ(mEqLmfQ); break;
 
-  case kEqHmfGain: mEqHmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHmfFilter[0].setPeakGain(mEqHmfGain); fEqHmfFilter[1].setPeakGain(mEqHmfGain);   SetFreqMeterValues();break;
-  case kEqHmfFreq: mEqHmfFreq = GetParam(paramIdx)->Value(); fEqHmfFilter[0].setFc(mEqHmfFreq / mSampleRate); fEqHmfFilter[1].setFc(mEqHmfFreq / mSampleRate);   SetFreqMeterValues();break;
-  case kEqHmfQ: mEqHmfQ = GetParam(paramIdx)->Value(); fEqHmfFilter[0].setQ(mEqHmfQ); fEqHmfFilter[1].setQ(mEqHmfQ);   SetFreqMeterValues();break;
+  case kEqHmfGain: mEqHmfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHmfFilter[0].setPeakGain(mEqHmfGain); fEqHmfFilter[1].setPeakGain(mEqHmfGain); break;
+  case kEqHmfFreq: mEqHmfFreq = GetParam(paramIdx)->Value(); fEqHmfFilter[0].setFc(mEqHmfFreq / mSampleRate); fEqHmfFilter[1].setFc(mEqHmfFreq / mSampleRate); break;
+  case kEqHmfQ: mEqHmfQ = GetParam(paramIdx)->Value(); fEqHmfFilter[0].setQ(mEqHmfQ); fEqHmfFilter[1].setQ(mEqHmfQ); break;
 
-  case kEqHfGain: mEqHfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHfFilter[0].setPeakGain(mEqHfGain); fEqHfFilter[1].setPeakGain(mEqHfGain);   SetFreqMeterValues();break;
-  case kEqHfFreq: mEqHfFreq = GetParam(paramIdx)->Value(); fEqHfFilter[0].setFc(mEqHfFreq / mSampleRate); fEqHfFilter[1].setFc(mEqHfFreq / mSampleRate);   SetFreqMeterValues();break;
+  case kEqHfGain: mEqHfGain = GetParam(paramIdx)->Value() * mEqAmount; fEqHfFilter[0].setPeakGain(mEqHfGain); fEqHfFilter[1].setPeakGain(mEqHfGain); break;
+  case kEqHfFreq: mEqHfFreq = GetParam(paramIdx)->Value(); fEqHfFilter[0].setFc(mEqHfFreq / mSampleRate); fEqHfFilter[1].setFc(mEqHfFreq / mSampleRate); break;
 
-  case kEqAmount: mEqAmount = GetParam(paramIdx)->Value() / 100.; OnParamChange(kEqHfGain); OnParamChange(kEqHmfGain); OnParamChange(kEqLmfGain); OnParamChange(kEqLfGain);   SetFreqMeterValues();break;
+  case kEqAmount: mEqAmount = GetParam(paramIdx)->Value() / 100.; OnParamChange(kEqHfGain); OnParamChange(kEqHmfGain); OnParamChange(kEqLmfGain); OnParamChange(kEqLfGain); break;
     //case kEqHfQ: mEqHfQ = GetParam(paramIdx)->Value(); fEqHfFilter[0].setQ(mEqHfQ); fEqHfFilter[1].setQ(mEqHfQ); break;
 
 

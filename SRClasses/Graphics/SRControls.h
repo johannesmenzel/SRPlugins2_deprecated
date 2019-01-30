@@ -591,7 +591,7 @@ namespace SR {
     };
 
 
-
+    // TODO: Draw with PathConvexShape from ptr to member array updated from Updatefunction
     class SRFrequencyResponseMeter : public IControl {
     public:
       SRFrequencyResponseMeter(IRECT bounds, int numValues, double* values, double shape = 1.0)

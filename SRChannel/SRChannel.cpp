@@ -155,7 +155,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     // CANVAS'
     const IRECT rectPlugin = pGraphics->GetBounds();      // Plug canvas
-    const IRECT rectHeader = rectPlugin.GetFromTop(70.f);
+    const IRECT rectHeader = rectPlugin.GetFromTop(80.f);
     const IRECT rectFooter = rectPlugin.GetFromBottom(30.f);
     const IRECT rectControls = rectPlugin.GetReducedFromTop(70.f).GetReducedFromBottom(30.f); // Control canvas
     // Section rects
@@ -194,10 +194,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(cInputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 0));
       pGraphics->GetControlWithTag(cGrMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 1));
       pGraphics->GetControlWithTag(cOutputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 2));
-      pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader);
+      pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 0).GetPadded(-5.f));
+      pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 1).GetPadded(-5.f));
 
       pGraphics->GetControlWithTag(cPresetMenu)->SetTargetAndDrawRECTs(rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(pGraphics->GetControlWithTag(cSRPluginsLogo)->GetRECT().W()).GetReducedFromRight(pGraphics->GetControlWithTag(cSRChannelLogo)->GetRECT().W()));
-      pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectEq.SubRectVertical(10, 9));
 
 
       for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
@@ -283,16 +283,19 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(3, 1), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 2), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
-    pGraphics->AttachControl(new IVScopeControl<2>(rectHeader, "Left", "Right"), cScope, "Meter");
+    pGraphics->AttachControl(new IVScopeControl<2>(rectHeader.SubRectHorizontal(6, 0).GetPadded(-5.f), "Left", "Right"), cScope, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader.SubRectHorizontal(6, 1).GetPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5)), cFreqMeter, "Meter");
+
+
+    // Preset Menu
+    pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(float(bmpSRPluginsLogo.W())).GetReducedFromRight(float(bmpSRChannelLogo.W())), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
+
     // Set Tooltip for these
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
     pGraphics->GetControlWithTag(cGrMeter)->SetTooltip("Gain reduction meter for RMS, peak and deessing compressors");
     pGraphics->GetControlWithTag(cOutputMeter)->SetTooltip("Output peak meter for left and right channel");
-    pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope fpr left and right channel");
-
-    // Preset Menu
-    pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(float(bmpSRPluginsLogo.W())).GetReducedFromRight(float(bmpSRChannelLogo.W())), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
-    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectEq.SubRectVertical(10, 9), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5)), cFreqMeter, "Meter");
+    pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope for left and right channel");
+    pGraphics->GetControlWithTag(cFreqMeter)->SetTooltip("Frequency response of EQ");
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       const IRECT *rect;

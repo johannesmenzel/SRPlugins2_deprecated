@@ -29,23 +29,26 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
     SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
     SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
+
     //SetChannelLabel(ERoute::kOutput, 2, "SC Out 1", true);
     //SetChannelLabel(ERoute::kOutput, 3, "SC Out 2", true);
 
   }
   else {
-    //GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
-    //GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
-    //GetIOConfig(1)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
-    //GetIOConfig(1)->GetBusInfo(ERoute::kInput, 1)->mLabel.Set("SC", MAX_CHAN_NAME_LEN);
-    //GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+    GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
+    GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+    GetIOConfig(1)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
+    GetIOConfig(1)->GetBusInfo(ERoute::kInput, 1)->mLabel.Set("SC", MAX_CHAN_NAME_LEN);
+    GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+
     //GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 1)->mLabel.Set("SC Out", MAX_CHAN_NAME_LEN);
-    SetChannelLabel(ERoute::kInput, 0, "In 1", true);
-    SetChannelLabel(ERoute::kInput, 1, "In 2", true);
-    SetChannelLabel(ERoute::kInput, 2, "SC 1", true);
-    SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
-    SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
-    SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
+
+    //SetChannelLabel(ERoute::kInput, 0, "In 1", true);
+    //SetChannelLabel(ERoute::kInput, 1, "In 2", true);
+    //SetChannelLabel(ERoute::kInput, 2, "SC 1", true);
+    //SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
+    //SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
+    //SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
 
     //GetIOConfig(1)->mBusInfo->Empty();
     //GetIOConfig(0)->AddBusInfo(ERoute::kInput, 2, "In");
@@ -194,7 +197,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader);
 
       pGraphics->GetControlWithTag(cPresetMenu)->SetTargetAndDrawRECTs(rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(pGraphics->GetControlWithTag(cSRPluginsLogo)->GetRECT().W()).GetReducedFromRight(pGraphics->GetControlWithTag(cSRChannelLogo)->GetRECT().W()));
-      pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectEq.SubRectVertical(5, 4));
+      pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectEq.SubRectVertical(10, 9));
 
 
       for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
@@ -289,7 +292,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     // Preset Menu
     pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(float(bmpSRPluginsLogo.W())).GetReducedFromRight(float(bmpSRChannelLogo.W())), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
-    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectEq.SubRectVertical(5, 4), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5)), cFreqMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectEq.SubRectVertical(10, 9), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5)), cFreqMeter, "Meter");
 
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       const IRECT *rect;

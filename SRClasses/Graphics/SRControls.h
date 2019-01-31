@@ -54,6 +54,7 @@ namespace SR {
     protected:
       bool mDisplayParamValue;
       bool mShowParamLabel = true;
+      bool mDrawCircleLabels;
       IRECT mHandleBounds;
       IRECT mLabelBounds;
       IRECT mValueBounds;
@@ -67,7 +68,6 @@ namespace SR {
       WDL_String mLabelMin;
       WDL_String mLabelMax;
       WDL_String mLabelCtr;
-      bool mDrawCircleLabels;
       IText mLabelText;
       IText& mValueText = mText;
       IText mTextCircleLabelMin;
@@ -592,29 +592,28 @@ namespace SR {
 
 
     // TODO: Draw with PathConvexShape from ptr to member array updated from Updatefunction
-    class SRFrequencyResponseMeter : public IControl {
+    class SRFrequencyResponseMeter : public IControl
+      , public IVectorBase
+    {
     public:
-      SRFrequencyResponseMeter(IRECT bounds, int numValues, double* values, double shape = 1.0)
+      SRFrequencyResponseMeter(IRECT bounds, int numValues, double* values, double shape = 1.0, const IVColorSpec& colorSpec = DEFAULT_SPEC)
         : IControl(bounds, -1)
+        , IVectorBase(colorSpec)
         , mValues(values)
         , mNumValues(numValues)
         , mShape(shape)
         , mPatternFill(IPattern(EPatternType::kSolidPattern))
-        //, mPatternFill(IPattern(EPatternType::kLinearPattern))
         , mPatternStroke(IPattern(EPatternType::kSolidPattern))
       {
         mStrokeOptions.mPreserve = true;
         mFillOptions.mPreserve = true;
-        mPatternStroke = IPattern(COLOR_LIGHT_GRAY);
-        //mPatternFill.CreateLinearGradient(mRECT, EDirection::kVertical,
-        //  {
-        //           IColorStop(IColor(255, 255, 255, 255), 0.0f),
-        //          IColorStop(IColor(255, 150, 150, 150), 0.5f),
-        //          IColorStop(IColor(255, 255, 255, 255), 1.0f)
-        //  }
-        //);
-        mPatternFill = IPattern(COLOR_DARK_GRAY);
+        mPatternStroke = IPattern(GetColor(kFG));
+        mPatternFill = IPattern(GetColor(kHL));
+        AttachIControl(this);
       }
+
+      ~SRFrequencyResponseMeter() {}
+
       void Draw(IGraphics& g) override {
         g.PathClear();
         g.PathMoveTo(mRECT.L, mRECT.MH());
@@ -630,16 +629,6 @@ namespace SR {
         g.PathFill(mPatternFill, mFillOptions, 0);
         g.PathStroke(mPatternStroke, 1.f, mStrokeOptions, 0);
       };
-
-      //void OnResize() override {
-      //  mPatternFill = IPattern::CreateLinearGradient(mRECT, EDirection::kVertical,
-      //    {
-      //            IColorStop(IColor(255, 255, 255, 255), 0.0f),
-      //            IColorStop(IColor(255, 150, 150, 150), 0.5f),
-      //            IColorStop(IColor(255, 255, 255, 255), 1.0f)
-      //    }
-      //  );
-      //};
 
       void UpdateValues(double* values) {
         mValues = values;

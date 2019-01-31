@@ -554,7 +554,9 @@ namespace SR {
       mDisp.SetFormatted(32, "%02d: %s", pNumber + 1, mPlug->GetPresetName(pNumber));
 
       IColor colorBg = IColor(50, 0, 0, 0);
-      g.FillRect(colorBg, mRECT);
+      IColor colorFrame = IColor(50, 255, 255, 255);
+      g.FillRoundRect(colorBg, mRECT, 5.f);
+      g.DrawRoundRect(colorFrame, mRECT, 5.f);
 
       if (mDisp.Get())
       {

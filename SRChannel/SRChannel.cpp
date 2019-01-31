@@ -184,12 +184,12 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(cPanelPost)->SetTargetAndDrawRECTs(rectPost);
       pGraphics->GetControlWithTag(cPanelOutput)->SetTargetAndDrawRECTs(rectOutput);
       pGraphics->GetControlWithTag(cPanelMeter)->SetTargetAndDrawRECTs(rectMeter);
-      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelInput))->SetPattern(patternPanel);
-      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelEq))->SetPattern(patternPanel);
-      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelComp))->SetPattern(patternPanel);
-      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelPost))->SetPattern(patternPanel);
-      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelOutput))->SetPattern(patternPanel);
-      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelMeter))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelInput))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelEq))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelComp))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelPost))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelOutput))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelMeter))->SetPattern(patternPanel);
 
       pGraphics->GetControlWithTag(cInputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 0));
       pGraphics->GetControlWithTag(cGrMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 1));
@@ -197,7 +197,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 0).GetPadded(-5.f));
       pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 1).GetPadded(-5.f));
 
-      pGraphics->GetControlWithTag(cPresetMenu)->SetTargetAndDrawRECTs(rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(pGraphics->GetControlWithTag(cSRPluginsLogo)->GetRECT().W()).GetReducedFromRight(pGraphics->GetControlWithTag(cSRChannelLogo)->GetRECT().W()));
+      pGraphics->GetControlWithTag(cPresetMenu)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 2).SubRectVertical(4, 1).FracRectVertical(2.f, true).GetPadded(-5.f));
 
 
       for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
@@ -271,12 +271,12 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromRight(float(bmpSRChannelLogo.W())), bmpSRChannelLogo, -1, EBlendType::kBlendNone), cSRChannelLogo, "UI");
     //pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", SRLayout.textVersionString), cVersion, "UI");
     // Attach section rect PANELS
-    pGraphics->AttachControl(new IPanelControl(rectInput, patternPanel, true), cPanelInput, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectEq, patternPanel, true), cPanelEq, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectComp, patternPanel, true), cPanelComp, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectPost, patternPanel, true), cPanelPost, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectOutput, patternPanel, true), cPanelOutput, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectMeter, patternPanel, true), cPanelMeter, "UI");
+    pGraphics->AttachControl(new SR::Graphics::SRPanel(rectInput, patternPanel, true), cPanelInput, "UI");
+    pGraphics->AttachControl(new SR::Graphics::SRPanel(rectEq, patternPanel, true), cPanelEq, "UI");
+    pGraphics->AttachControl(new SR::Graphics::SRPanel(rectComp, patternPanel, true), cPanelComp, "UI");
+    pGraphics->AttachControl(new SR::Graphics::SRPanel(rectPost, patternPanel, true), cPanelPost, "UI");
+    pGraphics->AttachControl(new SR::Graphics::SRPanel(rectOutput, patternPanel, true), cPanelOutput, "UI");
+    pGraphics->AttachControl(new SR::Graphics::SRPanel(rectMeter, patternPanel, true), cPanelMeter, "UI");
 
 
     // METERS peak and gain reduction
@@ -284,11 +284,11 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new SR::Graphics::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(3, 1), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 2), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader.SubRectHorizontal(6, 0).GetPadded(-5.f), "Left", "Right"), cScope, "Meter");
-    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader.SubRectHorizontal(6, 1).GetPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5)), cFreqMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader.SubRectHorizontal(6, 1).GetPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5), SRLayout.colorSpec), cFreqMeter, "Meter");
 
 
     // Preset Menu
-    pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectVertical(2, 0).GetReducedFromLeft(float(bmpSRPluginsLogo.W())).GetReducedFromRight(float(bmpSRChannelLogo.W())), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
+    pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectHorizontal(6, 2).SubRectVertical(4, 1).FracRectVertical(2.f, true).GetPadded(-5.f), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
 
     // Set Tooltip for these
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");

@@ -10,6 +10,7 @@
 #include <cmath>
 #include <functional>
 
+// Plugin connector:
 SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
   , mEqHfQ(stQ)
@@ -20,7 +21,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mCompRmsAutoMakeup(1.)
   , mAgcTrigger(false)
 {
-  // Name channels
+  // Name channels:
   if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
   {
     SetChannelLabel(ERoute::kInput, 0, "In 1", true);
@@ -58,26 +59,26 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     //GetIOConfig(1)->AddBusInfo(ERoute::kOutput, 2, "Out");
   }
 
-  // Initialize Parameters
+  // Initialize Parameters:
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
-    //IParam* param = GetParam(paramIdx);												// ... for which we temporally create a pointer "param"
     const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
+    IParam* thisParameter = GetParam(paramIdx);												          // ... for which we temporally create a pointer "param"
     switch (p.Type)
     {
     case IParam::EParamType::kTypeDouble:
       //InitDoubleShapeFromMiddlePosition(this, paramIdx, p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, 0, p.group, p.centerVal, p.centerPoint, IParam::kUnitCustom);
-      GetParam(paramIdx)->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, p.Flags, p.group, new ShapeFromMiddle(p.minVal, p.maxVal, p.centerVal, p.centerPoint), IParam::kUnitCustom);
+      thisParameter->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, p.Flags, p.group, new ShapeFromMiddle(p.minVal, p.maxVal, p.centerVal, p.centerPoint), IParam::kUnitCustom);
       break;
     case IParam::EParamType::kTypeInt:
-      GetParam(paramIdx)->InitInt(p.name, (int)p.defaultVal, (int)p.minVal, (int)p.maxVal, p.unit, 0, p.group);
+      thisParameter->InitInt(p.name, (int)p.defaultVal, (int)p.minVal, (int)p.maxVal, p.unit, 0, p.group);
       break;
     case IParam::EParamType::kTypeBool:
-      GetParam(paramIdx)->InitBool(p.name, (bool)p.defaultVal, p.unit, 0, p.group, p.labelMin, p.labelMax);
+      thisParameter->InitBool(p.name, (bool)p.defaultVal, p.unit, 0, p.group, p.labelMin, p.labelMax);
       break;
     case IParam::EParamType::kTypeEnum:
       switch (paramIdx) {
       case kEqHpOrder: /*case kEqLpOrder:*/
-        GetParam(paramIdx)->InitEnum(
+        thisParameter->InitEnum(
           p.name,
           (int)p.defaultVal,
           EFilterSlope::kNumOrders,
@@ -96,7 +97,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         );
         break;
       case kSaturationType:
-        GetParam(paramIdx)->InitEnum(p.name,
+        thisParameter->InitEnum(p.name,
           (int)p.defaultVal,
           SR::DSP::SRSaturation::SaturationTypes::numTypes,
           p.unit,
@@ -110,7 +111,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           "Full Rect"
         ); break;
       case kOversamplingRate:
-        GetParam(paramIdx)->InitEnum(
+        thisParameter->InitEnum(
           p.name,
           (int)p.defaultVal,
           OverSampler<double>::kNumFactors,
@@ -132,33 +133,41 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     // Setup display texts
     switch (paramIdx)
     {
-    case kLimiterThresh: GetParam(paramIdx)->SetDisplayText((int)p.maxVal, "Off"); break;
-    case kEqHpFreq: case kCompPeakSidechainFilterFreq: GetParam(paramIdx)->SetDisplayText((int)p.minVal, "Off"); break;
-    case kEqLpFreq: GetParam(paramIdx)->SetDisplayText((int)p.maxVal, "Off"); break;
-    case kCompPeakRatio: GetParam(paramIdx)->SetDisplayText((int)p.maxVal, "inf"); break;
+    case kLimiterThresh: thisParameter->SetDisplayText((int)p.maxVal, "Off"); break;
+    case kEqHpFreq: case kCompPeakSidechainFilterFreq: thisParameter->SetDisplayText((int)p.minVal, "Off"); break;
+    case kEqLpFreq: thisParameter->SetDisplayText((int)p.maxVal, "Off"); break;
+    case kCompPeakRatio: thisParameter->SetDisplayText((int)p.maxVal, "inf"); break;
     default: break;
     }
+
+    // To set default parameter member variable:
     OnParamChange(paramIdx);
   }
+
+  // Why?
   OnReset();
 
+  // Make presets:
   MakePresets();
 
 
-  // GRAPHICS func
-#if IPLUG_EDITOR // All UI methods and member variables should be within an IPLUG_EDITOR guard, should you want distributed UI
+  // GRAPHICS functions:
+#if IPLUG_EDITOR
+
+  // Create graphics context:
   mMakeGraphicsFunc = [&]() {
     return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
   };
 
+  // Create layout:
   mLayoutFunc = [&](IGraphics* pGraphics) {
 
-    // CANVAS'
+    // Make RECTs:
     const IRECT rectPlugin = pGraphics->GetBounds();      // Plug canvas
     const IRECT rectHeader = rectPlugin.GetFromTop(80.f);
     const IRECT rectFooter = rectPlugin.GetFromBottom(30.f);
     const IRECT rectControls = rectPlugin.GetReducedFromTop(70.f).GetReducedFromBottom(30.f); // Control canvas
-    // Section rects
+    // Make section RECTs:
     const IRECT rectInput = rectControls.SubRectHorizontal(6, 0).GetPadded(-5.f);
     const IRECT rectEq = rectControls.SubRectHorizontal(6, 1).GetPadded(-5.f);
     const IRECT rectComp = rectControls.SubRectHorizontal(6, 2).GetPadded(-5.f);
@@ -166,45 +175,52 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     const IRECT rectOutput = rectControls.SubRectHorizontal(6, 4).GetPadded(-5.f);
     const IRECT rectMeter = rectControls.SubRectHorizontal(6, 5).GetPadded(-5.f);
 
+    // Make PATTERNS:
     const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(SRLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f) });
 
-    // Set new RECTs on resize
+    // Resize loop:
     if (pGraphics->NControls()) {
 
+      // Rezize BACKGROUND:
       pGraphics->GetBackgroundControl()->SetTargetAndDrawRECTs(rectPlugin);
-      // Resize logo
-      //pGraphics->GetControlWithTag(cBitmapLogo)->SetTargetAndDrawRECTs(rectHeader.GetFromRight(300.f));
+      // Resize LOGO and VERSION STRING:
       pGraphics->GetControlWithTag(cSRPluginsLogo)->SetTargetAndDrawRECTs(rectHeader.SubRectVertical(2, 0).GetFromLeft(pGraphics->GetControlWithTag(cSRPluginsLogo)->GetRECT().W()));
       pGraphics->GetControlWithTag(cSRChannelLogo)->SetTargetAndDrawRECTs(rectHeader.SubRectVertical(2, 0).GetFromRight(pGraphics->GetControlWithTag(cSRChannelLogo)->GetRECT().W()));
       //pGraphics->GetControlWithTag(cVersion)->SetTargetAndDrawRECTs(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize));
-      // Resize section rect PANELS
+
+      // Resize section rect PANELS and patterns:
       pGraphics->GetControlWithTag(cPanelInput)->SetTargetAndDrawRECTs(rectInput);
-      pGraphics->GetControlWithTag(cPanelEq)->SetTargetAndDrawRECTs(rectEq);
-      pGraphics->GetControlWithTag(cPanelComp)->SetTargetAndDrawRECTs(rectComp);
-      pGraphics->GetControlWithTag(cPanelPost)->SetTargetAndDrawRECTs(rectPost);
-      pGraphics->GetControlWithTag(cPanelOutput)->SetTargetAndDrawRECTs(rectOutput);
-      pGraphics->GetControlWithTag(cPanelMeter)->SetTargetAndDrawRECTs(rectMeter);
       dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelInput))->SetPattern(patternPanel);
+      pGraphics->GetControlWithTag(cPanelEq)->SetTargetAndDrawRECTs(rectEq);
       dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelEq))->SetPattern(patternPanel);
+      pGraphics->GetControlWithTag(cPanelComp)->SetTargetAndDrawRECTs(rectComp);
       dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelComp))->SetPattern(patternPanel);
+      pGraphics->GetControlWithTag(cPanelPost)->SetTargetAndDrawRECTs(rectPost);
       dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelPost))->SetPattern(patternPanel);
+      pGraphics->GetControlWithTag(cPanelOutput)->SetTargetAndDrawRECTs(rectOutput);
       dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelOutput))->SetPattern(patternPanel);
+      pGraphics->GetControlWithTag(cPanelMeter)->SetTargetAndDrawRECTs(rectMeter);
       dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelMeter))->SetPattern(patternPanel);
 
+      // Resize METERS:
       pGraphics->GetControlWithTag(cInputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 0));
       pGraphics->GetControlWithTag(cGrMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 1));
       pGraphics->GetControlWithTag(cOutputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 2));
-      pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 0).GetPadded(-5.f));
-      pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 1).GetPadded(-5.f));
+      pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 0).GetVPadded(-5.f));
+      pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f));
 
+      // Resize PRESET menu:
       pGraphics->GetControlWithTag(cPresetMenu)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 2).SubRectVertical(4, 1).FracRectVertical(2.f, true).GetPadded(-5.f));
 
-
+      // Resize: Loop through parameters:
       for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
+
         const IRECT* rect;
         const SRParamProperties& p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
         const int ctrlIdx = p.ctrlTag;
+        IControl* thisControl = pGraphics->GetControlWithTag(ctrlIdx);												          // ... for which we temporally create a pointer "thisControl"
 
+        // Resize: Choose RECT for parameter control:
         switch (p.position.AttachToControlPanel) {
         case RectHeader: rect = &rectHeader; break;
         case RectInput: rect = &rectInput; break;
@@ -216,6 +232,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         default: break;
         }
 
+        // Place parameter controls here:
         const IRECT rectCurrentControl = rect->GetGridCell(p.position.y, p.position.x, sectionRectGridCells[p.position.AttachToControlPanel][0], sectionRectGridCells[p.position.AttachToControlPanel][1]).FracRectHorizontal(p.position.w, false).FracRectVertical(p.position.h, true).GetPadded((p.Knobs == Button) ? -5.0f : 0.0f);
 
 
@@ -223,30 +240,39 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         {
         case IParam::EParamType::kTypeInt: // No int ctrl...
         case IParam::EParamType::kTypeDouble:
+
           switch (paramIdx)
           {
           case kInputGain:
           case kOutputGain:
             // Resize faders
-            pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rectCurrentControl);
-            break;
+            thisControl->SetTargetAndDrawRECTs(rectCurrentControl); break;
+
           default:
             // Resize knobs
-            pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rectCurrentControl);
-            break;
+            thisControl->SetTargetAndDrawRECTs(rectCurrentControl); break;
           }
+
           break;
-          // Resize switches
+
         case IParam::EParamType::kTypeEnum:
         case IParam::EParamType::kTypeBool:
-          pGraphics->GetControlWithTag(ctrlIdx)->SetTargetAndDrawRECTs(rectCurrentControl);
-          break;
+          // Resize switches
+          thisControl->SetTargetAndDrawRECTs(rectCurrentControl); break;
+
         default:
           break;
+
         }
+
       }
+
+      // If resizing finished:
       return;
+
     } // End resize function
+
+
 
     // LOAD
     pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
@@ -265,11 +291,11 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachPanelBackground(SRLayout.colorPluginBG);        // Attach Background
     pGraphics->AttachCornerResizer(kUIResizerSize, true);                 // Attach Resizer
 
-    // Attach logo
-    //pGraphics->AttachControl(new IBitmapControl(rectHeader.GetFromRight(bmpLogo.W()), bmpLogo, -1, kBlendNone), cBitmapLogo);
+    // Attach logos and version string:
     pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromLeft(float(bmpSRPluginsLogo.W())), bmpSRPluginsLogo, -1, EBlendType::kBlendNone), cSRPluginsLogo, "UI");
     pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromRight(float(bmpSRChannelLogo.W())), bmpSRChannelLogo, -1, EBlendType::kBlendNone), cSRChannelLogo, "UI");
     //pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", SRLayout.textVersionString), cVersion, "UI");
+
     // Attach section rect PANELS
     pGraphics->AttachControl(new SR::Graphics::SRPanel(rectInput, patternPanel, true), cPanelInput, "UI");
     pGraphics->AttachControl(new SR::Graphics::SRPanel(rectEq, patternPanel, true), cPanelEq, "UI");
@@ -279,29 +305,32 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new SR::Graphics::SRPanel(rectMeter, patternPanel, true), cPanelMeter, "UI");
 
 
-    // METERS peak and gain reduction
+    // Attach meters
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(3, 1), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 2), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
-    pGraphics->AttachControl(new IVScopeControl<2>(rectHeader.SubRectHorizontal(6, 0).GetPadded(-5.f), "Left", "Right"), cScope, "Meter");
-    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader.SubRectHorizontal(6, 1).GetPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5), SRLayout.colorSpec), cFreqMeter, "Meter");
+    pGraphics->AttachControl(new IVScopeControl<2>(rectHeader.SubRectHorizontal(6, 0).GetVPadded(-5.f), "Left", "Right"), cScope, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5), SRLayout.colorSpec), cFreqMeter, "Meter");
 
 
-    // Preset Menu
+    // Attach preset menu:
     pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectHorizontal(6, 2).SubRectVertical(4, 1).FracRectVertical(2.f, true).GetPadded(-5.f), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
 
-    // Set Tooltip for these
+    // Set Tooltip for non-parameter controls:
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
     pGraphics->GetControlWithTag(cGrMeter)->SetTooltip("Gain reduction meter for RMS, peak and deessing compressors");
     pGraphics->GetControlWithTag(cOutputMeter)->SetTooltip("Output peak meter for left and right channel");
     pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope for left and right channel");
     pGraphics->GetControlWithTag(cFreqMeter)->SetTooltip("Frequency response of EQ");
 
+    // Loop through parameters:
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
-      const IRECT *rect;
+      const IRECT* rect;
       const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
       const int ctrlIdx = p.ctrlTag;
 
+
+      // Choose RECT for parameter control:
       switch (p.position.AttachToControlPanel) {
       case RectHeader: rect = &rectHeader; break;
       case RectInput: rect = &rectInput; break;
@@ -312,11 +341,12 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       case RectFooter: rect = &rectFooter; break;
       default: break;
       }
+
+      // Place parameter controls here:
       const IRECT rectCurrentControl = rect->GetGridCell(p.position.y, p.position.x, sectionRectGridCells[p.position.AttachToControlPanel][0], sectionRectGridCells[p.position.AttachToControlPanel][1]).FracRectHorizontal(p.position.w, false).FracRectVertical(p.position.h, true).GetPadded((p.Knobs == Button) ? -5.0f : 0.0f);
 
-      IColor knobColor;									// We're pointing at the type of knob we want to add
-
-      switch (p.Knobs) {						// "knob" is gonna be a pointer to IBitmap
+      IColor knobColor;               // "knobColor" gets what IColor is stated in the param struct
+      switch (p.Knobs) {
       case EControlImages::SslBlue: knobColor = SRLayout.colorKnobSslBlue; break;
       case EControlImages::SslGreen: knobColor = SRLayout.colorKnobSslGreen; break;
       case EControlImages::SslRed: knobColor = SRLayout.colorKnobSslRed; break;
@@ -333,13 +363,15 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       case IParam::EParamType::kTypeDouble:
         switch (paramIdx)
         {
+
         case kInputGain:
         case kOutputGain:
-          // Attach faders
+          // Attach imput and output faders
           pGraphics->AttachControl(new IVSliderControl(rectCurrentControl, paramIdx, SRLayout.colorSpec, kVertical, true, 32.f, 2.f), ctrlIdx);
           break;
+
         default:
-          // Attach knobs
+          // Attach knobs for all other double
           pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(
             rectCurrentControl,
             paramIdx,
@@ -363,9 +395,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           break;
         }
         break;
-        // Attach switches
+
       case IParam::EParamType::kTypeEnum:
       case IParam::EParamType::kTypeBool:
+        // Attach switches for bool and enum
         pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(
           rectCurrentControl,
           paramIdx,
@@ -375,25 +408,31 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           GetParam(paramIdx)->NDisplayTexts()
         ), ctrlIdx);
         break;
+
       default:
         break;
       }
+
+      // Other setup for EACH parameter control
       pGraphics->GetControlWithTag(ctrlIdx)->SetMOWhenGrayed(true);
       pGraphics->GetControlWithTag(ctrlIdx)->SetTooltip(p.tooltip);
     }
 
+    // Other setup for ALL parameter controls
     pGraphics->StyleAllVectorControls(true, true, false, 0.1f, 2.f, 3.f, SRLayout.colorSpec);
+
   }; // END LAYOUT function
+
 }// END GRAPHICS functions
 
 
 
 // Method to gray controls, which are currently bypassed. Thats why you have to test from top to bottom
-void SRChannel::GrayOutControls()
-{
+void SRChannel::GrayOutControls() {
   if (GetUI()) {
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
       const SRParamProperties& p = srchannelParamProperties[paramIdx];
+
       const bool grayout =
         (mBypass == 1 && p.group != "Global") ? true
         : (mInputBypass == 1 && p.group == "Input") ? true
@@ -401,13 +440,9 @@ void SRChannel::GrayOutControls()
         : (mEqBypass == 1 && p.group == "EQ") ? true
         : (mOutputBypass == 1 && p.group == "Output") ? true
         : (mCompIsParallel == 0 && paramIdx == kCompPeakRmsRatio) ? true
-        //: (paramIdx == kTestParam1
-        //  || paramIdx == kTestParam2
-        //  || paramIdx == kTestParam3
-        //  || paramIdx == kTestParam4
-        //  || paramIdx == kTestParam5
-        //  || paramIdx == kEqLpOrder ? true
+        //: (paramIdx == kEqLpOrder ? true
         : false;
+
       GetUI()->GetControlWithTag(p.ctrlTag)->GrayOut(grayout);
     }
   }
@@ -443,22 +478,24 @@ void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
   case kOutputBypass:
   case kBypass:
     GrayOutControls(); break;
-    //case kEqHpFreq:
-    //case kEqLpFreq:
-    //case kEqHfBell:
-    //case kEqLfBell:
-    //case kEqLfGain:
-    //case kEqLfFreq:
-    //case kEqLmfGain:
-    //case kEqLmfFreq:
-    //case kEqLmfQ:
-    //case kEqHmfGain:
-    //case kEqHmfFreq:
-    //case kEqHmfQ:
-    //case kEqHfGain:
-    //case kEqHfFreq:
-    //case kEqAmount:
-    //  SetFreqMeterValues(); break;
+
+  case kEqHpFreq:
+  case kEqLpFreq:
+  case kEqHfBell:
+  case kEqLfBell:
+  case kEqLfGain:
+  case kEqLfFreq:
+  case kEqLmfGain:
+  case kEqLmfFreq:
+  case kEqLmfQ:
+  case kEqHmfGain:
+  case kEqHmfFreq:
+  case kEqHmfQ:
+  case kEqHfGain:
+  case kEqHfFreq:
+  case kEqAmount:
+    SetFreqMeterValues(); break;
+
   default:
     break;
   }
@@ -720,54 +757,59 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
       if (mCompBypass != 1) {
 
-        // Deesser
+        // DEESSER
 
         if (mDeesserRatio != 1.0 && mDeesserThresh != 0.0) {
           fDeesser.process(*out1, *out2);
         }
 
-        // Compressor
+        // COMPRESSOR
+        // Create dry sample first
+        sample vCompDry[2] = { *out1, *out2 };
 
-        sample vCompDry1 = *out1;
-        sample vCompDry2 = *out2;
+        // Process parallel compression
+        if (mCompIsParallel) {
 
-        if (mCompIsParallel == 1) {
-          sample vCompRmsIn1 = *out1;
-          sample vCompPeakIn1 = *out1;
-          sample vCompRmsIn2 = *out2;
-          sample vCompPeakIn2 = *out2;
+          // Create samples to process of each compressor
+          sample vCompRmsIn[2] = { *out1, *out2 };
+          sample vCompPeakIn[2] = { *out1, *out2 };
 
           if (mCompRmsRatio != 1. && mCompRmsThresh != 0.) {
-            (mCompRmsIsExtSc != 1) ? fCompressorRms.process(vCompRmsIn1, vCompRmsIn2) : fCompressorRms.process(vCompRmsIn1, vCompRmsIn2, *sc1, *sc2);
+            (! mCompRmsIsExtSc)
+              ? fCompressorRms.process(vCompRmsIn[0], vCompRmsIn[1])
+              : fCompressorRms.process(vCompRmsIn[0], vCompRmsIn[1], *sc1, *sc2);
           }
 
           if (mCompPeakRatio != 1. && mCompPeakThresh != 0.) {
-            (mCompPeakIsExtSc != 1) ? fCompressorPeak.process(vCompPeakIn1, vCompPeakIn2) : fCompressorPeak.process(vCompPeakIn1, vCompPeakIn2, *sc1, *sc2);
+            (! mCompPeakIsExtSc)
+              ? fCompressorPeak.process(vCompPeakIn[0], vCompPeakIn[1])
+              : fCompressorPeak.process(vCompPeakIn[0], vCompPeakIn[1], *sc1, *sc2);
           }
 
-          if ((mCompRmsRatio != 1 && mCompRmsThresh != 0) || (mCompPeakRatio != 1 && mCompPeakThresh != 0)) {
-            *out1 = (1 - mCompPeakRmsRatio) * vCompRmsIn1 * mCompRmsMakeup * mCompRmsAutoMakeup + mCompPeakRmsRatio * vCompPeakIn1 * mCompPeakMakeup * mCompPeakAutoMakeup;
-            *out2 = (1 - mCompPeakRmsRatio) * vCompRmsIn2 * mCompRmsMakeup * mCompRmsAutoMakeup + mCompPeakRmsRatio * vCompPeakIn2 * mCompPeakMakeup * mCompPeakAutoMakeup;
+          if ((mCompRmsRatio != 1. && mCompRmsThresh != 0.) || (mCompPeakRatio != 1. && mCompPeakThresh != 0.)) {
+            *out1 = (1. - mCompPeakRmsRatio) * vCompRmsIn[0] * mCompRmsMakeup * mCompRmsAutoMakeup + mCompPeakRmsRatio * vCompPeakIn[0] * mCompPeakMakeup * mCompPeakAutoMakeup;
+            *out2 = (1. - mCompPeakRmsRatio) * vCompRmsIn[1] * mCompRmsMakeup * mCompRmsAutoMakeup + mCompPeakRmsRatio * vCompPeakIn[1] * mCompPeakMakeup * mCompPeakAutoMakeup;
           }
         }
+        // Process serial compression
         else {
           if (mCompRmsRatio != 1. && mCompRmsThresh != 0.) {
-            (mCompRmsIsExtSc != 1) ? fCompressorRms.process(*out1, *out2) : fCompressorRms.process(*out1, *out2, *sc1, *sc2);
+            (! mCompRmsIsExtSc) ? fCompressorRms.process(*out1, *out2) : fCompressorRms.process(*out1, *out2, *sc1, *sc2);
             *out1 *= mCompRmsMakeup * mCompRmsAutoMakeup;
             *out2 *= mCompRmsMakeup * mCompRmsAutoMakeup;
           }
 
           if (mCompPeakRatio != 1. && mCompPeakThresh != 0.) {
-            (mCompPeakIsExtSc != 1) ? fCompressorPeak.process(*out1, *out2) : fCompressorPeak.process(*out1, *out2, *sc1, *sc2);
+            (! mCompPeakIsExtSc) ? fCompressorPeak.process(*out1, *out2) : fCompressorPeak.process(*out1, *out2, *sc1, *sc2);
             *out1 *= mCompPeakMakeup * mCompPeakAutoMakeup;
             *out2 *= mCompPeakMakeup * mCompPeakAutoMakeup;
           }
         }
 
-        // Compressor's Dry/Wet
+        // Apply compressor's Dry/Wet afterwards
         if (mCompDryWet != 1.) {
-          *out1 = (mCompDryWet * *out1) + (vCompDry1 * (1. - mCompDryWet));
-          *out2 = (mCompDryWet * *out2) + (vCompDry2 * (1. - mCompDryWet));
+          *out1 = (mCompDryWet * *out1) + (vCompDry[0] * (1. - mCompDryWet));
+          *out2 = (mCompDryWet * *out2) + (vCompDry[1] * (1. - mCompDryWet));
         }
 
       }
@@ -783,24 +825,31 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
         // Pan
 
-        if (mPan != .5 || mIsPanMonoLow == true) {
-          sample vSafePanLowSignal1 = *out1;
-          sample vSafePanHighSignal1 = *out1;
-          sample vSafePanLowSignal2 = *out2;
-          sample vSafePanHighSignal2 = *out2;
+        if (mPan != .5 || mIsPanMonoLow) {
 
-          vSafePanLowSignal1 = fSafePanLp[0].process(vSafePanLowSignal1);
-          vSafePanLowSignal2 = fSafePanLp[1].process(vSafePanLowSignal2);
-          vSafePanHighSignal1 = fSafePanHp[0].process(vSafePanHighSignal1);
-          vSafePanHighSignal2 = fSafePanHp[1].process(vSafePanHighSignal2);
+          // Multiply signal...
+          sample vSafePanLowSignal[2] = { *out1, *out2 };
+          sample vSafePanHighSignal[2] = { *out1, *out2 };
 
-          fPan.process(vSafePanHighSignal1, vSafePanHighSignal2);
+          // Filter low and high split signal:
+          vSafePanLowSignal[0] = fSafePanLp[0].process(vSafePanLowSignal[0]);
+          vSafePanLowSignal[1] = fSafePanLp[1].process(vSafePanLowSignal[1]);
+          vSafePanHighSignal[0] = fSafePanHp[0].process(vSafePanHighSignal[0]);
+          vSafePanHighSignal[1] = fSafePanHp[1].process(vSafePanHighSignal[1]);
+
+          // Pan high signal:
+          fPan.process(vSafePanHighSignal[0], vSafePanHighSignal[1]);
+
+          // Mono low signal:
           if (mIsPanMonoLow) {
-            vSafePanLowSignal1 = (vSafePanLowSignal1 + vSafePanLowSignal2) * 0.5;
-            vSafePanLowSignal2 = (vSafePanLowSignal1 + vSafePanLowSignal2) * 0.5;
+            vSafePanLowSignal[0] = (vSafePanLowSignal[0] + vSafePanLowSignal[1]) * 0.5;
+            vSafePanLowSignal[1] = (vSafePanLowSignal[0] + vSafePanLowSignal[1]) * 0.5;
           }
-          *out1 = vSafePanHighSignal1 - vSafePanLowSignal1;
-          *out2 = vSafePanHighSignal2 - vSafePanLowSignal2;
+
+          // Apply mixed signals (flip phase of one):
+          // TODO: Allpass instead of flipped phase
+          *out1 = vSafePanHighSignal[0] - vSafePanLowSignal[0];
+          *out2 = vSafePanHighSignal[1] - vSafePanLowSignal[1];
         }
 
 

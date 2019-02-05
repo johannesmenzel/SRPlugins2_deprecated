@@ -422,3 +422,24 @@ const SRParamProperties srchannelParamProperties[kNumParams] = {
 };
 #endif
 
+// Used filters
+enum EFiltersTwoPole {
+  kHp1 = 0,
+  kHp2,
+  kHp3,
+  kHp4,
+  kHp5,
+  kHp6,
+  kHp7,
+  kHp8,
+  kHp9,
+  kHp10,
+  kLp,
+  kLf,
+  kLmf,
+  kHmf,
+  kHf,
+  kPanHp,
+  kPanLp,
+  kNumFiltersTwoPole
+};

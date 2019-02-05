@@ -97,18 +97,35 @@ private:
   unsigned short int circularBufferPointer;
 
   // FILTERS
+
+  enum EFiltersTwoPole {
+    kHp1 = 0,
+    kHp2,
+    kHp3,
+    kHp4,
+    kHp5,
+    kHp6,
+    kHp7,
+    kHp8,
+    kHp9,
+    kHp10,
+    kLp,
+    kLf,
+    kLmf,
+    kHmf,
+    kHf,
+    kPanHp,
+    kPanLp,
+    kNumFiltersTwoPole
+  };
+
     // Gain Filters
   SR::DSP::SRGain fInputGain, fOutputGain, fAutoGain;
   SR::DSP::SRPan fPan;
 
   // Spectral Filters
-  SR::DSP::SRFiltersTwoPole fEqHpFilter1[2], fEqHpFilter2[2], fEqHpFilter3[2], fEqHpFilter4[2], fEqHpFilter5[2], fEqHpFilter6[2], fEqHpFilter7[2], fEqHpFilter8[2], fEqHpFilter9[2], fEqHpFilter10[2],
-    fEqLpFilter1[2],
-    fEqLfFilter[2], fEqLmfFilter[2], fEqHmfFilter[2], fEqHfFilter[2];
-  // Safe-Pan
-  SR::DSP::SRFiltersTwoPole fSafePanHp[2], fSafePanLp[2];
-  //// Deesser
-  //SR::DSP::SRFiltersTwoPole fDeesserSidechainBandpassFilter[2], fDeesserReductionPeakFilter[2];
+  SR::DSP::SRFiltersTwoPole fFilterTwoPole[kNumFiltersTwoPole][2];
+
   // Extra Filters
   SR::DSP::SRFiltersOnePole fDcBlocker[2], fEqHpFilterOnepole[2], fEqLpFilterOnepole[2];
 
@@ -124,7 +141,6 @@ private:
   // Saturation
   SR::DSP::SRSaturation fInputSaturation[2];
   OverSampler<sample> mOverSampler[2]{ OverSampler<sample>::EFactor::kNone };
-
 
   //// TESTVARS
   //double sumIn;

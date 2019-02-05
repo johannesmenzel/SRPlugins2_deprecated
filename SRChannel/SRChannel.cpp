@@ -456,7 +456,18 @@ void SRChannel::SetFreqMeterValues() {
     // If pow shape
     double freq = std::pow((double(i) / double(FREQUENCYRESPONSE)), shape) * (0.5 * mSampleRate);
     mFreqMeterValue[i] = 0.;
-    if (mEqHpFreq > 16.) mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp1][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+    if (mEqHpFreq > 16.) {
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp1][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp2][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp3][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp4][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp5][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp6][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp7][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp8][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp9][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+      mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp10][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
+    }
     if (mEqLfGain != 0.0) mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kLf][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
     if (mEqLmfGain != 0.0) mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kLmf][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
     if (mEqHmfGain != 0.0) mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHmf][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
@@ -1052,36 +1063,41 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kEqHpFreq:
     mEqHpFreq = GetParam(paramIdx)->Value();
 
-    for (int c = 0; c < 2; c++) {
-      if (mEqHpOrder == EFilterSlope::dbo6 || mEqHpOrder == EFilterSlope::dbo18) {
-        fEqHpFilterOnepole[c].setFc(mEqHpFreq / mSampleRate);
-      }
-      if (mEqHpOrder >= EFilterSlope::dbo12) {
-        fFilterTwoPole[EFiltersTwoPole::kHp1][c].setFc(mEqHpFreq / mSampleRate);
-      }
-      if (mEqHpOrder >= EFilterSlope::dbo24) {
-        fFilterTwoPole[EFiltersTwoPole::kHp2][c].setFc(mEqHpFreq / mSampleRate);
-      }
-      if (mEqHpOrder >= EFilterSlope::dbo36) {
-        fFilterTwoPole[EFiltersTwoPole::kHp3][c].setFc(mEqHpFreq / mSampleRate);
-      }
-      if (mEqHpOrder >= EFilterSlope::dbo48) {
-        fFilterTwoPole[EFiltersTwoPole::kHp4][c].setFc(mEqHpFreq / mSampleRate);
-      }
-      if (mEqHpOrder >= EFilterSlope::dbo60) {
-        fFilterTwoPole[EFiltersTwoPole::kHp5][c].setFc(mEqHpFreq / mSampleRate);
-      }
-      if (mEqHpOrder >= EFilterSlope::dbo72) {
-        fFilterTwoPole[EFiltersTwoPole::kHp6][c].setFc(mEqHpFreq / mSampleRate);
-      }
-      if (mEqHpOrder >= EFilterSlope::dbo120) {
-        fFilterTwoPole[EFiltersTwoPole::kHp7][c].setFc(mEqHpFreq / mSampleRate);
-        fFilterTwoPole[EFiltersTwoPole::kHp8][c].setFc(mEqHpFreq / mSampleRate);
-        fFilterTwoPole[EFiltersTwoPole::kHp9][c].setFc(mEqHpFreq / mSampleRate);
-        fFilterTwoPole[EFiltersTwoPole::kHp10][c].setFc(mEqHpFreq / mSampleRate);
+    //for (int c = 0; c < 2; c++) {
+    //  if (mEqHpOrder == EFilterSlope::dbo6 || mEqHpOrder == EFilterSlope::dbo18) {
+    //    fEqHpFilterOnepole[c].setFc(mEqHpFreq / mSampleRate);
+    //  }
+    //  if (mEqHpOrder >= EFilterSlope::dbo12) {
+    //    fFilterTwoPole[EFiltersTwoPole::kHp1][c].setFc(mEqHpFreq / mSampleRate);
+    //  }
+    //  if (mEqHpOrder >= EFilterSlope::dbo24) {
+    //    fFilterTwoPole[EFiltersTwoPole::kHp2][c].setFc(mEqHpFreq / mSampleRate);
+    //  }
+    //  if (mEqHpOrder >= EFilterSlope::dbo36) {
+    //    fFilterTwoPole[EFiltersTwoPole::kHp3][c].setFc(mEqHpFreq / mSampleRate);
+    //  }
+    //  if (mEqHpOrder >= EFilterSlope::dbo48) {
+    //    fFilterTwoPole[EFiltersTwoPole::kHp4][c].setFc(mEqHpFreq / mSampleRate);
+    //  }
+    //  if (mEqHpOrder >= EFilterSlope::dbo60) {
+    //    fFilterTwoPole[EFiltersTwoPole::kHp5][c].setFc(mEqHpFreq / mSampleRate);
+    //  }
+    //  if (mEqHpOrder >= EFilterSlope::dbo72) {
+    //    fFilterTwoPole[EFiltersTwoPole::kHp6][c].setFc(mEqHpFreq / mSampleRate);
+    //  }
+    //  if (mEqHpOrder >= EFilterSlope::dbo120) {
+    //    fFilterTwoPole[EFiltersTwoPole::kHp7][c].setFc(mEqHpFreq / mSampleRate);
+    //    fFilterTwoPole[EFiltersTwoPole::kHp8][c].setFc(mEqHpFreq / mSampleRate);
+    //    fFilterTwoPole[EFiltersTwoPole::kHp9][c].setFc(mEqHpFreq / mSampleRate);
+    //    fFilterTwoPole[EFiltersTwoPole::kHp10][c].setFc(mEqHpFreq / mSampleRate);
+    //  }
+    //}
+
+    for (int f = EFiltersTwoPole::kHp1; f <= EFiltersTwoPole::kHp10; f++) {
+      for (int c = 0; c < 1; c++) {
+        fFilterTwoPole[f][c].setFc(mEqHpFreq / mSampleRate);
       }
     }
-
 
 
     break;

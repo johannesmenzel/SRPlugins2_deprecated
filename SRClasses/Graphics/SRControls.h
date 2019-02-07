@@ -290,8 +290,6 @@ namespace SR {
       /** Used on the DSP side in order to queue sample values and transfer data to low priority thread. */
       class SRMeterBallistics {
 
-
-
       public:
         SRMeterBallistics(int controlTag)
           : mControlTag(controlTag)
@@ -385,8 +383,6 @@ namespace SR {
       {
       }
 
-
-
       void OnResize() override {
         MakeRects();
         mText.mSize = int(mRECT.W() * 0.25f);
@@ -475,8 +471,6 @@ namespace SR {
         else
           peakRect = (!mDrawFromTop) ? fillRect.GetFromRight(mPeakSize) : fillRect.GetFromLeft(mPeakSize);
         DrawPeak(g, peakRect, chIdx);
-
-
       }
 
       virtual void DrawPeak(IGraphics& g, IRECT& r, int chIdx) {

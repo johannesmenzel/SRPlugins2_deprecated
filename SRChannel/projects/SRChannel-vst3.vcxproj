@@ -335,6 +335,7 @@
     <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3.h" />
     <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_Parameter.h" />
     <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_view.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRGain.h" />

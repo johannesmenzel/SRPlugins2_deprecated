@@ -10,6 +10,7 @@
 
 // SRClasses
 #include "../SRClasses/SRConstants.h"
+#include "../SRClasses/DSP/SRBuffer.h"
 #include "../SRClasses/DSP/SRGain.h"
 #include "../SRClasses/DSP/SRFilters.h"
 #include "../SRClasses/DSP/SRDynamics.h"
@@ -98,27 +99,6 @@ private:
 
   // FILTERS
 
-  enum EFiltersTwoPole {
-    kHp1 = 0,
-    kHp2,
-    kHp3,
-    kHp4,
-    kHp5,
-    kHp6,
-    kHp7,
-    kHp8,
-    kHp9,
-    kHp10,
-    kLp,
-    kLf,
-    kLmf,
-    kHmf,
-    kHf,
-    kPanHp,
-    kPanLp,
-    kNumFiltersTwoPole
-  };
-
     // Gain Filters
   SR::DSP::SRGain fInputGain, fOutputGain, fAutoGain;
   SR::DSP::SRPan fPan;
@@ -160,6 +140,10 @@ private:
   //sample circularBufferInL[circularBufferLenght], circularBufferInR[circularBufferLenght], circularBufferOutL[circularBufferLenght], circularBufferOutR[circularBufferLenght];
   //sample* circularBuffer[4] = { circularBufferInL, circularBufferInR, circularBufferOutL, circularBufferOutR };
   //sample** mCircularBuffer = circularBuffer;
+
+  SR::DSP::SRBuffer<4> bInputMeter;
+  SR::DSP::SRBuffer<2> bOutputMeter;
+  SR::DSP::SRBuffer<3> bGrMeter;
 
   double mFreqMeterValue[FREQUENCYRESPONSE];
   double* mFreqMeterValues = mFreqMeterValue;

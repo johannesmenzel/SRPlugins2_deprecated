@@ -491,6 +491,7 @@ void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
     GrayOutControls(); break;
 
   case kEqHpFreq:
+  case kEqHpOrder:
   case kEqLpFreq:
   case kEqHfBell:
   case kEqLfBell:
@@ -582,6 +583,9 @@ void SRChannel::InitEffects() {
   fDeesser.initRuntime();
 
   // Meter
+  bInputMeter.ResetBuffer(2, 1024);
+  bOutputMeter.ResetBuffer(2, 1024);
+  bGrMeter.ResetBuffer(3, 1024);
 
   // Circular Buffer can be uncommented if needed
   //mCircularBuffer[0].Resize(circularBufferLenght, false);
@@ -605,26 +609,31 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   sample* out1 = outputs[0];
   sample* out2 = outputs[1];
 
-  sample* in1MeterValue = new sample[nFrames];
-  sample* in2MeterValue = new sample[nFrames];
-  sample* out1MeterValue = new sample[nFrames];
-  sample* out2MeterValue = new sample[nFrames];
-  sample* grPeakMeterValue = new sample[nFrames];
-  sample* grRmsMeterValue = new sample[nFrames];
-  sample* grDeessMeterValue = new sample[nFrames];
 
-  sample* inMeterChannel[2] = { in1MeterValue, in2MeterValue };
-  sample* outMeterChannel[2] = { out1MeterValue, out2MeterValue };
-  sample* grMeterChannel[3] = { grPeakMeterValue, grRmsMeterValue, grDeessMeterValue };
+  //sample* in1MeterValue = new sample[nFrames];
+  //sample* in2MeterValue = new sample[nFrames];
+  //sample* out1MeterValue = new sample[nFrames];
+  //sample* out2MeterValue = new sample[nFrames];
+  //sample* grPeakMeterValue = new sample[nFrames];
+  //sample* grRmsMeterValue = new sample[nFrames];
+  //sample* grDeessMeterValue = new sample[nFrames];
 
-  sample** inMeterValues = inMeterChannel;
-  sample** outMeterValues = outMeterChannel;
-  sample** grMeterValues = grMeterChannel;
+  //sample* inMeterChannel[2] = { in1MeterValue, in2MeterValue };
+  //sample* outMeterChannel[2] = { out1MeterValue, out2MeterValue };
+  //sample* grMeterChannel[3] = { grPeakMeterValue, grRmsMeterValue, grDeessMeterValue };
+
+  //sample** inMeterValues = inMeterChannel;
+  //sample** outMeterValues = outMeterChannel;
+  //sample** grMeterValues = grMeterChannel;
+
+  bInputMeter.SetNumFrames(nFrames);
+  bOutputMeter.SetNumFrames(nFrames);
+  bGrMeter.SetNumFrames(nFrames);
 
 
   // Begin Processing per Frame
 
-  for (int s = 0; s < nFrames; ++s, ++in1, ++in2, ++out1, ++out2) {
+  for (int s = 0; s < nFrames; ++s, ++in1, ++in2, ++sc1, ++sc2, ++out1, ++out2) {
 
     // Begin global bypass test
     // ------------------------
@@ -654,13 +663,16 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       //circularBufferInL[circularBufferPointer] = *out1;
       //circularBufferInR[circularBufferPointer] = *out2;
 
+      // Fill input meter values
+      //in2MeterValue[s] = *out1;
+      //in2MeterValue[s] = *out2;
+      bInputMeter.ProcessBuffer(*out1, 0, s);
+      bInputMeter.ProcessBuffer(*out2, 1, s);
 
 
       // ----------------
       // End Pre Sections
 
-      in1MeterValue[s] = *out1;
-      in2MeterValue[s] = *out2;
 
 
       // INPUT SECTION
@@ -907,9 +919,6 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       // POST SECTIONS
       // -------------
 
-      // Fill circular buffer with output gain values
-      //circularBufferOutL[circularBufferPointer] = *out1;
-      //circularBufferOutR[circularBufferPointer] = *out2;
 
 
       // Output Gain
@@ -933,13 +942,24 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // -------------------------
     // End of global bypass test
 
-    out1MeterValue[s] = *out1;
-    out2MeterValue[s] = *out2;
-    grPeakMeterValue[s] = fCompressorPeak.getGrLin();
-    grRmsMeterValue[s] = fCompressorRms.getGrLin();
-    grDeessMeterValue[s] = fDeesser.getGrLin();
+    bOutputMeter.ProcessBuffer(*out1, 0, s);
+    bOutputMeter.ProcessBuffer(*out2, 1, s);
+    bGrMeter.ProcessBuffer(fCompressorPeak.getGrLin(), 0, s);
+    bGrMeter.ProcessBuffer(fCompressorRms.getGrLin(), 1, s);
+    bGrMeter.ProcessBuffer(fDeesser.getGrLin(), 2, s);
 
-    (circularBufferPointer >= circularBufferLenght - 1) ? circularBufferPointer = 0 : circularBufferPointer++;
+    //out1MeterValue[s] = *out1;
+    //out2MeterValue[s] = *out2;
+    //grPeakMeterValue[s] = fCompressorPeak.getGrLin();
+    //grRmsMeterValue[s] = fCompressorRms.getGrLin();
+    //grDeessMeterValue[s] = fDeesser.getGrLin();
+
+
+      // Fill circular buffer with output gain values
+      //circularBufferOutL[circularBufferPointer] = *out1;
+      //circularBufferOutR[circularBufferPointer] = *out2;
+
+    //(circularBufferPointer >= circularBufferLenght - 1) ? circularBufferPointer = 0 : circularBufferPointer++;
 
 
   }
@@ -948,30 +968,34 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
 
 
-  if (mAgc && mAgcTrigger) {
-    double sumIn = 0.; double sumOut = 0.;
-    for (int s = 0; s < nFrames; s++) {
-      sumIn += std::fabs(inMeterValues[0][s]) + std::fabs(inMeterValues[1][s]);
-      sumOut += std::fabs(outMeterValues[0][s]) + std::fabs(outMeterValues[1][s]);
-    }
-    double diff = sumIn / sumOut;
-    if (mAgc) fAutoGain.setGain(diff);
-    mAgcTrigger = false;
-  }
+  //if (mAgc && mAgcTrigger) {
+  //  double sumIn = 0.; double sumOut = 0.;
+  //  for (int s = 0; s < nFrames; s++) {
+  //    sumIn += std::fabs(inMeterValues[0][s]) + std::fabs(inMeterValues[1][s]);
+  //    sumOut += std::fabs(outMeterValues[0][s]) + std::fabs(outMeterValues[1][s]);
+  //  }
+  //  double diff = sumIn / sumOut;
+  //  if (mAgc) fAutoGain.setGain(diff);
+  //  mAgcTrigger = false;
+  //}
 
+  mInputMeterBallistics.ProcessBlock(bInputMeter.GetBuffer(), nFrames);
+  mOutputMeterBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
+  mGrMeterBallistics.ProcessBlock(bGrMeter.GetBuffer(), nFrames);
+  mScopeBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
 
-  mInputMeterBallistics.ProcessBlock(inMeterValues, nFrames);
-  mGrMeterBallistics.ProcessBlock(grMeterValues, nFrames);
-  mOutputMeterBallistics.ProcessBlock(outMeterValues, nFrames);
-  mScopeBallistics.ProcessBlock(outMeterValues, nFrames);
+  //mInputMeterBallistics.ProcessBlock(inMeterValues, nFrames);
+  //mGrMeterBallistics.ProcessBlock(grMeterValues, nFrames);
+  //mOutputMeterBallistics.ProcessBlock(outMeterValues, nFrames);
+  //mScopeBallistics.ProcessBlock(outMeterValues, nFrames);
 
-  delete[] grPeakMeterValue;
-  delete[] grRmsMeterValue;
-  delete[] grDeessMeterValue;
-  delete[] in1MeterValue;
-  delete[] in2MeterValue;
-  delete[] out1MeterValue;
-  delete[] out2MeterValue;
+  //delete[] grPeakMeterValue;
+  //delete[] grRmsMeterValue;
+  //delete[] grDeessMeterValue;
+  //delete[] in1MeterValue;
+  //delete[] in2MeterValue;
+  //delete[] out1MeterValue;
+  //delete[] out2MeterValue;
 }
 
 

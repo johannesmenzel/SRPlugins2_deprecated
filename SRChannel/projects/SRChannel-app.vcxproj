@@ -319,6 +319,7 @@
     <ClInclude Include="..\..\..\IPlug\IPlugUtilities.h" />
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_hdr.h" />
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_src.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRGain.h" />

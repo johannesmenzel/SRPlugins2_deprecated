@@ -254,6 +254,9 @@
     <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h">
       <Filter>SRClasses\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h">
+      <Filter>SRClasses\DSP</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="IPlug">

@@ -22,44 +22,45 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mAgcTrigger(false)
 {
   // Name channels:
-  if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
-  {
-    SetChannelLabel(ERoute::kInput, 0, "In 1", true);
-    SetChannelLabel(ERoute::kInput, 1, "In 2", true);
-    SetChannelLabel(ERoute::kInput, 2, "SC 1", true);
-    SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
-    SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
-    SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
+  //if (GetAPI() == kAPIVST2) // for VST2 we name individual outputs
+  //{
+  SetChannelLabel(ERoute::kInput, 0, "In 1", true);
+  SetChannelLabel(ERoute::kInput, 1, "In 2", true);
+  SetChannelLabel(ERoute::kInput, 2, "SC 1", true);
+  SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
+  SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
+  SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
 
-    //SetChannelLabel(ERoute::kOutput, 2, "SC Out 1", true);
-    //SetChannelLabel(ERoute::kOutput, 3, "SC Out 2", true);
+  //SetChannelLabel(ERoute::kOutput, 2, "SC Out 1", true);
+  //SetChannelLabel(ERoute::kOutput, 3, "SC Out 2", true);
 
-  }
-  else {
-    GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
-    GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
-    GetIOConfig(1)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
-    GetIOConfig(1)->GetBusInfo(ERoute::kInput, 1)->mLabel.Set("SC", MAX_CHAN_NAME_LEN);
-    GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+//}
+//else {
+//  GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
+//  GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+//  GetIOConfig(1)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
+//  GetIOConfig(1)->GetBusInfo(ERoute::kInput, 1)->mLabel.Set("SC", MAX_CHAN_NAME_LEN);
+//  GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
 
-    //GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 1)->mLabel.Set("SC Out", MAX_CHAN_NAME_LEN);
+  //GetIOConfig(1)->GetBusInfo(ERoute::kOutput, 1)->mLabel.Set("SC Out", MAX_CHAN_NAME_LEN);
 
-    //SetChannelLabel(ERoute::kInput, 0, "In 1", true);
-    //SetChannelLabel(ERoute::kInput, 1, "In 2", true);
-    //SetChannelLabel(ERoute::kInput, 2, "SC 1", true);
-    //SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
-    //SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
-    //SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
+  //SetChannelLabel(ERoute::kInput, 0, "In 1", true);
+  //SetChannelLabel(ERoute::kInput, 1, "In 2", true);
+  //SetChannelLabel(ERoute::kInput, 2, "SC 1", true);
+  //SetChannelLabel(ERoute::kInput, 3, "SC 2", true);
+  //SetChannelLabel(ERoute::kOutput, 0, "Out 1", true);
+  //SetChannelLabel(ERoute::kOutput, 1, "Out 2", true);
 
-    //GetIOConfig(1)->mBusInfo->Empty();
-    //GetIOConfig(0)->AddBusInfo(ERoute::kInput, 2, "In");
-    //GetIOConfig(0)->AddBusInfo(ERoute::kOutput, 2, "Out");
-    //GetIOConfig(1)->AddBusInfo(ERoute::kInput, 2, "In");
-    //GetIOConfig(1)->AddBusInfo(ERoute::kInput, 2, "SC");
-    //GetIOConfig(1)->AddBusInfo(ERoute::kOutput, 2, "Out");
-  }
+  //GetIOConfig(1)->mBusInfo->Empty();
+  //GetIOConfig(0)->AddBusInfo(ERoute::kInput, 2, "In");
+  //GetIOConfig(0)->AddBusInfo(ERoute::kOutput, 2, "Out");
+  //GetIOConfig(1)->AddBusInfo(ERoute::kInput, 2, "In");
+  //GetIOConfig(1)->AddBusInfo(ERoute::kInput, 2, "SC");
+  //GetIOConfig(1)->AddBusInfo(ERoute::kOutput, 2, "Out");
+//}
 
-  // Initialize Parameters:
+
+// Initialize Parameters:
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
     const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
     IParam* thisParameter = GetParam(paramIdx);												          // ... for which we temporally create a pointer "param"
@@ -455,7 +456,7 @@ void SRChannel::SetFreqMeterValues() {
     //double freq = 0.5 * mSampleRate * double(i) / double(FREQUENCYRESPONSE);
     // If pow shape
     double freq = std::pow((double(i) / double(FREQUENCYRESPONSE)), shape) * (0.5 * mSampleRate);
-    mFreqMeterValue[i] = 0.;
+    mFreqMeterValues[i] = 0.;
     if (mEqHpFreq > 16.) {
       mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp1][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
       mFreqMeterValues[i] += fFilterTwoPole[EFiltersTwoPole::kHp2][0].GetFrequencyResponse(freq / mSampleRate, 12., false);
@@ -519,13 +520,11 @@ void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
 #if IPLUG_DSP
 
 void SRChannel::InitEffects() {
-  // Get sample rate
-  mSampleRate = GetSampleRate();
 
   // Init gain and pan
-  fInputGain.initGain(mInputGain, mInputGain, double(mSampleRate) / 10., false);
-  fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate) / 10., false);
-  fAutoGain.initGain(mAutoGain, mAutoGain, double(mSampleRate) / 10., false);
+  fInputGain.initGain(mInputGain, mInputGain, double(mSampleRate), false);
+  fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate), false);
+  fAutoGain.initGain(mAutoGain, mAutoGain, double(mSampleRate), false);
   fPan.initPan(SR::DSP::typeSinusodial, mPan, true);
 
   for (int i = 0; i < NChannelsConnected(kOutput); i++) {
@@ -583,9 +582,12 @@ void SRChannel::InitEffects() {
   fDeesser.initRuntime();
 
   // Meter
-  bInputMeter.ResetBuffer(2, 1024);
-  bOutputMeter.ResetBuffer(2, 1024);
-  bGrMeter.ResetBuffer(3, 1024);
+#if USEBUFFER == 1
+  bInputMeter.ResetBuffer(2, GetBlockSize());
+  bOutputMeter.ResetBuffer(2, GetBlockSize());
+  bGrMeter.ResetBuffer(3, GetBlockSize());
+#endif // USEBUFFER
+
 
   // Circular Buffer can be uncommented if needed
   //mCircularBuffer[0].Resize(circularBufferLenght, false);
@@ -609,26 +611,25 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   sample* out1 = outputs[0];
   sample* out2 = outputs[1];
 
-
-  //sample* in1MeterValue = new sample[nFrames];
-  //sample* in2MeterValue = new sample[nFrames];
-  //sample* out1MeterValue = new sample[nFrames];
-  //sample* out2MeterValue = new sample[nFrames];
-  //sample* grPeakMeterValue = new sample[nFrames];
-  //sample* grRmsMeterValue = new sample[nFrames];
-  //sample* grDeessMeterValue = new sample[nFrames];
-
-  //sample* inMeterChannel[2] = { in1MeterValue, in2MeterValue };
-  //sample* outMeterChannel[2] = { out1MeterValue, out2MeterValue };
-  //sample* grMeterChannel[3] = { grPeakMeterValue, grRmsMeterValue, grDeessMeterValue };
-
-  //sample** inMeterValues = inMeterChannel;
-  //sample** outMeterValues = outMeterChannel;
-  //sample** grMeterValues = grMeterChannel;
-
+  #if USEBUFFER == 1
   bInputMeter.SetNumFrames(nFrames);
   bOutputMeter.SetNumFrames(nFrames);
   bGrMeter.SetNumFrames(nFrames);
+#elif USEBUFFER == 2
+  mInMeterValues = new sample*[2];
+  for (int ch = 0; ch < 2; ch++) {
+    mInMeterValues[ch] = new sample[nFrames];
+  }
+  mOutMeterValues = new sample*[2];
+  for (int ch = 0; ch < 2; ch++) {
+    mOutMeterValues[ch] = new sample[nFrames];
+  }
+  mGrMeterValues = new sample*[3];
+  for (int ch = 0; ch < 3; ch++) {
+    mGrMeterValues[ch] = new sample[nFrames];
+  }
+#endif
+
 
 
   // Begin Processing per Frame
@@ -664,10 +665,14 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       //circularBufferInR[circularBufferPointer] = *out2;
 
       // Fill input meter values
-      //in2MeterValue[s] = *out1;
-      //in2MeterValue[s] = *out2;
+
+#if USEBUFFER == 1
       bInputMeter.ProcessBuffer(*out1, 0, s);
       bInputMeter.ProcessBuffer(*out2, 1, s);
+#elif USEBUFFER == 2
+      mInMeterValues[0][s] = *out1;
+      mInMeterValues[1][s] = *out2;
+#endif
 
 
       // ----------------
@@ -681,18 +686,18 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
         // Saturation
         if (mSaturationAmount != 0.) {
-          // Non oversampled saturation processing
-          //*out1 = fInputSaturationL.process(*out1);
-          //*out2 = fInputSaturationR.process(*out2);
+          if (mOversamplingRate == OverSampler<sample>::EFactor::kNone) {
+            // Non oversampled saturation processing
+            *out1 = fInputSaturation[0].process(*out1);
+            *out2 = fInputSaturation[1].process(*out2);
+          }
+          else {
+            // oversampled saturation processing
+            *out1 = mOverSampler[0].Process(*out1, std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[0], std::placeholders::_1));
+            *out2 = mOverSampler[1].Process(*out2, std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[1], std::placeholders::_1));
+          }
 
-          // oversampled saturation processing
-          //using namespace std::placeholders;
-          *out1 = mOverSampler[0].Process(*out1, std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[0], std::placeholders::_1));
-          *out2 = mOverSampler[1].Process(*out2, std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[1], std::placeholders::_1));
 
-          // oversampled saturation processing if std::function<double(double)> is at hand
-          //*out1 = mOverSamplerL.Process(*out1 * mSaturationDrive, [](sample input) {return std::tanh(input);});
-          //*out2 = mOverSamplerR.Process(*out2 * mSaturationDrive, [](sample input) {return std::tanh(input);});
         }
 
       }
@@ -942,24 +947,25 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // -------------------------
     // End of global bypass test
 
+#if USEBUFFER == 1
     bOutputMeter.ProcessBuffer(*out1, 0, s);
     bOutputMeter.ProcessBuffer(*out2, 1, s);
     bGrMeter.ProcessBuffer(fCompressorPeak.getGrLin(), 0, s);
     bGrMeter.ProcessBuffer(fCompressorRms.getGrLin(), 1, s);
     bGrMeter.ProcessBuffer(fDeesser.getGrLin(), 2, s);
+#elif USEBUFFER == 2
+    mOutMeterValues[0][s] = *out1;
+    mOutMeterValues[1][s] = *out2;
+    mGrMeterValues[0][s] = fCompressorPeak.getGrLin();
+    mGrMeterValues[1][s] = fCompressorRms.getGrLin();
+    mGrMeterValues[2][s] = fDeesser.getGrLin();
+#endif
 
-    //out1MeterValue[s] = *out1;
-    //out2MeterValue[s] = *out2;
-    //grPeakMeterValue[s] = fCompressorPeak.getGrLin();
-    //grRmsMeterValue[s] = fCompressorRms.getGrLin();
-    //grDeessMeterValue[s] = fDeesser.getGrLin();
+    // Fill circular buffer with output gain values
+    //circularBufferOutL[circularBufferPointer] = *out1;
+    //circularBufferOutR[circularBufferPointer] = *out2;
 
-
-      // Fill circular buffer with output gain values
-      //circularBufferOutL[circularBufferPointer] = *out1;
-      //circularBufferOutR[circularBufferPointer] = *out2;
-
-    //(circularBufferPointer >= circularBufferLenght - 1) ? circularBufferPointer = 0 : circularBufferPointer++;
+  //(circularBufferPointer >= circularBufferLenght - 1) ? circularBufferPointer = 0 : circularBufferPointer++;
 
 
   }
@@ -967,35 +973,52 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   // End processing per frame and again some processing per Framesize
 
 
+#ifdef USEAGC
+  if (mAgc && mAgcTrigger) {
+    double sumIn = 0.; double sumOut = 0.;
+#if USEBUFFER == 1
+    const double diff = bInputMeter.AverageBuffer() / bOutputMeter.AverageBuffer();
+#elif USEBUFFER == 2
+    for (int s = 0; s < nFrames; s++) {
+      sumIn += std::fabs(mInMeterValues[0][s]) + std::fabs(mInMeterValues[1][s]);
+      sumOut += std::fabs(mOutMeterValues[0][s]) + std::fabs(mOutMeterValues[1][s]);
+    }
+    const double diff = sumIn / sumOut;
+#endif
+    if (mAgc && diff < 8) fAutoGain.setGain(diff);
+    mAgcTrigger = false;
+  }
+#endif
 
-  //if (mAgc && mAgcTrigger) {
-  //  double sumIn = 0.; double sumOut = 0.;
-  //  for (int s = 0; s < nFrames; s++) {
-  //    sumIn += std::fabs(inMeterValues[0][s]) + std::fabs(inMeterValues[1][s]);
-  //    sumOut += std::fabs(outMeterValues[0][s]) + std::fabs(outMeterValues[1][s]);
-  //  }
-  //  double diff = sumIn / sumOut;
-  //  if (mAgc) fAutoGain.setGain(diff);
-  //  mAgcTrigger = false;
-  //}
-
+#if USEBUFFER == 1
   mInputMeterBallistics.ProcessBlock(bInputMeter.GetBuffer(), nFrames);
   mOutputMeterBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
   mGrMeterBallistics.ProcessBlock(bGrMeter.GetBuffer(), nFrames);
   mScopeBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
+#elif USEBUFFER == 2
+  mInputMeterBallistics.ProcessBlock(mInMeterValues, nFrames);
+  mGrMeterBallistics.ProcessBlock(mGrMeterValues, nFrames);
+  mOutputMeterBallistics.ProcessBlock(mOutMeterValues, nFrames);
+  mScopeBallistics.ProcessBlock(mOutMeterValues, nFrames);
+  for (int ch = 0; ch < 2; ch++) {
+    delete[] mInMeterValues[ch];
+  }
+  delete[] mInMeterValues;
 
-  //mInputMeterBallistics.ProcessBlock(inMeterValues, nFrames);
-  //mGrMeterBallistics.ProcessBlock(grMeterValues, nFrames);
-  //mOutputMeterBallistics.ProcessBlock(outMeterValues, nFrames);
-  //mScopeBallistics.ProcessBlock(outMeterValues, nFrames);
+  for (int ch = 0; ch < 2; ch++) {
+    delete[] mOutMeterValues[ch];
+  }
+  delete[] mOutMeterValues;
 
-  //delete[] grPeakMeterValue;
-  //delete[] grRmsMeterValue;
-  //delete[] grDeessMeterValue;
-  //delete[] in1MeterValue;
-  //delete[] in2MeterValue;
-  //delete[] out1MeterValue;
-  //delete[] out2MeterValue;
+  for (int ch = 0; ch < 3; ch++) {
+    delete[] mGrMeterValues[ch];
+  }
+  delete[] mGrMeterValues;
+#endif // USEBUFFER
+
+
+
+
 }
 
 
@@ -1016,9 +1039,11 @@ void SRChannel::OnReset() {
 }
 
 void SRChannel::OnParamChange(int paramIdx) {
-  mSampleRate = GetSampleRate();
 
+#ifdef USEAGC
   if (mAgc) mAgcTrigger = true;
+#endif // USEAGC
+
 
   switch (paramIdx)
   {
@@ -1329,28 +1354,11 @@ void SRChannel::OnParamChange(int paramIdx) {
     // AUTOMATIC GAIN CONTROL
     // ----------------------
 
+#ifdef USEAGC
   case kAgc:
     mAgc = GetParam(paramIdx)->Bool();
-    //if (mCircularBuffer) {
-    //  double sumIn = 0.;
-    //  double sumOut = 0.;
-    //  double aveIn = 0.;
-    //  double aveOut = 0.;
-    //  double diffInOut = 0.;
-    //  for (int i = 0; i < circularBufferLenght; i++) {
-    //    sumIn += fabs(mCircularBuffer[0][i]) + fabs(mCircularBuffer[1][i]);
-    //    sumOut += fabs(mCircularBuffer[2][i]) + fabs(mCircularBuffer[3][i]);
-    //  }
-    //  aveIn = sumIn / (2. * (double(circularBufferLenght)));
-    //  aveOut = sumOut / (2. * (double(circularBufferLenght)));
-    //  diffInOut = aveIn / aveOut;
-
-    //  SetParameterValue(kOutputGain, GetParam(kOutputGain)->ToNormalized(AmpToDB(diffInOut)));
-    //  //GetParam(paramIdx)->Set(0.);
-    //  //if (GetUI()) GetUI()->SetAllControlsDirty();
-    //  //DirtyParametersFromUI();
-    //}
     break;
+#endif // USEAGC
 
     // DEESSER
     // -------

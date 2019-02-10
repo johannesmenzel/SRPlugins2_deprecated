@@ -1,6 +1,9 @@
 #ifndef SRCHANNEL_H
 #define SRCHANNEL_H
 
+#define USEBUFFER 1
+#define USEAGC
+
 // IPlug2 source
 #include "IPlug_include_in_plug_hdr.h"
 // Extra IPlug2 libs
@@ -10,7 +13,10 @@
 
 // SRClasses
 #include "../SRClasses/SRConstants.h"
+#if USEBUFFER == 1
 #include "../SRClasses/DSP/SRBuffer.h"
+#endif // USEBUFFER
+
 #include "../SRClasses/DSP/SRGain.h"
 #include "../SRClasses/DSP/SRFilters.h"
 #include "../SRClasses/DSP/SRDynamics.h"
@@ -141,12 +147,17 @@ private:
   //sample* circularBuffer[4] = { circularBufferInL, circularBufferInR, circularBufferOutL, circularBufferOutR };
   //sample** mCircularBuffer = circularBuffer;
 
-  SR::DSP::SRBuffer<4> bInputMeter;
-  SR::DSP::SRBuffer<2> bOutputMeter;
-  SR::DSP::SRBuffer<3> bGrMeter;
+#if USEBUFFER == 1
+  SR::DSP::SRBuffer2<sample, 2> bInputMeter;
+  SR::DSP::SRBuffer2<sample, 2> bOutputMeter;
+  SR::DSP::SRBuffer2<sample, 3> bGrMeter;
+#elif USEBUFFER == 2
+  sample **mInMeterValues, **mOutMeterValues, **mGrMeterValues;
+#endif // USEBUFFER
 
-  double mFreqMeterValue[FREQUENCYRESPONSE];
-  double* mFreqMeterValues = mFreqMeterValue;
+
+
+  double* mFreqMeterValues = new double[FREQUENCYRESPONSE];
 };
 
 #endif // SRCHANNEL_H

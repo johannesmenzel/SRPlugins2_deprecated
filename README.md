@@ -1,6 +1,6 @@
 # Important Note
 
-SRChannel is currently to be ported from WDL-OL to Oliver Larkins IPlug2. As long as this message remains, do not use this code for any productive use!
+SRChannel is under heavy development. Use the code with care and and your own risk.
 
 ---
 

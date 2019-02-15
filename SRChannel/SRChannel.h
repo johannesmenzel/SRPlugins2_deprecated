@@ -128,24 +128,10 @@ private:
   SR::DSP::SRSaturation fInputSaturation[2];
   OverSampler<sample> mOverSampler[2]{ OverSampler<sample>::EFactor::kNone };
 
-  //// TESTVARS
-  //double sumIn;
-  //double sumOut;
-  //double aveIn;
-  //double aveOut;
-  //double diffInOut;
-
   SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
   SR::Graphics::SRMeter<3, 1024>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
   SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
   IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
-
-  //IPlugQueue<sample> *circularBufferInL, *circularBufferInR, *circularBufferOutL, *circularBufferOutR;
-  //WDL_TypedBuf<sample> mCircularBuffer[4];
-
-  //sample circularBufferInL[circularBufferLenght], circularBufferInR[circularBufferLenght], circularBufferOutL[circularBufferLenght], circularBufferOutR[circularBufferLenght];
-  //sample* circularBuffer[4] = { circularBufferInL, circularBufferInR, circularBufferOutL, circularBufferOutR };
-  //sample** mCircularBuffer = circularBuffer;
 
 #if USEBUFFER == 1
   SR::DSP::SRBuffer2<sample, 2> bInputMeter;

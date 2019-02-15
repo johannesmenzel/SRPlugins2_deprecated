@@ -1,0 +1,3 @@
+[submodule "SRClasses"]
+	path = SRClasses
+	url = https://github.com/johannesmenzel/SRClasses.git

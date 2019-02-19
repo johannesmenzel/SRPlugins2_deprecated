@@ -68,7 +68,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     {
     case IParam::EParamType::kTypeDouble:
       //InitDoubleShapeFromMiddlePosition(this, paramIdx, p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, 0, p.group, p.centerVal, p.centerPoint, IParam::kUnitCustom);
-      thisParameter->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, p.Flags, p.group, new ShapeFromMiddle(p.minVal, p.maxVal, p.centerVal, p.centerPoint), IParam::kUnitCustom);
+      thisParameter->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, p.Flags, p.group, ShapeFromMiddle(p.minVal, p.maxVal, p.centerVal, p.centerPoint), IParam::kUnitCustom);
       break;
     case IParam::EParamType::kTypeInt:
       thisParameter->InitInt(p.name, (int)p.defaultVal, (int)p.minVal, (int)p.maxVal, p.unit, 0, p.group);
@@ -976,10 +976,10 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
 #ifdef USEAGC
   if (mAgc && mAgcTrigger) {
-    double sumIn = 0.; double sumOut = 0.;
 #if USEBUFFER == 1
     const double diff = bInputMeter.AverageBuffer() / bOutputMeter.AverageBuffer();
 #elif USEBUFFER == 2
+    double sumIn = 0.; double sumOut = 0.;
     for (int s = 0; s < nFrames; s++) {
       sumIn += std::fabs(mInMeterValues[0][s]) + std::fabs(mInMeterValues[1][s]);
       sumOut += std::fabs(mOutMeterValues[0][s]) + std::fabs(mOutMeterValues[1][s]);

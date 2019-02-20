@@ -7,7 +7,7 @@ Which current test buffer implementation:
 2 - SRBuffer2 class (T**)
 3 - SRBuffer class (Ptrlist of WDL_Typedbuf)
 */
-#define USEBUFFER 2
+#define USEBUFFER 3
 
 // Use automatic gain compensation
 #define USEAGC

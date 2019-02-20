@@ -1,22 +1,34 @@
 #ifndef SRCHANNEL_H
 #define SRCHANNEL_H
 
-#define USEBUFFER 1
+/*
+Which current test buffer implementation:
+1 - ordinary sample** buffer
+2 - SRBuffer2 class (T**)
+3 - SRBuffer class (Ptrlist of WDL_Typedbuf)
+*/
+#define USEBUFFER 2
+
+// Use automatic gain compensation
 #define USEAGC
+
+// C++ classes
+#include <functional> // for oversampler std::function
 
 // IPlug2 source
 #include "IPlug_include_in_plug_hdr.h"
+
 // Extra IPlug2 libs
 #include "IVMeterControl.h"
 #include "IVScopeControl.h"
-#include "IPlugQueue.h"
+#include "Oversampler.h"
+//#include "IPlugQueue.h"
 
 // SRClasses
 #include "../SRClasses/SRConstants.h"
-#if USEBUFFER == 1
+#if USEBUFFER >= 2
 #include "../SRClasses/DSP/SRBuffer.h"
 #endif // USEBUFFER
-
 #include "../SRClasses/DSP/SRGain.h"
 #include "../SRClasses/DSP/SRFilters.h"
 #include "../SRClasses/DSP/SRDynamics.h"
@@ -28,9 +40,6 @@
 #include "SRChannelConstants.h"
 #endif // !SRCHANNELCONSTANTS_H
 
-// ... Commented out until implementation of oversampling
-#include "Oversampler.h"
-#include <functional>
 
 
 
@@ -134,11 +143,15 @@ private:
   IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
 
 #if USEBUFFER == 1
+  sample **mInMeterValues, **mOutMeterValues, **mGrMeterValues;
+#elif USEBUFFER == 2
   SR::DSP::SRBuffer2<sample, 2> bInputMeter;
   SR::DSP::SRBuffer2<sample, 2> bOutputMeter;
   SR::DSP::SRBuffer2<sample, 3> bGrMeter;
-#elif USEBUFFER == 2
-  sample **mInMeterValues, **mOutMeterValues, **mGrMeterValues;
+#elif USEBUFFER == 3
+  SR::DSP::SRBuffer<sample, 2, 1024> bInputMeter;
+  SR::DSP::SRBuffer<sample, 3, 1024> bGrMeter;
+  SR::DSP::SRBuffer<sample, 2, 1024> bOutputMeter;
 #endif // USEBUFFER
 
 

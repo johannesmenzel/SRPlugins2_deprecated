@@ -574,10 +574,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     // Meter
 #if USEBUFFER == 2
     bInputMeter.ResetBuffer(2, GetBlockSize());
-    bOutputMeter.ResetBuffer(2, GetBlockSize());
-    bGrMeter.ResetBuffer(3, GetBlockSize());
-#elif USEBUFFER == 3
-    bInputMeter.ResetBuffer(2, GetBlockSize());
     bGrMeter.ResetBuffer(3, GetBlockSize());
     bOutputMeter.ResetBuffer(2, GetBlockSize());
 #endif // USEBUFFER
@@ -623,10 +619,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     bInputMeter.SetNumFrames(nFrames);
     bOutputMeter.SetNumFrames(nFrames);
     bGrMeter.SetNumFrames(nFrames);
-#elif USEBUFFER == 3
-    bInputMeter.SetNumFrames(nFrames);
-    bOutputMeter.SetNumFrames(nFrames);
-    bGrMeter.SetNumFrames(nFrames);
 #endif
 
 
@@ -669,9 +661,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         mInMeterValues[0][s] = *out1;
         mInMeterValues[1][s] = *out2;
 #elif USEBUFFER == 2
-        bInputMeter.ProcessBuffer(*out1, 0, s);
-        bInputMeter.ProcessBuffer(*out2, 1, s);
-#elif USEBUFFER == 3
         bInputMeter.ProcessBuffer(*out1, 0, s);
         bInputMeter.ProcessBuffer(*out2, 1, s);
 #endif
@@ -768,7 +757,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
           // Low Pass
 
-          if (mEqLpFreq < 22000.0) { *out1 = fFilterTwoPole[EFiltersTwoPole::kLp][0].process(*out1); *out2 = fFilterTwoPole[EFiltersTwoPole::kLp][1].process(*out2); }
+          if (mEqLpFreq < 22000.0) {
+            *out1 = fFilterTwoPole[EFiltersTwoPole::kLp][0].process(*out1);
+            *out2 = fFilterTwoPole[EFiltersTwoPole::kLp][1].process(*out2);
+          }
 
           // Parametric EQ
 
@@ -961,12 +953,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       bGrMeter.ProcessBuffer(fCompressorPeak.getGrLin(), 0, s);
       bGrMeter.ProcessBuffer(fCompressorRms.getGrLin(), 1, s);
       bGrMeter.ProcessBuffer(fDeesser.getGrLin(), 2, s);
-#elif USEBUFFER == 3
-      bOutputMeter.ProcessBuffer(*out1, 0, s);
-      bOutputMeter.ProcessBuffer(*out2, 1, s);
-      bGrMeter.ProcessBuffer(fCompressorPeak.getGrLin(), 0, s);
-      bGrMeter.ProcessBuffer(fCompressorRms.getGrLin(), 1, s);
-      bGrMeter.ProcessBuffer(fDeesser.getGrLin(), 2, s);
 #endif
 
       // Fill circular buffer with output gain values
@@ -991,8 +977,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       }
       const double diff = sumIn / sumOut;
 #elif USEBUFFER == 2
-      const double diff = bInputMeter.AverageBuffer() / bOutputMeter.AverageBuffer();
-#elif USEBUFFER == 3
       const double diff = bInputMeter.AverageBuffer() / bOutputMeter.AverageBuffer();
 #endif
       if (mAgc && diff < 8) fAutoGain.setGain(diff);
@@ -1020,11 +1004,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     }
     delete[] mGrMeterValues;
 #elif USEBUFFER == 2
-    mInputMeterBallistics.ProcessBlock(bInputMeter.GetBuffer(), nFrames);
-    mOutputMeterBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
-    mGrMeterBallistics.ProcessBlock(bGrMeter.GetBuffer(), nFrames);
-    mScopeBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
-#elif USEBUFFER == 3
     mInputMeterBallistics.ProcessBlock(bInputMeter.GetBuffer(), nFrames);
     mOutputMeterBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
     mGrMeterBallistics.ProcessBlock(bGrMeter.GetBuffer(), nFrames);
@@ -1159,7 +1138,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       //}
 
       for (int f = EFiltersTwoPole::kHp1; f <= EFiltersTwoPole::kHp10; f++) {
-        for (int c = 0; c < 1; c++) {
+        for (int c = 0; c < mNumOutChannels; c++) {
           fFilterTwoPole[f][c].setFc(mEqHpFreq / mSampleRate);
         }
       }
@@ -1169,7 +1148,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     case kEqHpOrder:
       mEqHpOrder = int(GetParam(paramIdx)->Int());
-      for (int c = 0; c < 2; c++) {
+      for (int c = 0; c < mNumOutChannels; c++) {
         switch (mEqHpOrder) {
         case EFilterSlope::dbo6:									// 1st order, 6 dB/Oct
           break;
@@ -1232,8 +1211,9 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       // Low Pass
     case kEqLpFreq:
       mEqLpFreq = GetParam(paramIdx)->Value();
-      fFilterTwoPole[EFiltersTwoPole::kLp][0].setFc(mEqLpFreq / mSampleRate);
-      fFilterTwoPole[EFiltersTwoPole::kLp][1].setFc(mEqLpFreq / mSampleRate);
+      for (int c = 0; c < mNumOutChannels; c++) {
+        fFilterTwoPole[EFiltersTwoPole::kLp][c].setFc(mEqLpFreq / mSampleRate);
+      }
       break;
       //case kEqLpOrder:
   //  break;

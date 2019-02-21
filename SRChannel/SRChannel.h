@@ -4,10 +4,9 @@
 /*
 Which current test buffer implementation:
 1 - ordinary sample** buffer
-2 - SRBuffer2 class (T**)
-3 - SRBuffer class (Ptrlist of WDL_Typedbuf)
+2 - SRBuffer class (Ptrlist or vector of WDL_Typedbuf or T**)
 */
-#define USEBUFFER 3
+#define USEBUFFER 2
 
 // Use automatic gain compensation
 #define USEAGC
@@ -145,10 +144,6 @@ private:
 #if USEBUFFER == 1
   sample **mInMeterValues, **mOutMeterValues, **mGrMeterValues;
 #elif USEBUFFER == 2
-  SR::DSP::SRBuffer2<sample, 2> bInputMeter;
-  SR::DSP::SRBuffer2<sample, 2> bOutputMeter;
-  SR::DSP::SRBuffer2<sample, 3> bGrMeter;
-#elif USEBUFFER == 3
   SR::DSP::SRBuffer<sample, 2, 1024> bInputMeter;
   SR::DSP::SRBuffer<sample, 3, 1024> bGrMeter;
   SR::DSP::SRBuffer<sample, 2, 1024> bOutputMeter;

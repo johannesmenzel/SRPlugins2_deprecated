@@ -10,7 +10,8 @@
 #include <cmath>
 #include <functional>
 
-// Plugin connector:
+#pragma mark - Plugin connector
+
 SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
   , mEqHfQ(stQ)
@@ -412,7 +413,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
   }// END GRAPHICS functions
 
-
+#pragma mark - User methods
 
   // Method to gray controls, which are currently bypassed. Thats why you have to test from top to bottom
   void SRChannel::GrayOutControls() {
@@ -503,6 +504,8 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
 #endif
 
+#pragma mark - User init methods
+
   // DSP func
 #if IPLUG_DSP
 
@@ -585,6 +588,8 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     //mCircularBuffer[2].Resize(circularBufferLenght, false);
     //mCircularBuffer[3].Resize(circularBufferLenght, false);
   }
+
+#pragma mark - Process block
 
   void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
@@ -1031,6 +1036,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
   }
 
+#pragma mark - IPlug overrides
 
   void SRChannel::OnIdle() {
     mInputMeterBallistics.TransmitData(*this);
@@ -1384,6 +1390,8 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     default: break;
     }
   }
+
+#pragma mark - Presets
 
   void SRChannel::MakePresets() {
     // Make Presets

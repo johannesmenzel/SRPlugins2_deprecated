@@ -324,6 +324,7 @@
     <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRGain.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h" />
     <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h" />
     <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h" />
     <ClInclude Include="..\..\SRClasses\SRConstants.h" />
@@ -331,7 +332,6 @@
     <ClInclude Include="..\SRChannel.h" />
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="..\SRChannelConstants.h" />
-    <ClInclude Include="SRParam.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\RTAudio\include\asio.cpp" />
@@ -415,12 +415,12 @@
     <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp" />
     <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp" />
     <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp" />
     <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp" />
     <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp" />
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRChannel.cpp" />
     <ClCompile Include="..\SRChannelPresets.cpp" />
-    <ClCompile Include="SRParam.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc" />

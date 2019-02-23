@@ -81,6 +81,9 @@
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
       <Filter>SRClasses\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="SRParam.cpp">
+      <Filter>SRClasses\DSP</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />
@@ -255,6 +258,9 @@
       <Filter>SRClasses\Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h">
+      <Filter>SRClasses\DSP</Filter>
+    </ClInclude>
+    <ClInclude Include="SRParam.h">
       <Filter>SRClasses\DSP</Filter>
     </ClInclude>
   </ItemGroup>

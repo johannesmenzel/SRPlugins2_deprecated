@@ -170,6 +170,7 @@
       <PreprocessorDefinitions>$(VST3_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -346,6 +347,7 @@
     <ClInclude Include="..\SRChannel.h" />
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="..\SRChannelConstants.h" />
+    <ClInclude Include="SRParam.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\base\source\baseiids.cpp" />
@@ -403,6 +405,7 @@
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRChannel.cpp" />
     <ClCompile Include="..\SRChannelPresets.cpp" />
+    <ClCompile Include="SRParam.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc" />

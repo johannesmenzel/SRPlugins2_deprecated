@@ -165,6 +165,7 @@
       <PreprocessorDefinitions>$(APP_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(APP_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
@@ -330,6 +331,7 @@
     <ClInclude Include="..\SRChannel.h" />
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="..\SRChannelConstants.h" />
+    <ClInclude Include="SRParam.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Dependencies\IPlug\RTAudio\include\asio.cpp" />
@@ -418,6 +420,7 @@
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRChannel.cpp" />
     <ClCompile Include="..\SRChannelPresets.cpp" />
+    <ClCompile Include="SRParam.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc" />

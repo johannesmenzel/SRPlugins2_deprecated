@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #define FREQUENCYRESPONSE 100
+#define MAXNUMOUTCHANNELS 2
 enum EPrograms {
   defaultProgram = 0,
   kick,
@@ -13,8 +14,6 @@ enum EPrograms {
 
 //const int kNumPrograms = 1;
 const double METER_ATTACK = .6, METER_DECAY = .05; // This is the global attack and release constants for meters
-const int circularBufferLenght = 48000; // should be replaced with a queue somewhen
-//const int circularBufferLenght = 65536; // should be replaced with a queue somewhen
 
 // Plugin's parameters
 enum EParams
@@ -423,8 +422,10 @@ const SRParamProperties srchannelParamProperties[kNumParams] = {
 #endif
 
 // Used filters
-enum EFiltersTwoPole {
-  kHp1 = 0,
+enum EFilters {
+  kOpHp = 0,
+  kOpLp,
+  kHp1,
   kHp2,
   kHp3,
   kHp4,
@@ -441,5 +442,6 @@ enum EFiltersTwoPole {
   kHf,
   kPanHp,
   kPanLp,
-  kNumFiltersTwoPole
+  kDC,
+  kNumFilters
 };

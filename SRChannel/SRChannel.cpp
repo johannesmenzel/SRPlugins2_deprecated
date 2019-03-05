@@ -1099,42 +1099,9 @@ void SRChannel::OnParamChange(int paramIdx) {
     // High Pass
   case kEqHpFreq:
     mEqHpFreq = GetParam(paramIdx)->Value();
-
-    //for (int c = 0; c < 2; c++) {
-    //  if (mEqHpOrder == EFilterSlope::dbo6 || mEqHpOrder == EFilterSlope::dbo18) {
-    //    fEqHpFilterOnepole[c].setFc(mEqHpFreq / mSampleRate);
-    //  }
-    //  if (mEqHpOrder >= EFilterSlope::dbo12) {
-    //    fFilters[EFilters::kHp1][c].setFc(mEqHpFreq / mSampleRate);
-    //  }
-    //  if (mEqHpOrder >= EFilterSlope::dbo24) {
-    //    fFilters[EFilters::kHp2][c].setFc(mEqHpFreq / mSampleRate);
-    //  }
-    //  if (mEqHpOrder >= EFilterSlope::dbo36) {
-    //    fFilters[EFilters::kHp3][c].setFc(mEqHpFreq / mSampleRate);
-    //  }
-    //  if (mEqHpOrder >= EFilterSlope::dbo48) {
-    //    fFilters[EFilters::kHp4][c].setFc(mEqHpFreq / mSampleRate);
-    //  }
-    //  if (mEqHpOrder >= EFilterSlope::dbo60) {
-    //    fFilters[EFilters::kHp5][c].setFc(mEqHpFreq / mSampleRate);
-    //  }
-    //  if (mEqHpOrder >= EFilterSlope::dbo72) {
-    //    fFilters[EFilters::kHp6][c].setFc(mEqHpFreq / mSampleRate);
-    //  }
-    //  if (mEqHpOrder >= EFilterSlope::dbo120) {
-    //    fFilters[EFilters::kHp7][c].setFc(mEqHpFreq / mSampleRate);
-    //    fFilters[EFilters::kHp8][c].setFc(mEqHpFreq / mSampleRate);
-    //    fFilters[EFilters::kHp9][c].setFc(mEqHpFreq / mSampleRate);
-    //    fFilters[EFilters::kHp10][c].setFc(mEqHpFreq / mSampleRate);
-    //  }
-    //}
-
     for (int f = EFilters::kOpHp; f <= EFilters::kHp10; f++) {
         fFilters[f].SetFreq(mEqHpFreq / mSampleRate);
     }
-
-
     break;
 
   case kEqHpOrder:

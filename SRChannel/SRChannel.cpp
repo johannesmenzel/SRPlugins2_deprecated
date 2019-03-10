@@ -554,22 +554,22 @@ void SRChannel::InitEffects() {
 
   // Init compressor
   fCompressorPeak.initCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, mSampleRate);
-  fCompressorPeak.initRuntime();
+  fCompressorPeak.Reset();
 
   // For sidechain filter frequency it requires an own knob later
   fCompressorRms.initCompressor(mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease, mCompPeakSidechainFilterFreq, mCompRmsKneeWidthDb, 300., mCompRmsIsFeedback, mSampleRate);
-  fCompressorRms.initRuntime();
+  fCompressorRms.Reset();
 
   // Init limiter
   fLimiter.setSampleRate(mSampleRate);
   fLimiter.setAttack(1.);
   fLimiter.setRelease(100.);
   fLimiter.setThresh(mLimiterThresh);
-  fLimiter.initRuntime();
+  fLimiter.Reset();
 
   // Init deesser
   fDeesser.setDeesser(mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserFreq / mSampleRate, mDeesserQ, 10., mSampleRate);
-  fDeesser.initRuntime();
+  fDeesser.Reset();
 
   // Meter
 #if USEBUFFER == 2
@@ -1028,11 +1028,17 @@ void SRChannel::OnReset() {
 
 void SRChannel::OnParamChange(int paramIdx) {
 
+  // If AGC enabled let the gain compensation be started on any parameter changes
 #ifdef USEAGC
-  if (mAgc) mAgcTrigger = true;
+  if (mAgc)
+    mAgcTrigger = true;
 #endif // USEAGC
 
-
+  switch (GetParam(paramIdx)->Type())
+  {
+  case IParam::EParamType::kTypeDouble:
+    break;
+  }
   switch (paramIdx)
   {
 
@@ -1266,6 +1272,8 @@ void SRChannel::OnParamChange(int paramIdx) {
       mCompPeakRatio = 0.;
     }
     fCompressorPeak.setRatio(mCompPeakRatio);
+    //fCompressorPeak.SetMaxGrDb(73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1. / mCompPeakRatio))));
+    fCompressorPeak.SetMaxGrDb(100.);
     //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
@@ -1305,6 +1313,7 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kCompRmsRatio:
     mCompRmsRatio = (1 / GetParam(paramIdx)->Value());
     fCompressorRms.setRatio(mCompRmsRatio);
+    fCompressorRms.SetMaxGrDb(73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1. / mCompRmsRatio))));
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 

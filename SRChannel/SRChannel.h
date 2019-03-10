@@ -68,6 +68,7 @@ private:
   // GLOBAL members
   double mSampleRate;
   int mNumInChannels, mNumOutChannels;
+
   // GAIN members
   double mInputGain, mOutputGain;
   // SAT members
@@ -85,15 +86,13 @@ private:
   // COMP members
   double mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease,
     mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease,
-    mCompRmsMakeup, mCompPeakMakeup, mCompRmsAutoMakeup, mCompPeakAutoMakeup,
+    mCompRmsMakeup, mCompPeakMakeup, 
     mCompPeakRmsRatio, mCompDryWet,
     mCompPeakSidechainFilterFreq,
     mCompPeakKneeWidthDb, mCompRmsKneeWidthDb;
   bool mCompIsParallel, mCompPeakIsExtSc, mCompRmsIsExtSc, mCompPeakIsFeedback, mCompRmsIsFeedback;
   // DEESSER members
   double mDeesserFreq, mDeesserQ, mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserMakeup;
-  // TESTPARAM
-  // double mTestParam1, mTestParam2, mTestParam3, mTestParam4, mTestParam5;
   // PAN members
   double mPan, mSafePanFreq;
   bool mIsPanMonoLow;
@@ -105,7 +104,13 @@ private:
   bool mInputBypass, mEqBypass, mCompBypass, mOutputBypass, mBypass;
   // AGC Members
   double mAutoGain;
-  bool mAgc, mAgcTrigger;
+  bool mAgc;
+
+  // Comp
+  double mCompRmsAutoMakeup, mCompPeakAutoMakeup;
+
+  // AGC
+  bool mAgcTrigger;
 
   // FILTERS
 

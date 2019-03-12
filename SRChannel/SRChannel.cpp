@@ -553,22 +553,22 @@ void SRChannel::InitEffects() {
   }
 
   // Init compressor
-  fCompressorPeak.initCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, mSampleRate);
+  fCompressorPeak.InitCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, false, mSampleRate);
   fCompressorPeak.Reset();
 
   // For sidechain filter frequency it requires an own knob later
-  fCompressorRms.initCompressor(mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease, mCompPeakSidechainFilterFreq, mCompRmsKneeWidthDb, 300., mCompRmsIsFeedback, mSampleRate);
+  fCompressorRms.InitCompressor(mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease, mCompPeakSidechainFilterFreq, mCompRmsKneeWidthDb, 300., mCompRmsIsFeedback, false, mSampleRate);
   fCompressorRms.Reset();
 
   // Init limiter
-  fLimiter.setSampleRate(mSampleRate);
-  fLimiter.setAttack(1.);
-  fLimiter.setRelease(100.);
-  fLimiter.setThresh(mLimiterThresh);
+  fLimiter.SetSampleRate(mSampleRate);
+  fLimiter.SetAttack(1.);
+  fLimiter.SetRelease(100.);
+  fLimiter.SetThresh(mLimiterThresh);
   fLimiter.Reset();
 
   // Init deesser
-  fDeesser.setDeesser(mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserFreq / mSampleRate, mDeesserQ, 10., mSampleRate);
+  fDeesser.SetDeesser(mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserFreq / mSampleRate, mDeesserQ, 10., mSampleRate);
   fDeesser.Reset();
 
   // Meter
@@ -781,10 +781,8 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       if (mCompBypass != 1) {
 
         // DEESSER
-
-        if (mDeesserRatio != 1.0 && mDeesserThresh != 0.0) {
-          fDeesser.process(*out1, *out2);
-        }
+        if (mDeesserRatio != 1.0 && mDeesserThresh != 0.0)
+          fDeesser.Process(*out1, *out2);
 
         // COMPRESSOR
         // Create dry sample first
@@ -798,34 +796,38 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
           sample vCompPeakIn[2] = { *out1, *out2 };
 
           if (mCompRmsRatio != 1. && mCompRmsThresh != 0.) {
-            (!mCompRmsIsExtSc)
-              ? fCompressorRms.process(vCompRmsIn[0], vCompRmsIn[1])
-              : fCompressorRms.process(vCompRmsIn[0], vCompRmsIn[1], *sc1, *sc2);
+            if (!mCompRmsIsExtSc)
+              fCompressorRms.Process(vCompRmsIn[0], vCompRmsIn[1]);
+            else
+              fCompressorRms.Process(vCompRmsIn[0], vCompRmsIn[1], *sc1, *sc2);
           }
 
           if (mCompPeakRatio != 1. && mCompPeakThresh != 0.) {
-            (!mCompPeakIsExtSc)
-              ? fCompressorPeak.process(vCompPeakIn[0], vCompPeakIn[1])
-              : fCompressorPeak.process(vCompPeakIn[0], vCompPeakIn[1], *sc1, *sc2);
+            if (!mCompPeakIsExtSc)
+              fCompressorPeak.Process(vCompPeakIn[0], vCompPeakIn[1]);
+            else
+              fCompressorPeak.Process(vCompPeakIn[0], vCompPeakIn[1], *sc1, *sc2);
           }
 
           if ((mCompRmsRatio != 1. && mCompRmsThresh != 0.) || (mCompPeakRatio != 1. && mCompPeakThresh != 0.)) {
-            *out1 = (1. - mCompPeakRmsRatio) * vCompRmsIn[0] * mCompRmsMakeup * mCompRmsAutoMakeup + mCompPeakRmsRatio * vCompPeakIn[0] * mCompPeakMakeup * mCompPeakAutoMakeup;
-            *out2 = (1. - mCompPeakRmsRatio) * vCompRmsIn[1] * mCompRmsMakeup * mCompRmsAutoMakeup + mCompPeakRmsRatio * vCompPeakIn[1] * mCompPeakMakeup * mCompPeakAutoMakeup;
+            *out1 = (1. - mCompPeakRmsRatio) * vCompRmsIn[0] + mCompPeakRmsRatio * vCompPeakIn[0];
+            *out2 = (1. - mCompPeakRmsRatio) * vCompRmsIn[1] + mCompPeakRmsRatio * vCompPeakIn[1];
           }
         }
-        // Process serial compression
         else {
+          // Process SERIAL RMS compression
           if (mCompRmsRatio != 1. && mCompRmsThresh != 0.) {
-            (!mCompRmsIsExtSc) ? fCompressorRms.process(*out1, *out2) : fCompressorRms.process(*out1, *out2, *sc1, *sc2);
-            *out1 *= mCompRmsMakeup * mCompRmsAutoMakeup;
-            *out2 *= mCompRmsMakeup * mCompRmsAutoMakeup;
+            if (!mCompRmsIsExtSc)
+              fCompressorRms.Process(*out1, *out2);
+            else
+              fCompressorRms.Process(*out1, *out2, *sc1, *sc2);
           }
-
+          // Process SERIAL Peak compression
           if (mCompPeakRatio != 1. && mCompPeakThresh != 0.) {
-            (!mCompPeakIsExtSc) ? fCompressorPeak.process(*out1, *out2) : fCompressorPeak.process(*out1, *out2, *sc1, *sc2);
-            *out1 *= mCompPeakMakeup * mCompPeakAutoMakeup;
-            *out2 *= mCompPeakMakeup * mCompPeakAutoMakeup;
+            if (!mCompPeakIsExtSc)
+              fCompressorPeak.Process(*out1, *out2);
+            else
+              fCompressorPeak.Process(*out1, *out2, *sc1, *sc2);
           }
         }
 
@@ -887,7 +889,7 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
         // Limiter
 
         if (mLimiterThresh != 10.) {
-          fLimiter.process(*out1, *out2);
+          fLimiter.Process(*out1, *out2);
         }
 
         // Soft Limiter
@@ -951,9 +953,9 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 #elif USEBUFFER == 2
     bOutputMeter.ProcessBuffer(*out1, 0, s);
     bOutputMeter.ProcessBuffer(*out2, 1, s);
-    bGrMeter.ProcessBuffer(fCompressorPeak.getGrLin(), 0, s);
-    bGrMeter.ProcessBuffer(fCompressorRms.getGrLin(), 1, s);
-    bGrMeter.ProcessBuffer(fDeesser.getGrLin(), 2, s);
+    bGrMeter.ProcessBuffer(fCompressorPeak.GetGrLin(), 0, s);
+    bGrMeter.ProcessBuffer(fCompressorRms.GetGrLin(), 1, s);
+    bGrMeter.ProcessBuffer(fDeesser.GetGrLin(), 2, s);
 #endif
 
   }
@@ -1034,11 +1036,12 @@ void SRChannel::OnParamChange(int paramIdx) {
     mAgcTrigger = true;
 #endif // USEAGC
 
-  switch (GetParam(paramIdx)->Type())
-  {
-  case IParam::EParamType::kTypeDouble:
-    break;
-  }
+  //switch (GetParam(paramIdx)->Type())
+  //{
+  //case IParam::EParamType::kTypeDouble:
+  //  break;
+  //}
+
   switch (paramIdx)
   {
 
@@ -1086,7 +1089,7 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kClipperThreshold: mClipperThreshold = 1. - GetParam(paramIdx)->Value() / 100.; break;
   case kLimiterThresh:
     mLimiterThresh = GetParam(paramIdx)->Value();
-    fLimiter.setThresh(mLimiterThresh);
+    fLimiter.SetThresh(mLimiterThresh);
     break;
   case kPan: mPan = (GetParam(paramIdx)->Value() + 100) / 200; fPan.setPanPosition(mPan); break;
   case kPanFreq:
@@ -1106,7 +1109,7 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kEqHpFreq:
     mEqHpFreq = GetParam(paramIdx)->Value();
     for (int f = EFilters::kOpHp; f <= EFilters::kHp10; f++) {
-        fFilters[f].SetFreq(mEqHpFreq / mSampleRate);
+      fFilters[f].SetFreq(mEqHpFreq / mSampleRate);
     }
     break;
 
@@ -1268,85 +1271,97 @@ void SRChannel::OnParamChange(int paramIdx) {
       // Peak Compressor
   case kCompPeakRatio:
     mCompPeakRatio = (1. / GetParam(paramIdx)->Value());
+    // For ratio 1:20 set infinite compression (limiting)
     if (mCompPeakRatio <= 1. / 20.) {
       mCompPeakRatio = 0.;
     }
-    fCompressorPeak.setRatio(mCompPeakRatio);
+    fCompressorPeak.SetRatio(mCompPeakRatio);
     //fCompressorPeak.SetMaxGrDb(73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1. / mCompPeakRatio))));
-    fCompressorPeak.SetMaxGrDb(100.);
+    //fCompressorPeak.SetMaxGrDb(0.);
     //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakThresh:
     mCompPeakThresh = GetParam(paramIdx)->Value();
-    fCompressorPeak.setThresh(mCompPeakThresh);
+    fCompressorPeak.SetThresh(mCompPeakThresh);
     //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakAttack:
     mCompPeakAttack = GetParam(paramIdx)->Value();
-    fCompressorPeak.setAttack(mCompPeakAttack);
+    fCompressorPeak.SetAttack(mCompPeakAttack);
     //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakRelease:
     mCompPeakRelease = GetParam(paramIdx)->Value();
-    fCompressorPeak.setRelease(mCompPeakRelease);
+    fCompressorPeak.SetRelease(mCompPeakRelease);
     //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakKneeWidthDb:
     mCompPeakKneeWidthDb = GetParam(paramIdx)->Value();
-    fCompressorPeak.setKnee(mCompPeakKneeWidthDb);
+    fCompressorPeak.SetKnee(mCompPeakKneeWidthDb);
     break;
 
   case kCompPeakSidechainFilterFreq:
     mCompPeakSidechainFilterFreq = GetParam(paramIdx)->Value();
-    fCompressorPeak.setSidechainFilterFreq(mCompPeakSidechainFilterFreq / mSampleRate);
-    fCompressorRms.setSidechainFilterFreq(mCompPeakSidechainFilterFreq / mSampleRate); // !!! This moves to own switch when RMS sidechain filter is implemented
+    fCompressorPeak.SetSidechainFilterFreq(mCompPeakSidechainFilterFreq / mSampleRate);
+    fCompressorRms.SetSidechainFilterFreq(mCompPeakSidechainFilterFreq / mSampleRate); // !!! This moves to own switch when RMS sidechain filter is implemented
     break;
 
-  case kCompPeakMakeup: mCompPeakMakeup = DBToAmp(GetParam(paramIdx)->Value()); break;
+  case kCompPeakMakeup:
+    mCompPeakMakeup = GetParam(paramIdx)->Value();
+    fCompressorPeak.SetMakeup(mCompPeakMakeup);
+    break;
 
 
     // RMS Compressor
+
   case kCompRmsRatio:
     mCompRmsRatio = (1 / GetParam(paramIdx)->Value());
-    fCompressorRms.setRatio(mCompRmsRatio);
+    fCompressorRms.SetRatio(mCompRmsRatio);
     fCompressorRms.SetMaxGrDb(73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1. / mCompRmsRatio))));
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsThresh:
     mCompRmsThresh = GetParam(paramIdx)->Value();
-    fCompressorRms.setThresh(mCompRmsThresh);
+    fCompressorRms.SetThresh(mCompRmsThresh);
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsAttack:
     mCompRmsAttack = GetParam(paramIdx)->Value();
-    fCompressorRms.setAttack(mCompRmsAttack);
+    fCompressorRms.SetAttack(mCompRmsAttack);
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsRelease:
     mCompRmsRelease = GetParam(paramIdx)->Value();
-    fCompressorRms.setRelease(mCompRmsRelease);
+    fCompressorRms.SetRelease(mCompRmsRelease);
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsKneeWidthDb:
     mCompRmsKneeWidthDb = GetParam(paramIdx)->Value();
-    fCompressorRms.setKnee(mCompRmsKneeWidthDb);
+    fCompressorRms.SetKnee(mCompRmsKneeWidthDb);
     break;
 
   case kCompRmsMakeup:
-    mCompRmsMakeup = DBToAmp(GetParam(paramIdx)->Value());
+    mCompRmsMakeup = GetParam(paramIdx)->Value();
+    fCompressorRms.SetMakeup(mCompRmsMakeup);
     break;
 
     // Both Compressors
-  case kCompPeakRmsRatio: mCompPeakRmsRatio = GetParam(paramIdx)->Value() / 100; break;
-  case kCompDryWet: mCompDryWet = GetParam(paramIdx)->Value() / 100; break;
+
+  case kCompPeakRmsRatio:
+    mCompPeakRmsRatio = GetParam(paramIdx)->Value() / 100;
+    break;
+
+  case kCompDryWet:
+    mCompDryWet = GetParam(paramIdx)->Value() / 100;
+    break;
 
 
     // Bool Switches
@@ -1365,12 +1380,12 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kCompPeakIsFeedback:
     mCompPeakIsFeedback = GetParam(paramIdx)->Bool();
-    fCompressorPeak.setTopologyFeedback(mCompPeakIsFeedback);
+    fCompressorPeak.SetTopologyFeedback(mCompPeakIsFeedback);
     break;
 
   case kCompRmsIsFeedback:
     mCompRmsIsFeedback = GetParam(paramIdx)->Bool();
-    fCompressorRms.setTopologyFeedback(mCompRmsIsFeedback);
+    fCompressorRms.SetTopologyFeedback(mCompRmsIsFeedback);
     break;
 
 
@@ -1396,12 +1411,12 @@ void SRChannel::OnParamChange(int paramIdx) {
     // DEESSER
     // -------
 
-  case kDeesserFreq: mDeesserFreq = GetParam(paramIdx)->Value(); fDeesser.setFrequency(mDeesserFreq / mSampleRate); break;
-  case kDeesserQ: mDeesserQ = GetParam(paramIdx)->Value(); fDeesser.setQ(mDeesserQ); break;
-  case kDeesserThresh: mDeesserThresh = GetParam(paramIdx)->Value(); fDeesser.setThresh(mDeesserThresh); break;
-  case kDeesserRatio: mDeesserRatio = (1. / GetParam(paramIdx)->Value()); fDeesser.setRatio(mDeesserRatio); break;
-  case kDeesserAttack: mDeesserAttack = GetParam(paramIdx)->Value(); fDeesser.setAttack(mDeesserAttack); break;
-  case kDeesserRelease: mDeesserRelease = GetParam(paramIdx)->Value(); fDeesser.setRelease(mDeesserRelease); break;
+  case kDeesserFreq: mDeesserFreq = GetParam(paramIdx)->Value(); fDeesser.SetFrequency(mDeesserFreq / mSampleRate); break;
+  case kDeesserQ: mDeesserQ = GetParam(paramIdx)->Value(); fDeesser.SetQ(mDeesserQ); break;
+  case kDeesserThresh: mDeesserThresh = GetParam(paramIdx)->Value(); fDeesser.SetThresh(mDeesserThresh); break;
+  case kDeesserRatio: mDeesserRatio = (1. / GetParam(paramIdx)->Value()); fDeesser.SetRatio(mDeesserRatio); break;
+  case kDeesserAttack: mDeesserAttack = GetParam(paramIdx)->Value(); fDeesser.SetAttack(mDeesserAttack); break;
+  case kDeesserRelease: mDeesserRelease = GetParam(paramIdx)->Value(); fDeesser.SetRelease(mDeesserRelease); break;
   case kDeesserMakeup: mDeesserMakeup = DBToAmp(GetParam(paramIdx)->Value()); break;
 
   default: break;

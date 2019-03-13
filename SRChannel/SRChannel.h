@@ -94,7 +94,7 @@ private:
   // DEESSER members
   double mDeesserFreq, mDeesserQ, mDeesserThresh, mDeesserRatio, mDeesserAttack, mDeesserRelease, mDeesserMakeup;
   // PAN members
-  double mPan, mSafePanFreq;
+  double mPan, mSafePanFreq, mWidth;
   bool mIsPanMonoLow;
   // CLIPPER members
   double mClipperThreshold;
@@ -115,11 +115,10 @@ private:
   // FILTERS
 
     // Gain Filters
-  SR::DSP::SRGain fInputGain, fOutputGain, fAutoGain;
-  SR::DSP::SRPan fPan;
+  SR::DSP::SRGain fInputGain, fOutputGain, fAutoGain, fPan;
 
   // Spectral Filters
-  SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS> fFilters[kNumFilters] = {};
+  SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS> fFilters[kNumFilters] = {};
 
   //// Extra Filters
   //SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS> fDcBlocker, fEqHpFilterOnepole, fEqLpFilterOnepole;

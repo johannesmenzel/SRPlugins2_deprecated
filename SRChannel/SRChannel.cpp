@@ -125,6 +125,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     case kEqHpFreq: case kCompPeakSidechainFilterFreq: thisParameter->SetDisplayText((int)p.minVal, "Off"); break;
     case kEqLpFreq: thisParameter->SetDisplayText((int)p.maxVal, "Off"); break;
     case kCompPeakRatio: thisParameter->SetDisplayText((int)p.maxVal, "inf"); break;
+    case kPanFreq: thisParameter->SetDisplayText((int)p.minVal, "Off"); break;
     default: break;
     }
 
@@ -512,34 +513,34 @@ void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
 void SRChannel::InitEffects() {
 
   // Init gain and pan
-  fInputGain.initGain(mInputGain, mInputGain, double(mSampleRate), false);
-  fOutputGain.initGain(mOutputGain, mOutputGain, double(mSampleRate), false);
-  fAutoGain.initGain(mAutoGain, mAutoGain, double(mSampleRate), false);
-  fPan.initPan(SR::DSP::typeSinusodial, mPan, true);
+  fInputGain.InitGain(int(mSampleRate * 0.1));
+  fOutputGain.InitGain(int(mSampleRate * 0.1));
+  fAutoGain.InitGain(int(mSampleRate * 0.1));
+  fPan.InitGain(int(mSampleRate * 0.1), SR::DSP::SRGain::PanType::kSinusodial);
 
   for (int i = 0; i < mNumOutChannels; i++) {
     // Init EQ
-    fFilters[EFilters::kOpHp].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::OnepoleHighpass, mEqHpFreq / mSampleRate, 0.0, 0.0, mSampleRate);
-    fFilters[EFilters::kHp1].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp2].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp3].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp4].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp5].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp6].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp7].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp8].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp9].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp10].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kLp].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHf].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
-    fFilters[EFilters::kHmf].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
-    fFilters[EFilters::kLmf].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
-    fFilters[EFilters::kLf].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
-    fFilters[EFilters::kDC].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::OnepoleHighpass, 10.0 / mSampleRate, 0.0, 0.0, mSampleRate);
+    fFilters[EFilters::kOpHp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::OnepoleHighpass, mEqHpFreq / mSampleRate, 0.0, 0.0, mSampleRate);
+    fFilters[EFilters::kHp1].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp2].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp3].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp4].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp5].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp6].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp7].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp8].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp9].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHp10].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kLp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
+    fFilters[EFilters::kHf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
+    fFilters[EFilters::kHmf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
+    fFilters[EFilters::kLmf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
+    fFilters[EFilters::kLf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
+    fFilters[EFilters::kDC].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::OnepoleHighpass, 10.0 / mSampleRate, 0.0, 0.0, mSampleRate);
 
     // Init safe pan filter
-    fFilters[EFilters::kPanHp].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLinkwitzHighpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-    fFilters[EFilters::kPanLp].SetFilter(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLinkwitzLowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+    fFilters[EFilters::kPanHp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLinkwitzHighpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+    fFilters[EFilters::kPanLp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLinkwitzLowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
 
     // Init saturation
     fInputSaturation[i].setSaturation(SR::DSP::SRSaturation::SaturationTypes::typeMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
@@ -643,7 +644,7 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
         //*out1 *= mInputGain;
         //*out2 *= mInputGain;
       }
-      fInputGain.process(*out1, *out2);
+      fInputGain.Process(*out1, *out2);
 
       // Fill input meter values
 #if USEBUFFER == 1
@@ -850,8 +851,7 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
         // Pan
 
-        if (mPan != .5 || mIsPanMonoLow) {
-
+        if (mSafePanFreq > 16.) {
           // Multiply signal...
           sample vSafePanLowSignal[MAXNUMOUTCHANNELS] = { *out1, *out2 };
           sample vSafePanHighSignal[MAXNUMOUTCHANNELS] = { *out1, *out2 };
@@ -863,7 +863,7 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
           vSafePanHighSignal[1] = fFilters[EFilters::kPanHp].Process(vSafePanHighSignal[1], 1);
 
           // Pan high signal:
-          fPan.process(vSafePanHighSignal[0], vSafePanHighSignal[1]);
+          fPan.Process(vSafePanHighSignal[0], vSafePanHighSignal[1]);
 
           // Mono low signal:
           if (mIsPanMonoLow) {
@@ -876,8 +876,9 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
           *out1 = vSafePanHighSignal[0] - vSafePanLowSignal[0];
           *out2 = vSafePanHighSignal[1] - vSafePanLowSignal[1];
         }
-
-
+        else {
+          fPan.Process(*out1, *out2);
+        }
         // Clipper
 
         if (mClipperThreshold < 1.) {
@@ -924,12 +925,9 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
 
       // Output Gain
-      fOutputGain.process(*out1, *out2);
-      fAutoGain.process(*out1, *out2);
-      //if (mOutputGain != 1.) {
-      //	*out1 *= mOutputGain;
-      //	*out2 *= mOutputGain;
-      //}
+      fOutputGain.Process(*out1, *out2);
+      if (mAgc)
+        fAutoGain.Process(*out1, *out2);
 
       *out1 = fFilters[EFilters::kDC].Process(*out1, 0);
       *out2 = fFilters[EFilters::kDC].Process(*out2, 1);
@@ -975,7 +973,7 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 #elif USEBUFFER == 2
     const double diff = bInputMeter.AverageBuffer() / bOutputMeter.AverageBuffer();
 #endif
-    if (mAgc && diff < 8) fAutoGain.setGain(diff);
+    if (mAgc && diff < 8) fAutoGain.SetGain(diff);
     mAgcTrigger = false;
   }
 #endif
@@ -1050,11 +1048,11 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kInputGain:
     mInputGain = DBToAmp(GetParam(paramIdx)->Value());
-    fInputGain.setGain(mInputGain);
+    fInputGain.SetGain(mInputGain);
     break;
   case kOutputGain:
     mOutputGain = DBToAmp(GetParam(paramIdx)->Value());
-    fOutputGain.setGain(mOutputGain);
+    fOutputGain.SetGain(mOutputGain);
     break;
   case kSaturationDrive:
     mSaturationDrive = GetParam(paramIdx)->Value();
@@ -1091,7 +1089,7 @@ void SRChannel::OnParamChange(int paramIdx) {
     mLimiterThresh = GetParam(paramIdx)->Value();
     fLimiter.SetThresh(mLimiterThresh);
     break;
-  case kPan: mPan = (GetParam(paramIdx)->Value() + 100) / 200; fPan.setPanPosition(mPan); break;
+  case kPan: mPan = (GetParam(paramIdx)->Value() + 100) / 200; fPan.SetPanPosition(mPan); break;
   case kPanFreq:
     mSafePanFreq = GetParam(paramIdx)->Value();
     fFilters[EFilters::kPanHp].SetFreq(mSafePanFreq / mSampleRate);
@@ -1100,6 +1098,11 @@ void SRChannel::OnParamChange(int paramIdx) {
     fFilters[EFilters::kPanLp].SetFreq(mSafePanFreq / mSampleRate);
     break;
   case kIsPanMonoLow: mIsPanMonoLow = GetParam(paramIdx)->Bool(); break;
+  case kWidth:
+    mWidth = GetParam(paramIdx)->Value() * 0.01;
+    fPan.SetWidth(mWidth);
+    break;
+
 
 
     // FILTER
@@ -1189,20 +1192,20 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kEqHfBell:
     mEqHfIsBell = GetParam(paramIdx)->Bool();
     if (mEqHfIsBell == 1) {
-      fFilters[EFilters::kHf].SetType(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak);
+      fFilters[EFilters::kHf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak);
     }
     else {
-      fFilters[EFilters::kHf].SetType(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighshelf);
+      fFilters[EFilters::kHf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighshelf);
     }
     break;
 
   case kEqLfBell:
     mEqLfIsBell = GetParam(paramIdx)->Bool();
     if (mEqLfIsBell == 1) {
-      fFilters[EFilters::kLf].SetType(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak);
+      fFilters[EFilters::kLf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak);
     }
     else {
-      fFilters[EFilters::kLf].SetType(SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowshelf);
+      fFilters[EFilters::kLf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowshelf);
     }
     break;
 
@@ -1432,7 +1435,7 @@ void SRChannel::MakePresets() {
     kEqLfFreq, 60.,
     kEqLfBell, true,
     kEqLfGain, 5.0);
-  MakePresetFromNamedParams("Vocals Female", 62,
+  MakePresetFromNamedParams("Vocals Female", 63,
     kInputGain, 0.000000,
     kSaturationType, 3,
     kSaturationDrive, 20.434783,
@@ -1486,6 +1489,7 @@ void SRChannel::MakePresets() {
     kPan, 0.000000,
     kPanFreq, 161.288652,
     kIsPanMonoLow, true,
+    kWidth, 100.0,
     kLimiterThresh, 10.000000,
     kClipperThreshold, 0.000000,
     kAgc, false,

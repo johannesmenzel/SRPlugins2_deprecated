@@ -376,7 +376,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             SRLayout.textKnobValue,
             -135.f,
             135.f,
-            (float)GetParam(paramIdx)->GetDefault(true),
+            //(float)GetParam(paramIdx)->GetDefault(true),
             0.5f,
             kVertical,
             4.f

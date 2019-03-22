@@ -13,7 +13,7 @@
 #define BUNDLE_MFR "SRPlugins"
 #define BUNDLE_DOMAIN "com"
 
-#define PLUG_CHANNEL_IO "2.2-2"  /*4-2 2-2 2.2-2 1-1 1.1-1*/
+#define PLUG_CHANNEL_IO "4-2"
 //#define PLUG_SC_CHANS 2
 
 #define PLUG_LATENCY 0

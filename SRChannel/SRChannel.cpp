@@ -22,29 +22,29 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mCompRmsAutoMakeup(1.)
   , mAgcTrigger(false)
 {
-  // Name channels:
-   // for VST2 we name individual outputs
-  if (GetAPI() == kAPIVST2) {
+  //// Name channels:
+  // // for VST2 we name individual outputs
+  //if (GetAPI() == kAPIVST2) {
 
-    SetChannelLabel(ERoute::kInput, 0, "In 1", false);
-    SetChannelLabel(ERoute::kInput, 1, "In 2", false);
-    SetChannelLabel(ERoute::kInput, 2, "SC 1", false);
-    SetChannelLabel(ERoute::kInput, 3, "SC 2", false);
-    SetChannelLabel(ERoute::kOutput, 0, "Out 1", false);
-    SetChannelLabel(ERoute::kOutput, 1, "Out 2", false);
+    //SetChannelLabel(ERoute::kInput, 0, "In 1", false);
+    //SetChannelLabel(ERoute::kInput, 1, "In 2", false);
+    //SetChannelLabel(ERoute::kInput, 2, "SC 1", false);
+    //SetChannelLabel(ERoute::kInput, 3, "SC 2", false);
+    //SetChannelLabel(ERoute::kOutput, 0, "Out 1", false);
+    //SetChannelLabel(ERoute::kOutput, 1, "Out 2", false);
 
-    //SetChannelLabel(ERoute::kOutput, 2, "SC Out 1", true);
-    //SetChannelLabel(ERoute::kOutput, 3, "SC Out 2", true);
+  //  //SetChannelLabel(ERoute::kOutput, 2, "SC Out 1", true);
+  //  //SetChannelLabel(ERoute::kOutput, 3, "SC Out 2", true);
 
-  }
-  else {
-    //GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
-    //GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
-    GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
-    GetIOConfig(0)->GetBusInfo(ERoute::kInput, 1)->mLabel.Set("SC", MAX_CHAN_NAME_LEN);
-    GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
-    //GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 1)->mLabel.Set("SC Out", MAX_CHAN_NAME_LEN);
-  }
+  //}
+  //else {
+  //  //GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
+  //  //GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+  //  GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
+  //  GetIOConfig(0)->GetBusInfo(ERoute::kInput, 1)->mLabel.Set("SC", MAX_CHAN_NAME_LEN);
+  //  GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
+  //  //GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 1)->mLabel.Set("SC Out", MAX_CHAN_NAME_LEN);
+  //}
 
 
   // Initialize Parameters:
@@ -54,7 +54,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     switch (p.Type)
     {
     case IParam::EParamType::kTypeDouble:
-      //InitDoubleShapeFromMiddlePosition(this, paramIdx, p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, 0, p.group, p.centerVal, p.centerPoint, IParam::kUnitCustom);
       thisParameter->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, p.Flags, p.group, ShapeFromMiddle(p.minVal, p.maxVal, p.centerVal, p.centerPoint), IParam::kUnitCustom);
       break;
     case IParam::EParamType::kTypeInt:

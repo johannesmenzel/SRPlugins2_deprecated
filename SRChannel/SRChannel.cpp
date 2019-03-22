@@ -1026,18 +1026,13 @@ void SRChannel::OnReset() {
 }
 
 void SRChannel::OnParamChange(int paramIdx) {
+  IParam* paramChanged = GetParam(paramIdx);
 
   // If AGC enabled let the gain compensation be started on any parameter changes
 #ifdef USEAGC
   if (mAgc)
     mAgcTrigger = true;
 #endif // USEAGC
-
-  //switch (GetParam(paramIdx)->Type())
-  //{
-  //case IParam::EParamType::kTypeDouble:
-  //  break;
-  //}
 
   switch (paramIdx)
   {
@@ -1046,59 +1041,59 @@ void SRChannel::OnParamChange(int paramIdx) {
     // ----------------------
 
   case kInputGain:
-    mInputGain = DBToAmp(GetParam(paramIdx)->Value());
+    mInputGain = DBToAmp(paramChanged->Value());
     fInputGain.SetGain(mInputGain);
     break;
   case kOutputGain:
-    mOutputGain = DBToAmp(GetParam(paramIdx)->Value());
+    mOutputGain = DBToAmp(paramChanged->Value());
     fOutputGain.SetGain(mOutputGain);
     break;
   case kSaturationDrive:
-    mSaturationDrive = GetParam(paramIdx)->Value();
+    mSaturationDrive = paramChanged->Value();
     fInputSaturation[0].setDrive(mSaturationDrive);
     fInputSaturation[1].setDrive(mSaturationDrive);
     break;
   case kSaturationAmount:
-    mSaturationAmount = GetParam(paramIdx)->Value() / 100.;
+    mSaturationAmount = paramChanged->Value() / 100.;
     fInputSaturation[0].setAmount(mSaturationAmount);
     fInputSaturation[1].setAmount(mSaturationAmount);
     break;
   case kSaturationHarmonics:
-    mSaturationHarmonics = GetParam(paramIdx)->Value() / 100.;
+    mSaturationHarmonics = paramChanged->Value() / 100.;
     fInputSaturation[0].setHarmonics(mSaturationHarmonics);
     fInputSaturation[1].setHarmonics(mSaturationHarmonics);
     break;
   case kSaturationSkew:
-    mSaturationSkew = GetParam(paramIdx)->Value() * 0.05;
+    mSaturationSkew = paramChanged->Value() * 0.05;
     fInputSaturation[0].setSkew(mSaturationSkew);
     fInputSaturation[1].setSkew(mSaturationSkew);
     break;
   case kSaturationType:
-    mSaturationType = int(GetParam(paramIdx)->Int());
+    mSaturationType = int(paramChanged->Int());
     fInputSaturation[0].setType(mSaturationType);
     fInputSaturation[1].setType(mSaturationType);
     break;
   case kOversamplingRate:
-    mOversamplingRate = int(GetParam(paramIdx)->Int());
+    mOversamplingRate = int(paramChanged->Int());
     mOverSampler[0].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
     mOverSampler[1].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
     break;
-  case kClipperThreshold: mClipperThreshold = 1. - GetParam(paramIdx)->Value() / 100.; break;
+  case kClipperThreshold: mClipperThreshold = 1. - paramChanged->Value() / 100.; break;
   case kLimiterThresh:
-    mLimiterThresh = GetParam(paramIdx)->Value();
+    mLimiterThresh = paramChanged->Value();
     fLimiter.SetThresh(mLimiterThresh);
     break;
-  case kPan: mPan = (GetParam(paramIdx)->Value() + 100) / 200; fPan.SetPanPosition(mPan); break;
+  case kPan: mPan = (paramChanged->Value() + 100) / 200; fPan.SetPanPosition(mPan); break;
   case kPanFreq:
-    mSafePanFreq = GetParam(paramIdx)->Value();
+    mSafePanFreq = paramChanged->Value();
     fFilters[EFilters::kPanHp].SetFreq(mSafePanFreq / mSampleRate);
     fFilters[EFilters::kPanHp].SetFreq(mSafePanFreq / mSampleRate);
     fFilters[EFilters::kPanLp].SetFreq(mSafePanFreq / mSampleRate);
     fFilters[EFilters::kPanLp].SetFreq(mSafePanFreq / mSampleRate);
     break;
-  case kIsPanMonoLow: mIsPanMonoLow = GetParam(paramIdx)->Bool(); break;
+  case kIsPanMonoLow: mIsPanMonoLow = paramChanged->Bool(); break;
   case kWidth:
-    mWidth = GetParam(paramIdx)->Value() * 0.01;
+    mWidth = paramChanged->Value() * 0.01;
     fPan.SetWidth(mWidth);
     break;
 
@@ -1109,14 +1104,14 @@ void SRChannel::OnParamChange(int paramIdx) {
 
     // High Pass
   case kEqHpFreq:
-    mEqHpFreq = GetParam(paramIdx)->Value();
+    mEqHpFreq = paramChanged->Value();
     for (int f = EFilters::kOpHp; f <= EFilters::kHp10; f++) {
       fFilters[f].SetFreq(mEqHpFreq / mSampleRate);
     }
     break;
 
   case kEqHpOrder:
-    mEqHpOrder = GetParam(paramIdx)->Int();
+    mEqHpOrder = paramChanged->Int();
     switch (mEqHpOrder) {
     case EFilterSlope::dbo6:									// 1st order, 6 dB/Oct
       break;
@@ -1177,7 +1172,7 @@ void SRChannel::OnParamChange(int paramIdx) {
 
     // Low Pass
   case kEqLpFreq:
-    mEqLpFreq = GetParam(paramIdx)->Value();
+    mEqLpFreq = paramChanged->Value();
     for (int c = 0; c < mNumOutChannels; c++) {
       fFilters[EFilters::kLp].SetFreq(mEqLpFreq / mSampleRate);
     }
@@ -1189,7 +1184,7 @@ void SRChannel::OnParamChange(int paramIdx) {
     // ---------
 
   case kEqHfBell:
-    mEqHfIsBell = GetParam(paramIdx)->Bool();
+    mEqHfIsBell = paramChanged->Bool();
     if (mEqHfIsBell == 1) {
       fFilters[EFilters::kHf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak);
     }
@@ -1199,7 +1194,7 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
 
   case kEqLfBell:
-    mEqLfIsBell = GetParam(paramIdx)->Bool();
+    mEqLfIsBell = paramChanged->Bool();
     if (mEqLfIsBell == 1) {
       fFilters[EFilters::kLf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak);
     }
@@ -1209,62 +1204,62 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
 
   case kEqLfGain:
-    mEqLfGain = GetParam(paramIdx)->Value() * mEqAmount;
+    mEqLfGain = paramChanged->Value() * mEqAmount;
     fFilters[EFilters::kLf].SetPeakGain(mEqLfGain);
     break;
 
   case kEqLfFreq:
-    mEqLfFreq = GetParam(paramIdx)->Value();
+    mEqLfFreq = paramChanged->Value();
     fFilters[EFilters::kLf].SetFreq(mEqLfFreq / mSampleRate);
     break;
-    //case kEqLfQ: mEqLfQ = GetParam(paramIdx)->Value(); fEqLfFilter[0].setQ(mEqLfQ); fEqLfFilter[1].setQ(mEqLfQ); break;
+    //case kEqLfQ: mEqLfQ = paramChanged->Value(); fEqLfFilter[0].setQ(mEqLfQ); fEqLfFilter[1].setQ(mEqLfQ); break;
 
   case kEqLmfGain:
-    mEqLmfGain = GetParam(paramIdx)->Value() * mEqAmount;
+    mEqLmfGain = paramChanged->Value() * mEqAmount;
     fFilters[EFilters::kLmf].SetPeakGain(mEqLmfGain);
     break;
 
   case kEqLmfFreq:
-    mEqLmfFreq = GetParam(paramIdx)->Value();
+    mEqLmfFreq = paramChanged->Value();
     fFilters[EFilters::kLmf].SetFreq(mEqLmfFreq / mSampleRate);
     break;
 
   case kEqLmfQ:
-    mEqLmfQ = GetParam(paramIdx)->Value();
+    mEqLmfQ = paramChanged->Value();
     fFilters[EFilters::kLmf].SetQ(mEqLmfQ);
     break;
 
   case kEqHmfGain:
-    mEqHmfGain = GetParam(paramIdx)->Value() * mEqAmount;
+    mEqHmfGain = paramChanged->Value() * mEqAmount;
     fFilters[EFilters::kHmf].SetPeakGain(mEqHmfGain);
     break;
 
   case kEqHmfFreq:
-    mEqHmfFreq = GetParam(paramIdx)->Value();
+    mEqHmfFreq = paramChanged->Value();
     fFilters[EFilters::kHmf].SetFreq(mEqHmfFreq / mSampleRate);
     break;
 
   case kEqHmfQ:
-    mEqHmfQ = GetParam(paramIdx)->Value();
+    mEqHmfQ = paramChanged->Value();
     fFilters[EFilters::kHmf].SetQ(mEqHmfQ);
     break;
 
   case kEqHfGain:
-    mEqHfGain = GetParam(paramIdx)->Value() * mEqAmount;
+    mEqHfGain = paramChanged->Value() * mEqAmount;
     fFilters[EFilters::kHf].SetPeakGain(mEqHfGain);
     break;
 
   case kEqHfFreq:
-    mEqHfFreq = GetParam(paramIdx)->Value();
+    mEqHfFreq = paramChanged->Value();
     fFilters[EFilters::kHf].SetFreq(mEqHfFreq / mSampleRate);
     break;
 
   case kEqAmount:
-    mEqAmount = GetParam(paramIdx)->Value() / 100.;
+    mEqAmount = paramChanged->Value() / 100.;
     OnParamChange(kEqHfGain); OnParamChange(kEqHmfGain);
     OnParamChange(kEqLmfGain); OnParamChange(kEqLfGain);
     break;
-    //case kEqHfQ: mEqHfQ = GetParam(paramIdx)->Value(); fEqHfFilter[0].setQ(mEqHfQ); fEqHfFilter[1].setQ(mEqHfQ); break;
+    //case kEqHfQ: mEqHfQ = paramChanged->Value(); fEqHfFilter[0].setQ(mEqHfQ); fEqHfFilter[1].setQ(mEqHfQ); break;
 
 
       // COMPRESSOR
@@ -1272,7 +1267,7 @@ void SRChannel::OnParamChange(int paramIdx) {
 
       // Peak Compressor
   case kCompPeakRatio:
-    mCompPeakRatio = (1. / GetParam(paramIdx)->Value());
+    mCompPeakRatio = (1. / paramChanged->Value());
     // For ratio 1:20 set infinite compression (limiting)
     if (mCompPeakRatio <= 1. / 20.) {
       mCompPeakRatio = 0.;
@@ -1284,36 +1279,36 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
 
   case kCompPeakThresh:
-    mCompPeakThresh = GetParam(paramIdx)->Value();
+    mCompPeakThresh = paramChanged->Value();
     fCompressorPeak.SetThresh(mCompPeakThresh);
     //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakAttack:
-    mCompPeakAttack = GetParam(paramIdx)->Value();
+    mCompPeakAttack = paramChanged->Value();
     fCompressorPeak.SetAttack(mCompPeakAttack);
     //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakRelease:
-    mCompPeakRelease = GetParam(paramIdx)->Value();
+    mCompPeakRelease = paramChanged->Value();
     fCompressorPeak.SetRelease(mCompPeakRelease);
     //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakKneeWidthDb:
-    mCompPeakKneeWidthDb = GetParam(paramIdx)->Value();
+    mCompPeakKneeWidthDb = paramChanged->Value();
     fCompressorPeak.SetKnee(mCompPeakKneeWidthDb);
     break;
 
   case kCompPeakSidechainFilterFreq:
-    mCompPeakSidechainFilterFreq = GetParam(paramIdx)->Value();
+    mCompPeakSidechainFilterFreq = paramChanged->Value();
     fCompressorPeak.SetSidechainFilterFreq(mCompPeakSidechainFilterFreq / mSampleRate);
     fCompressorRms.SetSidechainFilterFreq(mCompPeakSidechainFilterFreq / mSampleRate); // !!! This moves to own switch when RMS sidechain filter is implemented
     break;
 
   case kCompPeakMakeup:
-    mCompPeakMakeup = GetParam(paramIdx)->Value();
+    mCompPeakMakeup = paramChanged->Value();
     fCompressorPeak.SetMakeup(mCompPeakMakeup);
     break;
 
@@ -1321,72 +1316,72 @@ void SRChannel::OnParamChange(int paramIdx) {
     // RMS Compressor
 
   case kCompRmsRatio:
-    mCompRmsRatio = (1 / GetParam(paramIdx)->Value());
+    mCompRmsRatio = (1 / paramChanged->Value());
     fCompressorRms.SetRatio(mCompRmsRatio);
     fCompressorRms.SetMaxGrDb(73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1. / mCompRmsRatio))));
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsThresh:
-    mCompRmsThresh = GetParam(paramIdx)->Value();
+    mCompRmsThresh = paramChanged->Value();
     fCompressorRms.SetThresh(mCompRmsThresh);
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsAttack:
-    mCompRmsAttack = GetParam(paramIdx)->Value();
+    mCompRmsAttack = paramChanged->Value();
     fCompressorRms.SetAttack(mCompRmsAttack);
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsRelease:
-    mCompRmsRelease = GetParam(paramIdx)->Value();
+    mCompRmsRelease = paramChanged->Value();
     fCompressorRms.SetRelease(mCompRmsRelease);
     //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsKneeWidthDb:
-    mCompRmsKneeWidthDb = GetParam(paramIdx)->Value();
+    mCompRmsKneeWidthDb = paramChanged->Value();
     fCompressorRms.SetKnee(mCompRmsKneeWidthDb);
     break;
 
   case kCompRmsMakeup:
-    mCompRmsMakeup = GetParam(paramIdx)->Value();
+    mCompRmsMakeup = paramChanged->Value();
     fCompressorRms.SetMakeup(mCompRmsMakeup);
     break;
 
     // Both Compressors
 
   case kCompPeakRmsRatio:
-    mCompPeakRmsRatio = GetParam(paramIdx)->Value() / 100;
+    mCompPeakRmsRatio = paramChanged->Value() / 100;
     break;
 
   case kCompDryWet:
-    mCompDryWet = GetParam(paramIdx)->Value() / 100;
+    mCompDryWet = paramChanged->Value() / 100;
     break;
 
 
     // Bool Switches
 
   case kCompIsParallel:
-    mCompIsParallel = GetParam(paramIdx)->Bool();
+    mCompIsParallel = paramChanged->Bool();
     break;
 
   case kCompPeakIsExtSc:
-    mCompPeakIsExtSc = GetParam(paramIdx)->Bool();
+    mCompPeakIsExtSc = paramChanged->Bool();
     break;
 
   case kCompRmsIsExrSc:
-    mCompRmsIsExtSc = GetParam(paramIdx)->Bool();
+    mCompRmsIsExtSc = paramChanged->Bool();
     break;
 
   case kCompPeakIsFeedback:
-    mCompPeakIsFeedback = GetParam(paramIdx)->Bool();
+    mCompPeakIsFeedback = paramChanged->Bool();
     fCompressorPeak.SetTopologyFeedback(mCompPeakIsFeedback);
     break;
 
   case kCompRmsIsFeedback:
-    mCompRmsIsFeedback = GetParam(paramIdx)->Bool();
+    mCompRmsIsFeedback = paramChanged->Bool();
     fCompressorRms.SetTopologyFeedback(mCompRmsIsFeedback);
     break;
 
@@ -1394,11 +1389,11 @@ void SRChannel::OnParamChange(int paramIdx) {
     // GLOBAL BYPASS
     // -------------
 
-  case kEqBypass: mEqBypass = GetParam(paramIdx)->Bool(); break;
-  case kCompBypass: mCompBypass = GetParam(paramIdx)->Bool(); break;
-  case kInputBypass: mInputBypass = GetParam(paramIdx)->Bool(); break;
-  case kOutputBypass: mOutputBypass = GetParam(paramIdx)->Bool(); break;
-  case kBypass: mBypass = GetParam(paramIdx)->Bool(); break;
+  case kEqBypass: mEqBypass = paramChanged->Bool(); break;
+  case kCompBypass: mCompBypass = paramChanged->Bool(); break;
+  case kInputBypass: mInputBypass = paramChanged->Bool(); break;
+  case kOutputBypass: mOutputBypass = paramChanged->Bool(); break;
+  case kBypass: mBypass = paramChanged->Bool(); break;
 
 
     // AUTOMATIC GAIN CONTROL
@@ -1406,20 +1401,20 @@ void SRChannel::OnParamChange(int paramIdx) {
 
 #ifdef USEAGC
   case kAgc:
-    mAgc = GetParam(paramIdx)->Bool();
+    mAgc = paramChanged->Bool();
     break;
 #endif // USEAGC
 
     // DEESSER
     // -------
 
-  case kDeesserFreq: mDeesserFreq = GetParam(paramIdx)->Value(); fDeesser.SetFrequency(mDeesserFreq / mSampleRate); break;
-  case kDeesserQ: mDeesserQ = GetParam(paramIdx)->Value(); fDeesser.SetQ(mDeesserQ); break;
-  case kDeesserThresh: mDeesserThresh = GetParam(paramIdx)->Value(); fDeesser.SetThresh(mDeesserThresh); break;
-  case kDeesserRatio: mDeesserRatio = (1. / GetParam(paramIdx)->Value()); fDeesser.SetRatio(mDeesserRatio); break;
-  case kDeesserAttack: mDeesserAttack = GetParam(paramIdx)->Value(); fDeesser.SetAttack(mDeesserAttack); break;
-  case kDeesserRelease: mDeesserRelease = GetParam(paramIdx)->Value(); fDeesser.SetRelease(mDeesserRelease); break;
-  case kDeesserMakeup: mDeesserMakeup = DBToAmp(GetParam(paramIdx)->Value()); break;
+  case kDeesserFreq: mDeesserFreq = paramChanged->Value(); fDeesser.SetFrequency(mDeesserFreq / mSampleRate); break;
+  case kDeesserQ: mDeesserQ = paramChanged->Value(); fDeesser.SetQ(mDeesserQ); break;
+  case kDeesserThresh: mDeesserThresh = paramChanged->Value(); fDeesser.SetThresh(mDeesserThresh); break;
+  case kDeesserRatio: mDeesserRatio = (1. / paramChanged->Value()); fDeesser.SetRatio(mDeesserRatio); break;
+  case kDeesserAttack: mDeesserAttack = paramChanged->Value(); fDeesser.SetAttack(mDeesserAttack); break;
+  case kDeesserRelease: mDeesserRelease = paramChanged->Value(); fDeesser.SetRelease(mDeesserRelease); break;
+  case kDeesserMakeup: mDeesserMakeup = DBToAmp(paramChanged->Value()); break;
 
   default: break;
   }

@@ -98,12 +98,13 @@ private:
   // AGC Members
   double mAutoGain;
   bool mAgc;
+  double mEnvInput, mEnvPost, mEnvOutput;
 
   // Comp
   double mCompRmsAutoMakeup, mCompPeakAutoMakeup;
 
   // AGC
-  //bool mAgcTrigger;
+  bool mAgcTrigger;
 
   // FILTERS
   // Gain Filters
@@ -111,8 +112,7 @@ private:
 
   // Spectral Filters
   SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS> fFilters[kNumFilters] = {};
-  SR::DSP::SRFilterParamSmooth fEnvInput[MAXNUMOUTCHANNELS];
-  SR::DSP::SRFilterParamSmooth fEnvOutput[MAXNUMOUTCHANNELS];
+  SR::DSP::SRFilterParamSmooth fEnvInput, fEnvPost, fEnvOutput;
 
   // Dynamic Filters
   SR::DSP::SRCompressor fCompressorPeak;
@@ -137,10 +137,8 @@ private:
 
   // sample** buffers storing meter values
   SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bInputMeter;
-  SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bInputMeterRms;
   SR::DSP::SRBuffer<sample, 3, 1024> bGrMeter;
   SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bOutputMeter;
-  SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bOutputMeterRms;
 
   // Frequency response meter values
   double* mFreqMeterValues = new double[FREQUENCYRESPONSE];

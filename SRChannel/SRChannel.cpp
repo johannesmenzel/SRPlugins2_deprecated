@@ -20,8 +20,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mAutoGain(1.)
   , mCompPeakAutoMakeup(1.)
   , mCompRmsAutoMakeup(1.)
-  //, mAgcTrigger(false)
-
+  , mAgcTrigger(false)
+  , mEnvInput(0.0)
+  , mEnvPost(0.0)
+  , mEnvOutput(0.0)
 {
   //// Name channels:
   // // for VST2 we name individual outputs
@@ -500,7 +502,7 @@ void SRChannel::InitEffects() {
   // Init gain and pan
   fInputGain.InitGain(int(mSampleRate * 0.1));
   fOutputGain.InitGain(int(mSampleRate * 0.1));
-  fAutoGain.InitGain(int(mSampleRate));
+  fAutoGain.InitGain(int(mSampleRate * 0.1));
   fPan.InitGain(int(mSampleRate * 0.1), SR::DSP::SRGain::PanType::kSinusodial);
 
   // Init EQ
@@ -529,8 +531,9 @@ void SRChannel::InitEffects() {
   for (int channel = 0; channel < MAXNUMOUTCHANNELS; channel++) {
 
     // Init envelope filter
-    fEnvInput[channel].Reset(1000., mSampleRate);
-    fEnvOutput[channel].Reset(1000., mSampleRate);
+    fEnvInput.Reset(10000., mSampleRate);
+    fEnvPost.Reset(10000., mSampleRate);
+    fEnvOutput.Reset(10000., mSampleRate);
 
     // Init saturation
     fInputSaturation[channel].setSaturation(SR::DSP::SRSaturation::ESaturationType::kMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
@@ -560,10 +563,8 @@ void SRChannel::InitEffects() {
 
   // Meter
   bInputMeter.ResetBuffer(2, GetBlockSize());
-  bInputMeterRms.ResetBuffer(2, GetBlockSize());
   bGrMeter.ResetBuffer(3, GetBlockSize());
   bOutputMeter.ResetBuffer(2, GetBlockSize());
-  bOutputMeterRms.ResetBuffer(2, GetBlockSize());
 }
 
 #pragma mark - Process block
@@ -584,9 +585,7 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   sample* out2 = outputs[1];
 
   bInputMeter.SetNumFrames(nFrames);
-  bInputMeterRms.SetNumFrames(nFrames);
   bOutputMeter.SetNumFrames(nFrames);
-  bOutputMeterRms.SetNumFrames(nFrames);
   bGrMeter.SetNumFrames(nFrames);
 
 
@@ -622,8 +621,8 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       // Fill input meter values
       bInputMeter.ProcessBuffer(*out1, 0, s);
       bInputMeter.ProcessBuffer(*out2, 1, s);
-      bInputMeterRms.ProcessBuffer(fEnvInput[0].Process(std::fabs(*out1)), 0, s);
-      bInputMeterRms.ProcessBuffer(fEnvInput[1].Process(std::fabs(*out2)), 1, s);
+
+      mEnvInput = fEnvInput.Process(std::fabs((*out1 + *out2) * 0.5));
 
 
       // ----------------
@@ -897,6 +896,10 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       // Apply out gain
       fOutputGain.Process(*out1, *out2);
 
+
+      mEnvPost = fEnvPost.Process(std::fabs((*out1 + *out2) * 0.5));
+
+
       // Apply automatic gain
       if (mAgc)
         fAutoGain.Process(*out1, *out2);
@@ -909,6 +912,9 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       *out1 -= dcoff;
       *out2 -= dcoff;
 
+      mEnvOutput = fEnvOutput.Process(std::fabs((*out1 + *out2) * 0.5));
+
+
       // ----------------
       // End Post Section
 
@@ -917,11 +923,9 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // -------------------------
     // End of global bypass test
 
-    // fill meter value buffers with current sample
+    // fill meter value buffers w ith current sample
     bOutputMeter.ProcessBuffer(*out1, 0, s);
     bOutputMeter.ProcessBuffer(*out2, 1, s);
-    bOutputMeterRms.ProcessBuffer(fEnvOutput[0].Process(std::fabs(*out1)), 0, s);
-    bOutputMeterRms.ProcessBuffer(fEnvOutput[1].Process(std::fabs(*out2)), 1, s);
     bGrMeter.ProcessBuffer(fCompressorPeak.GetGrLin(), 0, s);
     bGrMeter.ProcessBuffer(fCompressorRms.GetGrLin(), 1, s);
     bGrMeter.ProcessBuffer(fDeesser.GetGrLin(), 2, s);
@@ -930,27 +934,30 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   // ----------------------------------------------------------------
   // End processing per frame and again some processing per Framesize
 
-
 #ifdef USEAGC
-  if (mAgc/* && mAgcTrigger*/) {
-    const double currentInputEnv = (bInputMeterRms.GetBuffer(0, nFrames - 1) + bInputMeterRms.GetBuffer(1, nFrames - 1)) * 0.5;
-    const double currentOutputEnv = (bOutputMeterRms.GetBuffer(0, nFrames - 1) + bOutputMeterRms.GetBuffer(1, nFrames - 1)) * 0.5;
-    const double diff = std::min(8., currentInputEnv / currentOutputEnv);
-    if (currentInputEnv > DBToAmp(-60.) && currentOutputEnv > DBToAmp(-60.)) {
-      if (std::fabs(1. - fAutoGain.GetGain() / diff) >= 0.1) {
-      fAutoGain.SetGain(diff);
-      //mAgcTrigger = false;
+  // This is the automatic gain compensation. Takes place after the sample loop
+  // mAgcTrigger is true after every parameter change
+  if (mAgc && mAgcTrigger) {
+    // Get the average of the last sample of each the input and output envelope buffer
+    // calculating the difference
+
+    if (mEnvInput > 0.003981071705534969 && mEnvPost > 0.003981071705534969) { // this is -48dB
+      const double diff = mEnvInput / mEnvPost;
+      mAutoGain = diff;
+      fAutoGain.SetGain(mAutoGain);
+      const double totaldiff = mEnvInput / mEnvOutput;
+      DBGMSG("%f %f", mAutoGain, totaldiff);
+      if (std::fabs(1. - totaldiff) < 0.0001) {
+        mAgcTrigger = false;
       }
+
     }
-    DBGMSG("%f", diff);
   }
 #endif
 
   // Send meter buffer data to meter ballistics class
   mInputMeterBallistics.ProcessBlock(bInputMeter.GetBuffer(), nFrames);
-  mInputRmsMeterBallistics.ProcessBlock(bInputMeterRms.GetBuffer(), nFrames);
   mOutputMeterBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
-  mOutputRmsMeterBallistics.ProcessBlock(bOutputMeterRms.GetBuffer(), nFrames);
   mGrMeterBallistics.ProcessBlock(bGrMeter.GetBuffer(), nFrames);
   mScopeBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
 }
@@ -959,10 +966,8 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
 void SRChannel::OnIdle() {
   mInputMeterBallistics.TransmitData(*this);
-  mInputRmsMeterBallistics.TransmitData(*this);
   mGrMeterBallistics.TransmitData(*this);
   mOutputMeterBallistics.TransmitData(*this);
-  mOutputRmsMeterBallistics.TransmitData(*this);
   mScopeBallistics.TransmitData(*this);
   SetFreqMeterValues();
   if (GetUI())
@@ -981,10 +986,12 @@ void SRChannel::OnParamChange(int paramIdx) {
   IParam* paramChanged = GetParam(paramIdx);
 
   // If AGC enabled let the gain compensation be started on any parameter changes
-//#ifdef USEAGC
-//  if (mAgc)
-//    mAgcTrigger = true;
-//#endif // USEAGC
+  // Could optionally only apply if parameter has something to do with any gain changes
+#ifdef USEAGC
+  if (mAgc) {
+    mAgcTrigger = true;
+  }
+#endif // USEAGC
 
   switch (paramIdx)
   {

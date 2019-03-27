@@ -20,7 +20,8 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mAutoGain(1.)
   , mCompPeakAutoMakeup(1.)
   , mCompRmsAutoMakeup(1.)
-  , mAgcTrigger(false)
+  //, mAgcTrigger(false)
+
 {
   //// Name channels:
   // // for VST2 we name individual outputs
@@ -86,7 +87,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       case kSaturationType:
         thisParameter->InitEnum(p.name,
           (int)p.defaultVal,
-          SR::DSP::SRSaturation::SaturationTypes::numTypes,
+          SR::DSP::SRSaturation::ESaturationType::kNumTypes,
           p.unit,
           0,
           p.group,
@@ -190,10 +191,16 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(cPanelMeter)->SetTargetAndDrawRECTs(rectMeter);
       dynamic_cast<SR::Graphics::SRPanel*>(pGraphics->GetControlWithTag(cPanelMeter))->SetPattern(patternPanel);
 
+      // Resize info boxes
+      pGraphics->GetControlWithTag(cInfo)->SetTargetAndDrawRECTs(rectFooter.GetFromBottom(10.f));
+
+
       // Resize METERS:
-      pGraphics->GetControlWithTag(cInputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 0));
-      pGraphics->GetControlWithTag(cGrMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 1));
-      pGraphics->GetControlWithTag(cOutputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(3, 2));
+      pGraphics->GetControlWithTag(cInputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(5, 1));
+      pGraphics->GetControlWithTag(cInputMeterRms)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(5, 0));
+      pGraphics->GetControlWithTag(cGrMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(5, 2));
+      pGraphics->GetControlWithTag(cOutputMeter)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(5, 3));
+      pGraphics->GetControlWithTag(cOutputMeterRms)->SetTargetAndDrawRECTs(rectMeter.SubRectHorizontal(5, 4));
       pGraphics->GetControlWithTag(cScope)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 0).GetVPadded(-5.f));
       pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f));
 
@@ -222,36 +229,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
         // Place parameter controls here:
         const IRECT rectCurrentControl = rect->GetGridCell(p.position.y, p.position.x, sectionRectGridCells[p.position.AttachToControlPanel][0], sectionRectGridCells[p.position.AttachToControlPanel][1]).FracRectHorizontal(p.position.w, false).FracRectVertical(p.position.h, true).GetPadded((p.Knobs == Button) ? -5.0f : 0.0f);
-
-
-        switch (p.Type)
-        {
-        case IParam::EParamType::kTypeInt: // No int ctrl...
-        case IParam::EParamType::kTypeDouble:
-
-          switch (paramIdx)
-          {
-          case kInputGain:
-          case kOutputGain:
-            // Resize faders
-            thisControl->SetTargetAndDrawRECTs(rectCurrentControl); break;
-
-          default:
-            // Resize knobs
-            thisControl->SetTargetAndDrawRECTs(rectCurrentControl); break;
-          }
-
-          break;
-
-        case IParam::EParamType::kTypeEnum:
-        case IParam::EParamType::kTypeBool:
-          // Resize switches
-          thisControl->SetTargetAndDrawRECTs(rectCurrentControl); break;
-
-        default:
-          break;
-
-        }
+        thisControl->SetTargetAndDrawRECTs(rectCurrentControl);
 
       }
 
@@ -292,11 +270,15 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new SR::Graphics::SRPanel(rectOutput, patternPanel, true), cPanelOutput, "UI");
     pGraphics->AttachControl(new SR::Graphics::SRPanel(rectMeter, patternPanel, true), cPanelMeter, "UI");
 
+    // Attach Info boxes
+    pGraphics->AttachControl(new ITextControl(rectFooter.GetFromBottom(10.f), "TEST THINGY", SRLayout.textKnobLabel), cInfo, "UI");
 
     // Attach meters
-    pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
-    pGraphics->AttachControl(new SR::Graphics::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(3, 1), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
-    pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 2), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 1), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeterRms, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(5, 2), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 3), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 4), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeterRms, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectHeader.SubRectHorizontal(6, 0).GetVPadded(-5.f), "Left", "Right"), cScope, "Meter");
     //pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5), SRLayout.colorSpec), cFreqMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRGraphBase(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SRLayout.colorSpec), cFreqMeter, "Meter");
@@ -409,9 +391,11 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     // Other setup for ALL parameter controls
     pGraphics->StyleAllVectorControls(true, true, false, 0.1f, 2.f, 3.f, SRLayout.colorSpec);
 
-  }; // END LAYOUT function
+  };
+  // END LAYOUT function
 
-}// END GRAPHICS functions
+}
+// End of plugin class constructor
 
 #pragma mark - User methods
 
@@ -467,6 +451,8 @@ void SRChannel::SetFreqMeterValues() {
   if (GetUI()) dynamic_cast<SR::Graphics::SRGraphBase*>(GetUI()->GetControlWithTag(cFreqMeter))->Process(mFreqMeterValues);
 }
 
+
+
 void SRChannel::OnParamChangeUI(int paramIdx, EParamSource source)
 {
   switch (paramIdx)
@@ -514,42 +500,43 @@ void SRChannel::InitEffects() {
   // Init gain and pan
   fInputGain.InitGain(int(mSampleRate * 0.1));
   fOutputGain.InitGain(int(mSampleRate * 0.1));
-  fAutoGain.InitGain(int(mSampleRate * 0.1));
+  fAutoGain.InitGain(int(mSampleRate));
   fPan.InitGain(int(mSampleRate * 0.1), SR::DSP::SRGain::PanType::kSinusodial);
 
-  for (int i = 0; i < mNumOutChannels; i++) {
-    // Init EQ
-    fFilters[EFilters::kOpHp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::OnepoleHighpass, mEqHpFreq / mSampleRate, 0.0, 0.0, mSampleRate);
-    fFilters[EFilters::kHp1].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp2].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp3].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp4].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp5].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp6].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp7].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp8].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp9].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHp10].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kLp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
-    fFilters[EFilters::kHf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
-    fFilters[EFilters::kHmf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
-    fFilters[EFilters::kLmf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
-    fFilters[EFilters::kLf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
-    fFilters[EFilters::kDC].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::OnepoleHighpass, 10.0 / mSampleRate, 0.0, 0.0, mSampleRate);
+  // Init EQ
+  fFilters[EFilters::kOpHp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::OnepoleHighpass, mEqHpFreq / mSampleRate, 0.0, 0.0, mSampleRate);
+  fFilters[EFilters::kHp1].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp2].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp3].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp4].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp5].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp6].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp7].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp8].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp9].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHp10].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighpass, mEqHpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kLp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowpass, mEqLpFreq / mSampleRate, stQ, 0., mSampleRate);
+  fFilters[EFilters::kHf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighshelf, mEqHfFreq / mSampleRate, mEqHfQ, mEqHfGain, mSampleRate);
+  fFilters[EFilters::kHmf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak, mEqHmfFreq / mSampleRate, mEqHmfQ, mEqHmfGain, mSampleRate);
+  fFilters[EFilters::kLmf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak, mEqLmfFreq / mSampleRate, mEqLmfQ, mEqLmfGain, mSampleRate);
+  fFilters[EFilters::kLf].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowshelf, mEqLfFreq / mSampleRate, mEqLfQ, mEqLfGain, mSampleRate);
+  fFilters[EFilters::kDC].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::OnepoleHighpass, 10.0 / mSampleRate, 0.0, 0.0, mSampleRate);
 
-    // Init safe pan filter
-    fFilters[EFilters::kPanHp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLinkwitzHighpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
-    fFilters[EFilters::kPanLp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLinkwitzLowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+  // Init safe pan filter
+  fFilters[EFilters::kPanHp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLinkwitzHighpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+  fFilters[EFilters::kPanLp].SetFilter(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLinkwitzLowpass, mSafePanFreq / mSampleRate, 0., 0., mSampleRate);
+
+  for (int channel = 0; channel < MAXNUMOUTCHANNELS; channel++) {
+
+    // Init envelope filter
+    fEnvInput[channel].Reset(1000., mSampleRate);
+    fEnvOutput[channel].Reset(1000., mSampleRate);
 
     // Init saturation
-    fInputSaturation[i].setSaturation(SR::DSP::SRSaturation::SaturationTypes::typeMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
-
-    //... Commented out until implementation of oversampling
-    //fOverSamplerProcessL = std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[0].process, std::placeholders::_1);
-    //fOverSamplerProcessR = std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[1].process, std::placeholders::_1);
+    fInputSaturation[channel].setSaturation(SR::DSP::SRSaturation::ESaturationType::kMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
 
     // Oversampling
-    mOverSampler[i].Reset();
+    mOverSampler[channel].Reset();
   }
 
   // Init compressor
@@ -572,11 +559,11 @@ void SRChannel::InitEffects() {
   fDeesser.Reset();
 
   // Meter
-#if USEBUFFER == 2
   bInputMeter.ResetBuffer(2, GetBlockSize());
+  bInputMeterRms.ResetBuffer(2, GetBlockSize());
   bGrMeter.ResetBuffer(3, GetBlockSize());
   bOutputMeter.ResetBuffer(2, GetBlockSize());
-#endif // USEBUFFER
+  bOutputMeterRms.ResetBuffer(2, GetBlockSize());
 }
 
 #pragma mark - Process block
@@ -596,24 +583,11 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
   sample* out1 = outputs[0];
   sample* out2 = outputs[1];
 
-#if USEBUFFER == 1
-  mInMeterValues = new sample*[2];
-  for (int ch = 0; ch < 2; ch++) {
-    mInMeterValues[ch] = new sample[nFrames];
-  }
-  mOutMeterValues = new sample*[2];
-  for (int ch = 0; ch < 2; ch++) {
-    mOutMeterValues[ch] = new sample[nFrames];
-  }
-  mGrMeterValues = new sample*[3];
-  for (int ch = 0; ch < 3; ch++) {
-    mGrMeterValues[ch] = new sample[nFrames];
-  }
-#elif USEBUFFER == 2
   bInputMeter.SetNumFrames(nFrames);
+  bInputMeterRms.SetNumFrames(nFrames);
   bOutputMeter.SetNumFrames(nFrames);
+  bOutputMeterRms.SetNumFrames(nFrames);
   bGrMeter.SetNumFrames(nFrames);
-#endif
 
 
 
@@ -646,13 +620,10 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       fInputGain.Process(*out1, *out2);
 
       // Fill input meter values
-#if USEBUFFER == 1
-      mInMeterValues[0][s] = *out1;
-      mInMeterValues[1][s] = *out2;
-#elif USEBUFFER == 2
       bInputMeter.ProcessBuffer(*out1, 0, s);
       bInputMeter.ProcessBuffer(*out2, 1, s);
-#endif
+      bInputMeterRms.ProcessBuffer(fEnvInput[0].Process(std::fabs(*out1)), 0, s);
+      bInputMeterRms.ProcessBuffer(fEnvInput[1].Process(std::fabs(*out2)), 1, s);
 
 
       // ----------------
@@ -897,7 +868,8 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
         if (*out1 > 1.) {
           *out1 = (1. - 4 / (*out1 + (4 - 1.))) * 4 + 1.;
         }
-        else {
+        else
+        {
           if (*out1 < -1.) {
             *out1 = (1. + 4 / (*out1 - (4 - 1.))) * -4 - 1.;
           }
@@ -906,7 +878,8 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
         if (*out2 > 1.) {
           *out2 = (1. - 4 / (*out2 + (4 - 1.))) * 4 + 1.;
         }
-        else {
+        else
+        {
           if (*out2 < -1.) {
             *out2 = (1. + 4 / (*out2 - (4 - 1.))) * -4 - 1.;
           }
@@ -921,15 +894,18 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
       // POST SECTIONS
       // -------------
 
-
-
-      // Output Gain
+      // Apply out gain
       fOutputGain.Process(*out1, *out2);
+
+      // Apply automatic gain
       if (mAgc)
         fAutoGain.Process(*out1, *out2);
 
+      // Apply DC Remove filter
       *out1 = fFilters[EFilters::kDC].Process(*out1, 0);
       *out2 = fFilters[EFilters::kDC].Process(*out2, 1);
+
+      // subtract DC offset
       *out1 -= dcoff;
       *out2 -= dcoff;
 
@@ -941,19 +917,14 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // -------------------------
     // End of global bypass test
 
-#if USEBUFFER == 1
-    mOutMeterValues[0][s] = *out1;
-    mOutMeterValues[1][s] = *out2;
-    mGrMeterValues[0][s] = fCompressorPeak.getGrLin();
-    mGrMeterValues[1][s] = fCompressorRms.getGrLin();
-    mGrMeterValues[2][s] = fDeesser.getGrLin();
-#elif USEBUFFER == 2
+    // fill meter value buffers with current sample
     bOutputMeter.ProcessBuffer(*out1, 0, s);
     bOutputMeter.ProcessBuffer(*out2, 1, s);
+    bOutputMeterRms.ProcessBuffer(fEnvOutput[0].Process(std::fabs(*out1)), 0, s);
+    bOutputMeterRms.ProcessBuffer(fEnvOutput[1].Process(std::fabs(*out2)), 1, s);
     bGrMeter.ProcessBuffer(fCompressorPeak.GetGrLin(), 0, s);
     bGrMeter.ProcessBuffer(fCompressorRms.GetGrLin(), 1, s);
     bGrMeter.ProcessBuffer(fDeesser.GetGrLin(), 2, s);
-#endif
 
   }
   // ----------------------------------------------------------------
@@ -961,62 +932,43 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
 
 #ifdef USEAGC
-  if (mAgc && mAgcTrigger) {
-#if USEBUFFER == 1
-    double sumIn = 0.; double sumOut = 0.;
-    for (int s = 0; s < nFrames; s++) {
-      sumIn += std::fabs(mInMeterValues[0][s]) + std::fabs(mInMeterValues[1][s]);
-      sumOut += std::fabs(mOutMeterValues[0][s]) + std::fabs(mOutMeterValues[1][s]);
+  if (mAgc/* && mAgcTrigger*/) {
+    const double currentInputEnv = (bInputMeterRms.GetBuffer(0, nFrames - 1) + bInputMeterRms.GetBuffer(1, nFrames - 1)) * 0.5;
+    const double currentOutputEnv = (bOutputMeterRms.GetBuffer(0, nFrames - 1) + bOutputMeterRms.GetBuffer(1, nFrames - 1)) * 0.5;
+    const double diff = std::min(8., currentInputEnv / currentOutputEnv);
+    if (currentInputEnv > DBToAmp(-60.) && currentOutputEnv > DBToAmp(-60.)) {
+      if (std::fabs(1. - fAutoGain.GetGain() / diff) >= 0.1) {
+      fAutoGain.SetGain(diff);
+      //mAgcTrigger = false;
+      }
     }
-    const double diff = sumIn / sumOut;
-#elif USEBUFFER == 2
-    const double diff = bInputMeter.AverageBuffer() / bOutputMeter.AverageBuffer();
-#endif
-    if (mAgc && diff < 8) fAutoGain.SetGain(diff);
-    mAgcTrigger = false;
+    DBGMSG("%f", diff);
   }
 #endif
 
-#if USEBUFFER == 1
-  mInputMeterBallistics.ProcessBlock(mInMeterValues, nFrames);
-  mGrMeterBallistics.ProcessBlock(mGrMeterValues, nFrames);
-  mOutputMeterBallistics.ProcessBlock(mOutMeterValues, nFrames);
-  mScopeBallistics.ProcessBlock(mOutMeterValues, nFrames);
-  for (int ch = 0; ch < 2; ch++) {
-    delete[] mInMeterValues[ch];
-  }
-  delete[] mInMeterValues;
-
-  for (int ch = 0; ch < 2; ch++) {
-    delete[] mOutMeterValues[ch];
-  }
-  delete[] mOutMeterValues;
-
-  for (int ch = 0; ch < 3; ch++) {
-    delete[] mGrMeterValues[ch];
-  }
-  delete[] mGrMeterValues;
-#elif USEBUFFER == 2
+  // Send meter buffer data to meter ballistics class
   mInputMeterBallistics.ProcessBlock(bInputMeter.GetBuffer(), nFrames);
+  mInputRmsMeterBallistics.ProcessBlock(bInputMeterRms.GetBuffer(), nFrames);
   mOutputMeterBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
+  mOutputRmsMeterBallistics.ProcessBlock(bOutputMeterRms.GetBuffer(), nFrames);
   mGrMeterBallistics.ProcessBlock(bGrMeter.GetBuffer(), nFrames);
   mScopeBallistics.ProcessBlock(bOutputMeter.GetBuffer(), nFrames);
-#endif // USEBUFFER
-
-
-
-
 }
 
 #pragma mark - IPlug overrides
 
 void SRChannel::OnIdle() {
   mInputMeterBallistics.TransmitData(*this);
+  mInputRmsMeterBallistics.TransmitData(*this);
   mGrMeterBallistics.TransmitData(*this);
   mOutputMeterBallistics.TransmitData(*this);
+  mOutputRmsMeterBallistics.TransmitData(*this);
   mScopeBallistics.TransmitData(*this);
   SetFreqMeterValues();
+  if (GetUI())
+    dynamic_cast<ITextControl*>(GetUI()->GetControlWithTag(cInfo))->SetStrFmt(1024, "Samplerate: %6.0f | Framesize: %d | Channels: %d/%d | Version: %s", mSampleRate, GetBlockSize(), mNumInChannels, mNumOutChannels, PLUG_VERSION_STR);
 }
+
 
 void SRChannel::OnReset() {
   mSampleRate = GetSampleRate();
@@ -1029,61 +981,78 @@ void SRChannel::OnParamChange(int paramIdx) {
   IParam* paramChanged = GetParam(paramIdx);
 
   // If AGC enabled let the gain compensation be started on any parameter changes
-#ifdef USEAGC
-  if (mAgc)
-    mAgcTrigger = true;
-#endif // USEAGC
+//#ifdef USEAGC
+//  if (mAgc)
+//    mAgcTrigger = true;
+//#endif // USEAGC
 
   switch (paramIdx)
   {
 
+    // ---------------------------------------------------------------------------------------------------------------
     // INPUT AND OUTPUT STAGE
-    // ----------------------
+    // ---------------------------------------------------------------------------------------------------------------
 
   case kInputGain:
     mInputGain = DBToAmp(paramChanged->Value());
     fInputGain.SetGain(mInputGain);
     break;
+
   case kOutputGain:
     mOutputGain = DBToAmp(paramChanged->Value());
     fOutputGain.SetGain(mOutputGain);
     break;
+
   case kSaturationDrive:
     mSaturationDrive = paramChanged->Value();
     fInputSaturation[0].setDrive(mSaturationDrive);
     fInputSaturation[1].setDrive(mSaturationDrive);
     break;
+
   case kSaturationAmount:
     mSaturationAmount = paramChanged->Value() / 100.;
     fInputSaturation[0].setAmount(mSaturationAmount);
     fInputSaturation[1].setAmount(mSaturationAmount);
     break;
+
   case kSaturationHarmonics:
     mSaturationHarmonics = paramChanged->Value() / 100.;
     fInputSaturation[0].setHarmonics(mSaturationHarmonics);
     fInputSaturation[1].setHarmonics(mSaturationHarmonics);
     break;
+
   case kSaturationSkew:
     mSaturationSkew = paramChanged->Value() * 0.05;
     fInputSaturation[0].setSkew(mSaturationSkew);
     fInputSaturation[1].setSkew(mSaturationSkew);
     break;
+
   case kSaturationType:
     mSaturationType = int(paramChanged->Int());
-    fInputSaturation[0].setType(mSaturationType);
-    fInputSaturation[1].setType(mSaturationType);
+    fInputSaturation[0].setType(SR::DSP::SRSaturation::ESaturationType(mSaturationType));
+    fInputSaturation[1].setType(SR::DSP::SRSaturation::ESaturationType(mSaturationType));
     break;
+
   case kOversamplingRate:
     mOversamplingRate = int(paramChanged->Int());
     mOverSampler[0].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
     mOverSampler[1].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
     break;
-  case kClipperThreshold: mClipperThreshold = 1. - paramChanged->Value() / 100.; break;
+
+  case kClipperThreshold:
+    mClipperThreshold = 1. - paramChanged->Value() / 100.;
+    break;
+
   case kLimiterThresh:
     mLimiterThresh = paramChanged->Value();
     fLimiter.SetThresh(mLimiterThresh);
     break;
-  case kPan: mPan = (paramChanged->Value() + 100) / 200; fPan.SetPanPosition(mPan); break;
+
+  case kPan:
+    mPan = (paramChanged->Value() + 100) / 200;
+    fPan.SetPanPosition(mPan);
+    break;
+
   case kPanFreq:
     mSafePanFreq = paramChanged->Value();
     fFilters[EFilters::kPanHp].SetFreq(mSafePanFreq / mSampleRate);
@@ -1091,18 +1060,22 @@ void SRChannel::OnParamChange(int paramIdx) {
     fFilters[EFilters::kPanLp].SetFreq(mSafePanFreq / mSampleRate);
     fFilters[EFilters::kPanLp].SetFreq(mSafePanFreq / mSampleRate);
     break;
-  case kIsPanMonoLow: mIsPanMonoLow = paramChanged->Bool(); break;
+
+  case kIsPanMonoLow:
+    mIsPanMonoLow = paramChanged->Bool();
+    break;
+
   case kWidth:
     mWidth = paramChanged->Value() * 0.01;
     fPan.SetWidth(mWidth);
     break;
 
 
-
+    // ---------------------------------------------------------------------------------------------------------------
     // FILTER
-    // ------
+    // ---------------------------------------------------------------------------------------------------------------
 
-    // High Pass
+      // High Pass
   case kEqHpFreq:
     mEqHpFreq = paramChanged->Value();
     for (int f = EFilters::kOpHp; f <= EFilters::kHp10; f++) {
@@ -1173,15 +1146,15 @@ void SRChannel::OnParamChange(int paramIdx) {
     // Low Pass
   case kEqLpFreq:
     mEqLpFreq = paramChanged->Value();
-    for (int c = 0; c < mNumOutChannels; c++) {
-      fFilters[EFilters::kLp].SetFreq(mEqLpFreq / mSampleRate);
-    }
+    fFilters[EFilters::kLp].SetFreq(mEqLpFreq / mSampleRate);
     break;
     //case kEqLpOrder:
-//  break;
+    //  break;
 
-    // EQUALIZER
-    // ---------
+
+      // ---------------------------------------------------------------------------------------------------------------
+      // EQUALIZER
+      // ---------------------------------------------------------------------------------------------------------------
 
   case kEqHfBell:
     mEqHfIsBell = paramChanged->Bool();
@@ -1212,7 +1185,6 @@ void SRChannel::OnParamChange(int paramIdx) {
     mEqLfFreq = paramChanged->Value();
     fFilters[EFilters::kLf].SetFreq(mEqLfFreq / mSampleRate);
     break;
-    //case kEqLfQ: mEqLfQ = paramChanged->Value(); fEqLfFilter[0].setQ(mEqLfQ); fEqLfFilter[1].setQ(mEqLfQ); break;
 
   case kEqLmfGain:
     mEqLmfGain = paramChanged->Value() * mEqAmount;
@@ -1259,13 +1231,12 @@ void SRChannel::OnParamChange(int paramIdx) {
     OnParamChange(kEqHfGain); OnParamChange(kEqHmfGain);
     OnParamChange(kEqLmfGain); OnParamChange(kEqLfGain);
     break;
-    //case kEqHfQ: mEqHfQ = paramChanged->Value(); fEqHfFilter[0].setQ(mEqHfQ); fEqHfFilter[1].setQ(mEqHfQ); break;
 
+    // ---------------------------------------------------------------------------------------------------------------
+    // COMPRESSOR
+    // ---------------------------------------------------------------------------------------------------------------
 
-      // COMPRESSOR
-      // ----------
-
-      // Peak Compressor
+        // Peak Compressor
   case kCompPeakRatio:
     mCompPeakRatio = (1. / paramChanged->Value());
     // For ratio 1:20 set infinite compression (limiting)
@@ -1275,25 +1246,21 @@ void SRChannel::OnParamChange(int paramIdx) {
     fCompressorPeak.SetRatio(mCompPeakRatio);
     //fCompressorPeak.SetMaxGrDb(73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1. / mCompPeakRatio))));
     //fCompressorPeak.SetMaxGrDb(0.);
-    //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakThresh:
     mCompPeakThresh = paramChanged->Value();
     fCompressorPeak.SetThresh(mCompPeakThresh);
-    //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakAttack:
     mCompPeakAttack = paramChanged->Value();
     fCompressorPeak.SetAttack(mCompPeakAttack);
-    //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakRelease:
     mCompPeakRelease = paramChanged->Value();
     fCompressorPeak.SetRelease(mCompPeakRelease);
-    //mCompPeakAutoMakeup = SR::Utils::calcAutoMakeup(mCompPeakThresh, mCompPeakRatio, -18., mCompPeakAttack, mCompPeakRelease); // Auto Makeup
     break;
 
   case kCompPeakKneeWidthDb:
@@ -1319,25 +1286,21 @@ void SRChannel::OnParamChange(int paramIdx) {
     mCompRmsRatio = (1 / paramChanged->Value());
     fCompressorRms.SetRatio(mCompRmsRatio);
     fCompressorRms.SetMaxGrDb(73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1. / mCompRmsRatio))));
-    //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsThresh:
     mCompRmsThresh = paramChanged->Value();
     fCompressorRms.SetThresh(mCompRmsThresh);
-    //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsAttack:
     mCompRmsAttack = paramChanged->Value();
     fCompressorRms.SetAttack(mCompRmsAttack);
-    //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsRelease:
     mCompRmsRelease = paramChanged->Value();
     fCompressorRms.SetRelease(mCompRmsRelease);
-    //mCompRmsAutoMakeup = SR::Utils::calcAutoMakeup(mCompRmsThresh, mCompRmsRatio, -18., mCompRmsAttack, mCompRmsRelease); // Auto Makeup
     break;
 
   case kCompRmsKneeWidthDb:
@@ -1385,9 +1348,9 @@ void SRChannel::OnParamChange(int paramIdx) {
     fCompressorRms.SetTopologyFeedback(mCompRmsIsFeedback);
     break;
 
-
+    // ---------------------------------------------------------------------------------------------------------------
     // GLOBAL BYPASS
-    // -------------
+    // ---------------------------------------------------------------------------------------------------------------
 
   case kEqBypass: mEqBypass = paramChanged->Bool(); break;
   case kCompBypass: mCompBypass = paramChanged->Bool(); break;
@@ -1395,9 +1358,9 @@ void SRChannel::OnParamChange(int paramIdx) {
   case kOutputBypass: mOutputBypass = paramChanged->Bool(); break;
   case kBypass: mBypass = paramChanged->Bool(); break;
 
-
+    // ---------------------------------------------------------------------------------------------------------------
     // AUTOMATIC GAIN CONTROL
-    // ----------------------
+    // ---------------------------------------------------------------------------------------------------------------
 
 #ifdef USEAGC
   case kAgc:
@@ -1405,8 +1368,10 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
 #endif // USEAGC
 
+
+    // ---------------------------------------------------------------------------------------------------------------
     // DEESSER
-    // -------
+    // ---------------------------------------------------------------------------------------------------------------
 
   case kDeesserFreq: mDeesserFreq = paramChanged->Value(); fDeesser.SetFrequency(mDeesserFreq / mSampleRate); break;
   case kDeesserQ: mDeesserQ = paramChanged->Value(); fDeesser.SetQ(mDeesserQ); break;

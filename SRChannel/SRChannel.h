@@ -1,13 +1,6 @@
 #ifndef SRCHANNEL_H
 #define SRCHANNEL_H
 
-/*
-Which current test buffer implementation:
-1 - ordinary sample** buffer
-2 - SRBuffer class (Ptrlist or vector of WDL_Typedbuf or T**)
-*/
-#define USEBUFFER 2
-
 // Use automatic gain compensation
 #define USEAGC
 
@@ -25,9 +18,7 @@ Which current test buffer implementation:
 
 // SRClasses
 #include "../SRClasses/SRConstants.h"
-#if USEBUFFER >= 2
 #include "../SRClasses/DSP/SRBuffer.h"
-#endif // USEBUFFER
 #include "../SRClasses/DSP/SRGain.h"
 #include "../SRClasses/DSP/SRFilters.h"
 #include "../SRClasses/DSP/SRDynamics.h"
@@ -54,6 +45,8 @@ public:
   void OnParamChange(int paramIdx) override;
   void OnIdle() override;
 #endif
+
+
 #if IPLUG_EDITOR
   void OnParamChangeUI(int paramIdx, EParamSource source = kUnknown) override;
 #endif
@@ -86,7 +79,7 @@ private:
   // COMP members
   double mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease,
     mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease,
-    mCompRmsMakeup, mCompPeakMakeup, 
+    mCompRmsMakeup, mCompPeakMakeup,
     mCompPeakRmsRatio, mCompDryWet,
     mCompPeakSidechainFilterFreq,
     mCompPeakKneeWidthDb, mCompRmsKneeWidthDb;
@@ -110,18 +103,16 @@ private:
   double mCompRmsAutoMakeup, mCompPeakAutoMakeup;
 
   // AGC
-  bool mAgcTrigger;
+  //bool mAgcTrigger;
 
   // FILTERS
-
-    // Gain Filters
+  // Gain Filters
   SR::DSP::SRGain fInputGain, fOutputGain, fAutoGain, fPan;
 
   // Spectral Filters
   SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS> fFilters[kNumFilters] = {};
-
-  //// Extra Filters
-  //SR::DSP::SRFiltersIIR<sample, MAXNUMOUTCHANNELS> fDcBlocker, fEqHpFilterOnepole, fEqLpFilterOnepole;
+  SR::DSP::SRFilterParamSmooth fEnvInput[MAXNUMOUTCHANNELS];
+  SR::DSP::SRFilterParamSmooth fEnvOutput[MAXNUMOUTCHANNELS];
 
   // Dynamic Filters
   SR::DSP::SRCompressor fCompressorPeak;
@@ -136,22 +127,24 @@ private:
   SR::DSP::SRSaturation fInputSaturation[MAXNUMOUTCHANNELS] = {};
   OverSampler<sample> mOverSampler[MAXNUMOUTCHANNELS]{ OverSampler<sample>::EFactor::kNone };
 
+  // meter ballistics attached to meter controls
   SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
+  SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mInputRmsMeterBallistics{ cInputMeterRms };
   SR::Graphics::SRMeter<3, 1024>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
   SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
+  SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mOutputRmsMeterBallistics{ cOutputMeterRms };
   IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
 
-#if USEBUFFER == 1
-  sample **mInMeterValues, **mOutMeterValues, **mGrMeterValues;
-#elif USEBUFFER == 2
+  // sample** buffers storing meter values
   SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bInputMeter;
+  SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bInputMeterRms;
   SR::DSP::SRBuffer<sample, 3, 1024> bGrMeter;
   SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bOutputMeter;
-#endif // USEBUFFER
+  SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bOutputMeterRms;
 
-
-
+  // Frequency response meter values
   double* mFreqMeterValues = new double[FREQUENCYRESPONSE];
 };
 
 #endif // SRCHANNEL_H
+

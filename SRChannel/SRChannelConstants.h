@@ -288,12 +288,15 @@ enum ECtrlTags {
   cPanelMeter,
   cPresetMenu,
   cInputMeter,
+  cInputMeterRms,
   cGrMeter,
   cOutputMeter,
+  cOutputMeterRms,
   cScope,
   cChannelCount,
   cVersion,
   cFreqMeter,
+  cInfo,
 
   // Number of controls
   kNumCtrlTags,

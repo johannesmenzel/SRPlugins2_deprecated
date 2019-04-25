@@ -13,7 +13,7 @@
 #define BUNDLE_MFR "SRPlugins"
 #define BUNDLE_DOMAIN "com"
 
-#define PLUG_CHANNEL_IO "4-2"
+#define PLUG_CHANNEL_IO "2-2 4-2"
 //#define PLUG_SC_CHANS 2
 
 #define PLUG_LATENCY 0
@@ -51,8 +51,6 @@
 #define APP_SIGNAL_VECTOR_SIZE 64
 
 #define ROBOTTO_FN "Roboto-Regular.ttf"
-#define CENTURY_FN "GOTHIC.TTF"
-//#define LOGO_FN	"../SRImages/Logo.png"
-//#define PANEL_FN	"../SRImages/SrChannel-Background.png"
+#define CENTURY_FN "Gothic.ttf"
 #define SRCHANNELLOGO_FN "../SRImages/SRChannel_Logo.png"
 #define SRPLUGINSLOGO_FN "../SRImages/SRPlugins_Logo.png"

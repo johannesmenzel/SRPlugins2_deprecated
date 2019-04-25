@@ -62,9 +62,6 @@
     <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />
@@ -241,12 +238,6 @@
     </Filter>
     <Filter Include="config">
       <UniqueIdentifier>{8c338368-7512-426b-af83-0f50719ca0bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses">
-      <UniqueIdentifier>{892c1851-e11b-491b-9e14-28fc0aa20a51}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{b08e6335-d74f-4f01-a8af-657b28f6fe7a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

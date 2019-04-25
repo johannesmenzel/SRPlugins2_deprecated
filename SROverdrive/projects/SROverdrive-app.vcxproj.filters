@@ -89,9 +89,6 @@
     <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SROverdrive.h" />
@@ -310,12 +307,6 @@
     </Filter>
     <Filter Include="IPlug\APP\RTAudioMidi\include">
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses">
-      <UniqueIdentifier>{173f0084-97d0-466c-859a-a388cd51a51f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{7a950eae-58e2-4456-aa26-b360b333ce37}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>SRCompressor</string>
 	<key>CFBundleGetInfoString</key>
-	<string>SRCompressor v1.0.0 Copyright 2017 Acme Inc</string>
+	<string>SRCompressor v1.0.0 Copyright 2019 Acme Inc</string>
 	<key>CFBundleIconFile</key>
 	<string>SRCompressor.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -32,6 +32,8 @@
 	<string>10.11.0</string>
 	<key>NSMainNibFile</key>
 	<string>SRCompressor-macOS-MainMenu</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs mic access to process audio.</string>
 	<key>NSPrincipalClass</key>
 	<string>SWELLApplication</string>
 </dict>

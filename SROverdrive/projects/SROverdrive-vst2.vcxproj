@@ -369,7 +369,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
     <ClCompile Include="..\..\..\IPlug\VST2\IPlugVST2.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp" />
     <ClCompile Include="..\SROverdrive.cpp" />
   </ItemGroup>
   <ItemGroup>

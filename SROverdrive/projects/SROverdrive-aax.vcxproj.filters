@@ -71,9 +71,6 @@
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SROverdrive.h" />
@@ -259,12 +256,6 @@
     </Filter>
     <Filter Include="IGraphics\Controls">
       <UniqueIdentifier>{3c740de7-2371-4065-bf3d-5af9193c7b7d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses">
-      <UniqueIdentifier>{c73d82da-ffbc-48ae-9573-48ccc1a55166}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{a87c7d7f-c130-462b-8737-9f539abf672f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -72,6 +72,9 @@
     <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp">
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp">
+      <Filter>SRClasses\DSP</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp">
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
@@ -80,9 +83,6 @@
     </ClCompile>
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
       <Filter>SRClasses\Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp">
-      <Filter>SRClasses\DSP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -239,6 +239,9 @@
     <ClInclude Include="..\..\SRClasses\SRConstants.h">
       <Filter>SRClasses</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h">
+      <Filter>SRClasses\DSP</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h">
       <Filter>SRClasses\DSP</Filter>
     </ClInclude>
@@ -246,6 +249,9 @@
       <Filter>SRClasses\DSP</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SRClasses\DSP\SRGain.h">
+      <Filter>SRClasses\DSP</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h">
       <Filter>SRClasses\DSP</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h">
@@ -256,12 +262,6 @@
     </ClInclude>
     <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h">
       <Filter>SRClasses\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h">
-      <Filter>SRClasses\DSP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h">
-      <Filter>SRClasses\DSP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -290,16 +290,16 @@
       <UniqueIdentifier>{8c338368-7512-426b-af83-0f50719ca0bd}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{c82f7339-bdc4-46b6-877e-067ff2e6962c}</UniqueIdentifier>
+      <UniqueIdentifier>{eb318932-df48-4030-a39d-fc99ae0d8dd4}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{b5473cc8-09fe-422f-b98c-2d42708d5a33}</UniqueIdentifier>
+      <UniqueIdentifier>{fbcef826-f77b-42dc-9e75-b52ff6f2dc55}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Graphics">
-      <UniqueIdentifier>{dd37d579-6f96-437c-bbf9-0507afebe73d}</UniqueIdentifier>
+      <UniqueIdentifier>{66c632c9-91b8-49f0-9ee0-42242a74f746}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Utils">
-      <UniqueIdentifier>{c5aac7e7-a714-4752-967f-f2b48960342f}</UniqueIdentifier>
+      <UniqueIdentifier>{2cefe33c-36e1-4a0a-9ce4-c46c4562a613}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

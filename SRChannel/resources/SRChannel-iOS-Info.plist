@@ -9,9 +9,6 @@
 	<key>CFBundleIcons</key>
 	<dict>
 	</dict>
-	<key>CFBundleIcons~ipad</key>
-	<dict>
-	</dict>
 	<key>CFBundleIdentifier</key>
 	<string>com.SRPlugins.app.SRChannel</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -30,11 +27,11 @@
 	<string>public.app-category.music</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Needs microphone access to process audio</string>
 	<key>UILaunchStoryboardName</key>
-	<string>SRChannel-iOS-launchScreen</string>
+	<string>SRChannel-iOS-LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
-	<string>SRChannel-iOS</string>
-	<key>UIMainStoryboardFile~ipad</key>
 	<string>SRChannel-iOS</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>

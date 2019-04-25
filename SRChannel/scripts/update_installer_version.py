@@ -58,9 +58,9 @@ def main():
       line="AppVersion=" + config['FULL_VER_STR'] + "\n"
     if "OutputBaseFilename" in line:
       if demo:
-        line="OutputBaseFilename=IPlugEffect Demo Installer\n"
+        line="OutputBaseFilename=SRChannel Demo Installer\n"
       else:
-        line="OutputBaseFilename=IPlugEffect Installer\n"
+        line="OutputBaseFilename=SRChannel Installer\n"
         
     if 'Source: "readme' in line:
      if demo:
@@ -70,15 +70,15 @@ def main():
     
     if "WelcomeLabel1" in line:
      if demo:
-       line="WelcomeLabel1=Welcome to the IPlugEffect Demo installer\n"
+       line="WelcomeLabel1=Welcome to the SRChannel Demo installer\n"
      else:
-       line="WelcomeLabel1=Welcome to the IPlugEffect installer\n"
+       line="WelcomeLabel1=Welcome to the SRChannel installer\n"
        
     if "SetupWindowTitle" in line:
      if demo:
-       line="SetupWindowTitle=IPlugEffect Demo installer\n"
+       line="SetupWindowTitle=SRChannel Demo installer\n"
      else:
-       line="SetupWindowTitle=IPlugEffect installer\n"
+       line="SetupWindowTitle=SRChannel installer\n"
        
     sys.stdout.write(line)
     

@@ -51,6 +51,6 @@
 #define APP_SIGNAL_VECTOR_SIZE 64
 
 #define ROBOTTO_FN "Roboto-Regular.ttf"
-#define CENTURY_FN "Gothic.ttf"
+#define CENTURY_FN "../SRImages/Gothic.ttf"
 #define SRCHANNELLOGO_FN "../SRImages/SRChannel_Logo.png"
 #define SRPLUGINSLOGO_FN "../SRImages/SRPlugins_Logo.png"

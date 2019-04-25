@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>SRCompressor</string>
 	<key>CFBundleGetInfoString</key>
-	<string>SRCompressor v1.0.0 Copyright 2017 Acme Inc</string>
+	<string>SRCompressor v1.0.0 Copyright 2019 Acme Inc</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.SRPlugins.vst3.SRCompressor</string>
 	<key>CFBundleInfoDictionaryVersion</key>

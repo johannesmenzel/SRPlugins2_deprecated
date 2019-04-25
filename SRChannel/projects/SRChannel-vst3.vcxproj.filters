@@ -125,7 +125,9 @@
     <ClCompile Include="..\..\..\IPlug\VST3\IPlugVST3_ProcessorBase.cpp">
       <Filter>IPlug\VST3</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\public.sdk\source\common\commoniids.cpp" />
+    <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\public.sdk\source\common\commoniids.cpp">
+      <Filter>IPlug\VST3\VST3_SDK\public.sdk\common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp">
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
@@ -147,6 +149,7 @@
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
       <Filter>SRClasses\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />
@@ -182,12 +185,6 @@
       <Filter>IGraphics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\IGraphics\IGraphics_select.h">
-      <Filter>IGraphics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\IGraphics\Platforms\IGraphicsIOS.h">
-      <Filter>IGraphics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\IGraphics\Platforms\IGraphicsIOS_view.h">
       <Filter>IGraphics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsAGG.h">
@@ -409,6 +406,7 @@
     <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h">
       <Filter>SRClasses\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -469,16 +467,16 @@
       <UniqueIdentifier>{5f06b03e-5093-46c0-9513-efb4e494c857}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{ba7f95c7-f5ac-40b6-8bc6-778355017e68}</UniqueIdentifier>
+      <UniqueIdentifier>{a7e109d7-028e-4045-ae27-d0eec1b8e4df}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{842498d1-c17b-46a0-99cf-bb0a894fcf85}</UniqueIdentifier>
+      <UniqueIdentifier>{f314f249-58ff-433a-a36c-52855c868b1b}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Graphics">
-      <UniqueIdentifier>{b8a6726a-dbf2-4c74-9da6-8c6997732721}</UniqueIdentifier>
+      <UniqueIdentifier>{6d7adffc-81ac-4a03-acd0-1df0fc39dd48}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Utils">
-      <UniqueIdentifier>{ac300d36-7d48-4bab-9ea8-7611fedb0756}</UniqueIdentifier>
+      <UniqueIdentifier>{473d1409-c183-47ef-a3e3-872a507e5c01}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

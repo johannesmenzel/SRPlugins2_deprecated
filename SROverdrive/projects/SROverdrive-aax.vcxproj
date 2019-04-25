@@ -448,7 +448,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp" />
     <ClCompile Include="..\SROverdrive.cpp" />
   </ItemGroup>
   <ItemGroup>

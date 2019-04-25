@@ -86,20 +86,8 @@
     <ClCompile Include="..\..\..\IGraphics\Controls\ITextEntryControl.cpp">
       <Filter>IGraphics\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRDynamics.cpp">
-      <Filter>SRClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRFilters.cpp">
-      <Filter>SRClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRGain.cpp">
-      <Filter>SRClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRHelpers.cpp">
-      <Filter>SRClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRSaturation.cpp">
-      <Filter>SRClasses</Filter>
+    <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
+      <Filter>IPlug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -285,20 +273,8 @@
     <ClInclude Include="..\..\..\IGraphics\Controls\ITextEntryControl.h">
       <Filter>IGraphics\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRDynamics.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRFilters.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRGain.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRHelpers.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRSaturation.h">
-      <Filter>SRClasses</Filter>
+    <ClInclude Include="..\..\..\IPlug\IPlugPaths.h">
+      <Filter>IPlug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -331,9 +307,6 @@
     </Filter>
     <Filter Include="IPlug\APP\RTAudioMidi\include">
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses">
-      <UniqueIdentifier>{56f5fb02-78c4-4fbe-9f34-2f6e6d661058}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

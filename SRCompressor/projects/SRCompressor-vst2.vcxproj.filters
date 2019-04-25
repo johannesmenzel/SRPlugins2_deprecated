@@ -59,20 +59,8 @@
     <ClCompile Include="..\..\..\IGraphics\Controls\ITextEntryControl.cpp">
       <Filter>IGraphics\Controls</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRDynamics.cpp">
-      <Filter>SRClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRFilters.cpp">
-      <Filter>SRClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRGain.cpp">
-      <Filter>SRClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRHelpers.cpp">
-      <Filter>SRClasses</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\SRSaturation.cpp">
-      <Filter>SRClasses</Filter>
+    <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
+      <Filter>IPlug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -222,20 +210,8 @@
     <ClInclude Include="..\..\..\IGraphics\Controls\ITextEntryControl.h">
       <Filter>IGraphics\Controls</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRDynamics.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRFilters.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRGain.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRHelpers.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRSaturation.h">
-      <Filter>SRClasses</Filter>
+    <ClInclude Include="..\..\..\IPlug\IPlugPaths.h">
+      <Filter>IPlug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -262,9 +238,6 @@
     </Filter>
     <Filter Include="config">
       <UniqueIdentifier>{8c338368-7512-426b-af83-0f50719ca0bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses">
-      <UniqueIdentifier>{5de71c4f-c8e7-40f7-b47a-886650b23ebb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

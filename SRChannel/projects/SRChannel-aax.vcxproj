@@ -448,14 +448,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp" />
-    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp" />
-    <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRChannel.cpp" />
-    <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuildStep Include="..\..\AAX_SDK\Libs\Release\AAXLibrary.lib">
@@ -538,17 +531,9 @@
     <ClInclude Include="..\..\..\IPlug\IPlugUtilities.h" />
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_hdr.h" />
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_src.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRGain.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h" />
-    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h" />
-    <ClInclude Include="..\..\SRClasses\SRConstants.h" />
-    <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h" />
     <ClInclude Include="..\config.h" />
     <ClInclude Include="..\SRChannel.h" />
     <ClInclude Include="..\resources\resource.h" />
-    <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc" />

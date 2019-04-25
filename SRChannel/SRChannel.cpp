@@ -248,8 +248,8 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
 
     // LOAD
-    //pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
-    pGraphics->LoadFont(CENTURY_FN);
+    pGraphics->LoadFont("Roboto-Regular", ROBOTTO_FN);                                        // Load std font
+    //pGraphics->LoadFont("Century-Gothic", CENTURY_FN);
     IBitmap bmpSRPluginsLogo = pGraphics->LoadBitmap(SRPLUGINSLOGO_FN);                       // Load logo bitmap
     IBitmap bmpSRChannelLogo = pGraphics->LoadBitmap(SRCHANNELLOGO_FN);                       // Load logo bitmap
 
@@ -376,7 +376,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(
           rectCurrentControl,
           paramIdx,
-          FlashCircleClickActionFunc,
+          SplashClickActionFunc,
           p.label,
           DEFAULT_SPEC,
           GetParam(paramIdx)->NDisplayTexts()

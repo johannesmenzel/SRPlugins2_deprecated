@@ -125,7 +125,8 @@ private:
 
   // Saturation
   SR::DSP::SRSaturation fInputSaturation[MAXNUMOUTCHANNELS] = {};
-  OverSampler<sample> mOverSampler[MAXNUMOUTCHANNELS]{ OverSampler<sample>::EFactor::kNone };
+  //OverSampler<sample> mOverSampler[MAXNUMOUTCHANNELS]{ OverSampler<sample>::EFactor::kNone };
+  OverSampler<sample> mOverSampler[MAXNUMOUTCHANNELS]{ EFactor::kNone };
 
   // meter ballistics attached to meter controls
   SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };

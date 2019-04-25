@@ -25,6 +25,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mEnvPost(0.0)
   , mEnvOutput(0.0)
 {
+  
   //// Name channels:
   // // for VST2 we name individual outputs
   //if (GetAPI() == kAPIVST2) {
@@ -97,14 +98,16 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           "Zoelzer",
           "Pirkle",
           "Pirkle Mod",
+          "Soft Sat",
           "Half Rect",
           "Full Rect"
-        ); break;
+        );
+        break;
       case kOversamplingRate:
         thisParameter->InitEnum(
           p.name,
           (int)p.defaultVal,
-          OverSampler<double>::kNumFactors,
+          EFactor::kNumFactors,
           p.unit,
           0,
           p.group,
@@ -113,8 +116,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           "OS 4X",
           "OS 8X",
           "OS 16X"
-        ); break;
-      default: break;
+        );
+        break;
+      default:
+        break;
       }
     default:
       break;
@@ -243,17 +248,14 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
 
     // LOAD
-    pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
-    //pGraphics->LoadFont(CENTURY_FN);
-    //IBitmap bmpLogo = pGraphics->LoadBitmap(LOGO_FN);                       // Load logo bitmap
+    //pGraphics->LoadFont(ROBOTTO_FN);                                        // Load std font
+    pGraphics->LoadFont(CENTURY_FN);
     IBitmap bmpSRPluginsLogo = pGraphics->LoadBitmap(SRPLUGINSLOGO_FN);                       // Load logo bitmap
     IBitmap bmpSRChannelLogo = pGraphics->LoadBitmap(SRCHANNELLOGO_FN);                       // Load logo bitmap
-    //IBitmap bmpPanel = pGraphics->LoadBitmap(PANEL_FN);
+
     // SETUP
     if (!pGraphics->CanHandleMouseOver()) pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
     if (!pGraphics->TooltipsEnabled()) pGraphics->EnableTooltips(true);                                        // Enable Tooltips
-
-
 
     // ATTACH
     pGraphics->AttachPanelBackground(SRLayout.colorPluginBG);        // Attach Background
@@ -536,7 +538,7 @@ void SRChannel::InitEffects() {
     fEnvOutput.Reset(10000., mSampleRate);
 
     // Init saturation
-    fInputSaturation[channel].setSaturation(SR::DSP::SRSaturation::ESaturationType::kMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
+    fInputSaturation[channel].SetSaturation(SR::DSP::SRSaturation::ESaturationType::kMusicDSP, mSaturationDrive, mSaturationAmount, mSaturationHarmonics, false, mSaturationSkew, 1., mSampleRate);
 
     // Oversampling
     mOverSampler[channel].Reset();
@@ -636,15 +638,15 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
 
         // Saturation
         if (mSaturationAmount != 0.) {
-          if (mOversamplingRate == OverSampler<sample>::EFactor::kNone) {
+          if (mOversamplingRate == EFactor::kNone) {
             // Non oversampled saturation processing
-            *out1 = fInputSaturation[0].process(*out1);
-            *out2 = fInputSaturation[1].process(*out2);
+            *out1 = fInputSaturation[0].Process(*out1);
+            *out2 = fInputSaturation[1].Process(*out2);
           }
           else {
             // oversampled saturation processing
-            *out1 = mOverSampler[0].Process(*out1, std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[0], std::placeholders::_1));
-            *out2 = mOverSampler[1].Process(*out2, std::bind(&SR::DSP::SRSaturation::process, fInputSaturation[1], std::placeholders::_1));
+            *out1 = mOverSampler[0].Process(*out1, std::bind(&SR::DSP::SRSaturation::Process, fInputSaturation[0], std::placeholders::_1));
+            *out2 = mOverSampler[1].Process(*out2, std::bind(&SR::DSP::SRSaturation::Process, fInputSaturation[1], std::placeholders::_1));
           }
 
 
@@ -865,22 +867,22 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
         // Soft Limiter
 
         if (*out1 > 1.) {
-          *out1 = (1. - 4 / (*out1 + (4 - 1.))) * 4 + 1.;
+          *out1 = (1. - 4. / (*out1 + (4. - 1.))) * 4. + 1.;
         }
         else
         {
           if (*out1 < -1.) {
-            *out1 = (1. + 4 / (*out1 - (4 - 1.))) * -4 - 1.;
+            *out1 = (1. + 4. / (*out1 - (4. - 1.))) * -4. - 1.;
           }
         }
 
         if (*out2 > 1.) {
-          *out2 = (1. - 4 / (*out2 + (4 - 1.))) * 4 + 1.;
+          *out2 = (1. - 4. / (*out2 + (4. - 1.))) * 4. + 1.;
         }
         else
         {
           if (*out2 < -1.) {
-            *out2 = (1. + 4 / (*out2 - (4 - 1.))) * -4 - 1.;
+            *out2 = (1. + 4. / (*out2 - (4. - 1.))) * -4. - 1.;
           }
         }
 
@@ -941,7 +943,7 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // Get the average of the last sample of each the input and output envelope buffer
     // calculating the difference
 
-    if (mEnvInput > 0.003981071705534969 && mEnvPost > 0.003981071705534969) { // this is -48dB
+    if (mEnvInput > 0.003981071705534969 && mEnvPost > 0.003981071705534969) { // this is -48dB in linear
       const double diff = mEnvInput / mEnvPost;
       mAutoGain = diff;
       fAutoGain.SetGain(mAutoGain);
@@ -977,8 +979,8 @@ void SRChannel::OnIdle() {
 
 void SRChannel::OnReset() {
   mSampleRate = GetSampleRate();
-  mNumInChannels = NChannelsConnected(kInput);
-  mNumOutChannels = NChannelsConnected(kOutput);
+  mNumInChannels = NChannelsConnected(ERoute::kInput);
+  mNumOutChannels = NChannelsConnected(ERoute::kOutput);
   InitEffects();
 }
 
@@ -1012,38 +1014,38 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kSaturationDrive:
     mSaturationDrive = paramChanged->Value();
-    fInputSaturation[0].setDrive(mSaturationDrive);
-    fInputSaturation[1].setDrive(mSaturationDrive);
+    fInputSaturation[0].SetDrive(mSaturationDrive);
+    fInputSaturation[1].SetDrive(mSaturationDrive);
     break;
 
   case kSaturationAmount:
     mSaturationAmount = paramChanged->Value() / 100.;
-    fInputSaturation[0].setAmount(mSaturationAmount);
-    fInputSaturation[1].setAmount(mSaturationAmount);
+    fInputSaturation[0].SetAmount(mSaturationAmount);
+    fInputSaturation[1].SetAmount(mSaturationAmount);
     break;
 
   case kSaturationHarmonics:
     mSaturationHarmonics = paramChanged->Value() / 100.;
-    fInputSaturation[0].setHarmonics(mSaturationHarmonics);
-    fInputSaturation[1].setHarmonics(mSaturationHarmonics);
+    fInputSaturation[0].SetHarmonics(mSaturationHarmonics);
+    fInputSaturation[1].SetHarmonics(mSaturationHarmonics);
     break;
 
   case kSaturationSkew:
     mSaturationSkew = paramChanged->Value() * 0.05;
-    fInputSaturation[0].setSkew(mSaturationSkew);
-    fInputSaturation[1].setSkew(mSaturationSkew);
+    fInputSaturation[0].SetSkew(mSaturationSkew);
+    fInputSaturation[1].SetSkew(mSaturationSkew);
     break;
 
   case kSaturationType:
-    mSaturationType = int(paramChanged->Int());
-    fInputSaturation[0].setType(SR::DSP::SRSaturation::ESaturationType(mSaturationType));
-    fInputSaturation[1].setType(SR::DSP::SRSaturation::ESaturationType(mSaturationType));
+    mSaturationType = paramChanged->Int();
+    fInputSaturation[0].SetType(SR::DSP::SRSaturation::ESaturationType(mSaturationType));
+    fInputSaturation[1].SetType(SR::DSP::SRSaturation::ESaturationType(mSaturationType));
     break;
 
   case kOversamplingRate:
-    mOversamplingRate = int(paramChanged->Int());
-    mOverSampler[0].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
-    mOverSampler[1].SetOverSampling((OverSampler<sample>::EFactor)mOversamplingRate);
+    mOversamplingRate = paramChanged->Int();
+    mOverSampler[0].SetOverSampling((EFactor)mOversamplingRate);
+    mOverSampler[1].SetOverSampling((EFactor)mOversamplingRate);
     break;
 
   case kClipperThreshold:
@@ -1056,7 +1058,7 @@ void SRChannel::OnParamChange(int paramIdx) {
     break;
 
   case kPan:
-    mPan = (paramChanged->Value() + 100) / 200;
+    mPan = (paramChanged->Value() + 100.) / 200.;
     fPan.SetPanPosition(mPan);
     break;
 
@@ -1165,22 +1167,18 @@ void SRChannel::OnParamChange(int paramIdx) {
 
   case kEqHfBell:
     mEqHfIsBell = paramChanged->Bool();
-    if (mEqHfIsBell == 1) {
+    if (mEqHfIsBell)
       fFilters[EFilters::kHf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak);
-    }
-    else {
+    else
       fFilters[EFilters::kHf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadHighshelf);
-    }
     break;
 
   case kEqLfBell:
     mEqLfIsBell = paramChanged->Bool();
-    if (mEqLfIsBell == 1) {
+    if (mEqLfIsBell)
       fFilters[EFilters::kLf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadPeak);
-    }
-    else {
+    else
       fFilters[EFilters::kLf].SetType(SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS>::EFilterType::BiquadLowshelf);
-    }
     break;
 
   case kEqLfGain:
@@ -1290,9 +1288,9 @@ void SRChannel::OnParamChange(int paramIdx) {
     // RMS Compressor
 
   case kCompRmsRatio:
-    mCompRmsRatio = (1 / paramChanged->Value());
+    mCompRmsRatio = (1. / paramChanged->Value());
     fCompressorRms.SetRatio(mCompRmsRatio);
-    fCompressorRms.SetMaxGrDb(73.4979484210802 - 88.939188010773 * (1 - exp(-1.75091102973106 * (1. / mCompRmsRatio))));
+    fCompressorRms.SetMaxGrDb(-15.);
     break;
 
   case kCompRmsThresh:
@@ -1323,11 +1321,11 @@ void SRChannel::OnParamChange(int paramIdx) {
     // Both Compressors
 
   case kCompPeakRmsRatio:
-    mCompPeakRmsRatio = paramChanged->Value() / 100;
+    mCompPeakRmsRatio = paramChanged->Value() / 100.;
     break;
 
   case kCompDryWet:
-    mCompDryWet = paramChanged->Value() / 100;
+    mCompDryWet = paramChanged->Value() / 100.;
     break;
 
 

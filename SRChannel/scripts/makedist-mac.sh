@@ -253,8 +253,8 @@ sudo rm -R -f installer/build-mac/
 
 if [ $DEMO == 1 ]
 then
-git checkout installer/SRChannel.iss
-git checkout installer/SRChannel.pkgproj
+git checkout installer/IPlugEffect.iss
+git checkout installer/IPlugEffect.pkgproj
 git checkout resources/img/AboutBox.png
 fi
 

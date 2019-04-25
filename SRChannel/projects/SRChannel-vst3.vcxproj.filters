@@ -32,9 +32,6 @@
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\IPlug\VST3\IPlugVST3.cpp">
-      <Filter>IPlug\VST3</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\IGraphics\Controls\ITextEntryControl.cpp">
       <Filter>IGraphics\Controls</Filter>
     </ClCompile>
@@ -116,13 +113,19 @@
     <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\pluginterfaces\base\ustring.cpp">
       <Filter>IPlug\VST3\VST3_SDK\plugininterfaces\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\public.sdk\source\main\pluginfactoryvst3.cpp">
+    <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\public.sdk\source\main\pluginfactory.cpp">
       <Filter>IPlug\VST3\VST3_SDK\public.sdk\main</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
-    <ClCompile Include="..\SRChannelPresets.cpp" />
+    <ClCompile Include="..\..\..\IPlug\VST3\IPlugVST3.cpp">
+      <Filter>IPlug\VST3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\IPlug\VST3\IPlugVST3_ProcessorBase.cpp">
+      <Filter>IPlug\VST3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Dependencies\IPlug\VST3_SDK\public.sdk\source\common\commoniids.cpp" />
     <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp">
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
@@ -130,6 +133,9 @@
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
     <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp">
+      <Filter>SRClasses\DSP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp">
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
     <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp">
@@ -141,9 +147,6 @@
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
       <Filter>SRClasses\Utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="../config.h" />
@@ -152,9 +155,6 @@
       <Filter>resources</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\IGraphics\IGraphics.h">
-      <Filter>IGraphics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\IGraphics\IGraphicsAutoGUI.h">
       <Filter>IGraphics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\IGraphics\IGraphicsConstants.h">
@@ -283,15 +283,6 @@
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_src.h">
       <Filter>IPlug</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_Parameter.h">
-      <Filter>IPlug\VST3</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_view.h">
-      <Filter>IPlug\VST3</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3.h">
-      <Filter>IPlug\VST3</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\IGraphics\Controls\ITextEntryControl.h">
       <Filter>IGraphics\Controls</Filter>
     </ClInclude>
@@ -373,9 +364,29 @@
     <ClInclude Include="..\..\..\IPlug\IPlugPaths.h">
       <Filter>IPlug</Filter>
     </ClInclude>
-    <ClInclude Include="..\SRChannelConstants.h" />
+    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3.h">
+      <Filter>IPlug\VST3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_Common.h">
+      <Filter>IPlug\VST3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_ControllerBase.h">
+      <Filter>IPlug\VST3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_Parameter.h">
+      <Filter>IPlug\VST3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_ProcessorBase.h">
+      <Filter>IPlug\VST3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_View.h">
+      <Filter>IPlug\VST3</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\SRClasses\SRConstants.h">
       <Filter>SRClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h">
+      <Filter>SRClasses\DSP</Filter>
     </ClInclude>
     <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h">
       <Filter>SRClasses\DSP</Filter>
@@ -386,6 +397,9 @@
     <ClInclude Include="..\..\SRClasses\DSP\SRGain.h">
       <Filter>SRClasses\DSP</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h">
+      <Filter>SRClasses\DSP</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h">
       <Filter>SRClasses\DSP</Filter>
     </ClInclude>
@@ -394,12 +408,6 @@
     </ClInclude>
     <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h">
       <Filter>SRClasses\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h">
-      <Filter>SRClasses\DSP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h">
-      <Filter>SRClasses\DSP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -461,16 +469,16 @@
       <UniqueIdentifier>{5f06b03e-5093-46c0-9513-efb4e494c857}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{093bc2d0-02da-4f5a-85be-fff230a220ff}</UniqueIdentifier>
+      <UniqueIdentifier>{ba7f95c7-f5ac-40b6-8bc6-778355017e68}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{6bc5aceb-7689-40cb-942a-855548865dda}</UniqueIdentifier>
+      <UniqueIdentifier>{842498d1-c17b-46a0-99cf-bb0a894fcf85}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Graphics">
-      <UniqueIdentifier>{273d6ecf-c346-4d28-87dd-77f31c142bc2}</UniqueIdentifier>
+      <UniqueIdentifier>{b8a6726a-dbf2-4c74-9da6-8c6997732721}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Utils">
-      <UniqueIdentifier>{8fda5b95-b32f-471d-9941-7ef5352b4ed3}</UniqueIdentifier>
+      <UniqueIdentifier>{ac300d36-7d48-4bab-9ea8-7611fedb0756}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -15,16 +15,16 @@ def  main():
   else:
     demo=int(sys.argv[1])
    
-  installer = "\installer\SRChannel Installer.exe"
+  installer = "\installer\IPlugEffect Installer.exe"
    
   if demo:
-    installer = "\installer\SRChannel Demo Installer.exe"
+    installer = "\installer\IPlugEffect Demo Installer.exe"
    
   FILES_TO_ZIP = [
     projectpath + installer,
     projectpath + "\installer\changelog.txt",
     projectpath + "\installer\known-issues.txt",
-    projectpath + "\manual\SRChannel manual.pdf" 
+    projectpath + "\manual\IPlugEffect manual.pdf" 
   ]
 
   # extract values from config.h
@@ -43,10 +43,10 @@ def  main():
 
   FULLVERSIONSTR = MAJORSTR + "." + MINORSTR + "." + BUGFIXSTR
 
-  ZIPNAME = "SRChannel-v" + FULLVERSIONSTR + "-win.zip"
+  ZIPNAME = "IPlugEffect-v" + FULLVERSIONSTR + "-win.zip"
   
   if demo:
-    ZIPNAME = "SRChannel-v" + FULLVERSIONSTR + "-win-demo.zip"
+    ZIPNAME = "IPlugEffect-v" + FULLVERSIONSTR + "-win-demo.zip"
   
   zf = zipfile.ZipFile(projectpath + "\installer\/" + ZIPNAME, mode="w")
 

@@ -74,14 +74,14 @@ python $EMSCRIPTEN/tools/file_packager.py fonts.data --preload ../resources/font
 python $EMSCRIPTEN/tools/file_packager.py svgs.data --preload ../resources/img/ --exclude *.png --exclude *DS_Store --js-output=svgs.js
 
 # echo "if(window.devicePixelRatio == 1) {\n" > imgs.js
-python $EMSCRIPTEN/tools/file_packager.py imgs.data --use-preload-plugins --preload ../resources/img/ --use-preload-cache --indexedDB-name="/SRChannel_pkg" --exclude *DS_Store --exclude  *@2x.png --exclude  *.svg >> imgs.js
+python $EMSCRIPTEN/tools/file_packager.py imgs.data --use-preload-plugins --preload ../resources/img/ --use-preload-cache --indexedDB-name="/IPlugEffect_pkg" --exclude *DS_Store --exclude  *@2x.png --exclude  *.svg >> imgs.js
 # echo "\n}" >> imgs.js
 # package @2x resources into separate .data file
 mkdir ./2x/
 cp ../resources/img/*@2x* ./2x
 # echo "if(window.devicePixelRatio > 1) {\n" > imgs@2x.js
-#--use-preload-cache --indexedDB-name="/SRChannel_data"
-python $EMSCRIPTEN/tools/file_packager.py imgs@2x.data --use-preload-plugins --preload ./2x@/resources/img/ --use-preload-cache --indexedDB-name="/SRChannel_pkg" --exclude *DS_Store >> imgs@2x.js
+#--use-preload-cache --indexedDB-name="/IPlugEffect_data"
+python $EMSCRIPTEN/tools/file_packager.py imgs@2x.data --use-preload-plugins --preload ./2x@/resources/img/ --use-preload-cache --indexedDB-name="/IPlugEffect_pkg" --exclude *DS_Store >> imgs@2x.js
 # echo "\n}" >> imgs@2x.js
 rm -r ./2x
 
@@ -90,7 +90,7 @@ echo -
 
 
 echo MAKING  - WAM WASM MODULE -----------------------------
-emmake make --makefile projects/SRChannel-wam-processor.mk
+emmake make --makefile projects/IPlugEffect-wam-processor.mk
 
 if [ $? -ne "0" ]
 then
@@ -100,24 +100,24 @@ fi
 
 cd build-web/scripts
 
-echo "AudioWorkletGlobalScope.WAM = AudioWorkletGlobalScope.WAM || {}; AudioWorkletGlobalScope.WAM.SRChannel = { ENVIRONMENT: 'WEB' };" > SRChannel-wam.tmp.js;
-cat SRChannel-wam.js >> SRChannel-wam.tmp.js
-mv SRChannel-wam.tmp.js SRChannel-wam.js
+echo "AudioWorkletGlobalScope.WAM = AudioWorkletGlobalScope.WAM || {}; AudioWorkletGlobalScope.WAM.IPlugEffect = { ENVIRONMENT: 'WEB' };" > IPlugEffect-wam.tmp.js;
+cat IPlugEffect-wam.js >> IPlugEffect-wam.tmp.js
+mv IPlugEffect-wam.tmp.js IPlugEffect-wam.js
 
 cp ../../../../Dependencies/IPlug/WAM_SDK/wamsdk/*.js .
 cp ../../../../Dependencies/IPlug/WAM_AWP/*.js .
-cp ../../../../IPlug/WEB/Template/scripts/IPlugWAM-awn.js SRChannel-awn.js
-sed -i.bak s/NAME_PLACEHOLDER/SRChannel/g SRChannel-awn.js
-cp ../../../../IPlug/WEB/Template/scripts/IPlugWAM-awp.js SRChannel-awp.js
-sed -i.bak s/NAME_PLACEHOLDER/SRChannel/g SRChannel-awp.js
-sed -i.bak s,ORIGIN_PLACEHOLDER,$origin,g SRChannel-awn.js
+cp ../../../../IPlug/WEB/Template/scripts/IPlugWAM-awn.js IPlugEffect-awn.js
+sed -i.bak s/NAME_PLACEHOLDER/IPlugEffect/g IPlugEffect-awn.js
+cp ../../../../IPlug/WEB/Template/scripts/IPlugWAM-awp.js IPlugEffect-awp.js
+sed -i.bak s/NAME_PLACEHOLDER/IPlugEffect/g IPlugEffect-awp.js
+sed -i.bak s,ORIGIN_PLACEHOLDER,$origin,g IPlugEffect-awn.js
 rm *.bak
 
 cd ..
 
 #copy in the template html - comment if you have customised the html
 cp ../../../IPlug/WEB/Template/IPlugWAM-standalone.html index.html
-sed -i.bak s/NAME_PLACEHOLDER/SRChannel/g index.html
+sed -i.bak s/NAME_PLACEHOLDER/IPlugEffect/g index.html
 rm *.bak
 
 cp ../../../IPlug/WEB/Template/favicon.ico favicon.ico
@@ -127,7 +127,7 @@ cd ../
 echo
 echo MAKING  - WEB WASM MODULE -----------------------------
 
-emmake make --makefile projects/SRChannel-wam-controller.mk EXTRA_CFLAGS=-DWEBSOCKET_CLIENT=$websocket
+emmake make --makefile projects/IPlugEffect-wam-controller.mk EXTRA_CFLAGS=-DWEBSOCKET_CLIENT=$websocket
 
 if [ $? -ne "0" ]
 then

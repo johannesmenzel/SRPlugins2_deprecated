@@ -170,6 +170,7 @@
       <PreprocessorDefinitions>$(VST3_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -335,6 +336,15 @@
     <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_Parameter.h" />
     <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_ProcessorBase.h" />
     <ClInclude Include="..\..\..\IPlug\VST3\IPlugVST3_View.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRGain.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h" />
+    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h" />
+    <ClInclude Include="..\..\SRClasses\SRConstants.h" />
+    <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h" />
     <ClInclude Include="..\SRReverb.h" />
     <ClInclude Include="..\resources\resource.h" />
   </ItemGroup>
@@ -388,6 +398,13 @@
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
     <ClCompile Include="..\..\..\IPlug\VST3\IPlugVST3.cpp" />
     <ClCompile Include="..\..\..\IPlug\VST3\IPlugVST3_ProcessorBase.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp" />
+    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp" />
+    <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRReverb.cpp" />
   </ItemGroup>
   <ItemGroup>

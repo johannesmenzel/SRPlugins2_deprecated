@@ -35,7 +35,7 @@ SRReverb::SRReverb(IPlugInstanceInfo instanceInfo)
   mLayoutFunc = [&](IGraphics* pGraphics) {
     pGraphics->AttachCornerResizer(kUIResizerScale, false);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
-    pGraphics->LoadFont(ROBOTTO_FN);
+    pGraphics->LoadFont("Roboto-Regular", ROBOTTO_FN);
     const IRECT b = pGraphics->GetBounds();
     const IRECT rectReverb = IRECT(b.GetGridCell(0, 0, 2, 2).GetPadded(-5.f));
     const IRECT rectFilter = IRECT(b.GetGridCell(0, 1, 2, 2).GetPadded(-5.f));
@@ -71,19 +71,22 @@ void SRReverb::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
       outputs[c][s] = fHighpass.Process(outputs[c][s], c);
       outputs[c][s] = fLowpass.Process(outputs[c][s], c);
     }
+
     fCompressor.Process(outputs[0][s], outputs[1][s]);
+
     for (int c = 0; c < nChans; c++) {
       outputs[c][s] = mWet * outputs[c][s] + mDry * inputs[c][s];
     }
   }
 }
+
 void SRReverb::OnReset()
 {
   fReverb.SetSampleRate(GetSampleRate());
   fReverb.Reset();
   fHighpass.SetFilter(SR::DSP::SRFilterIIR<sample, 2>::EFilterType::BiquadHighpass, mHighpass / GetSampleRate(), sqrt(0.5), 0.0, GetSampleRate());
   fLowpass.SetFilter(SR::DSP::SRFilterIIR<sample, 2>::EFilterType::BiquadLowpass, mLowpass / GetSampleRate(), sqrt(0.5), 0.0, GetSampleRate());
-  fCompressor.InitCompressor(mCompThresh, mCompRatio, mCompAttack, mCompRelease, 50., 10., 300., true, false, GetSampleRate());
+  fCompressor.InitCompressor(mCompThresh, mCompRatio, mCompAttack, mCompRelease, 50., 10., 10., true, false, GetSampleRate());
 }
 
 void SRReverb::OnParamChange(int paramIdx)
@@ -122,10 +125,11 @@ void SRReverb::OnParamChange(int paramIdx)
     break;
   case kCompress:
     mCompress = p->Value() * 0.01;
-    mCompThresh = -60. * mCompress;
-    mCompRatio = 1. / (1. + 10. * mCompress);
+    mCompThresh = -18. - 36. * mCompress;
+    mCompRatio = 1. / (1. + 3. * mCompress);
     fCompressor.SetThresh(mCompThresh);
     fCompressor.SetRatio(mCompRatio);
+    fCompressor.SetMakeup((mCompRatio - 1.) * (-18. - mCompThresh));
     break;
   default:
     break;

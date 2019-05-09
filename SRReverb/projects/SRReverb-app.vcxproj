@@ -165,6 +165,7 @@
       <PreprocessorDefinitions>$(APP_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(APP_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
@@ -319,6 +320,15 @@
     <ClInclude Include="..\..\..\IPlug\IPlugUtilities.h" />
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_hdr.h" />
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_src.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRGain.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h" />
+    <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h" />
+    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h" />
+    <ClInclude Include="..\..\SRClasses\SRConstants.h" />
+    <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h" />
     <ClInclude Include="..\SRReverb.h" />
     <ClInclude Include="..\resources\resource.h" />
   </ItemGroup>
@@ -401,6 +411,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp" />
+    <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp" />
+    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp" />
+    <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRReverb.cpp" />
   </ItemGroup>
   <ItemGroup>

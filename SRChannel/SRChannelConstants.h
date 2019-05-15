@@ -5,6 +5,8 @@
 
 #define FREQUENCYRESPONSE 100
 #define MAXNUMOUTCHANNELS 2
+
+
 enum EPrograms {
   defaultProgram = 0,
   kick,
@@ -426,7 +428,6 @@ const SRParamProperties srchannelParamProperties[kNumParams] = {
   { kBypass, cBypass, "Bypass", "Byp", 0, 0, 1, 0.1, 0.5, .5, "", "Global", IParam::EParamType::kTypeBool, IParam::EFlags::kFlagsNone, IParam::EParamUnit::kUnitCustom, Button, {RectFooter, 20, 0, 2.f, 1.f}, "ON", "OFF", "", "Bypass Plugin" }
   // { "NAME", "SNAME" DEF, MIN, MAX, STEP, CENTER, CTRPNT, "LABEL",GROUP , TYPE, KNOB, X, Y, "LBLMIN", "LBLMAX", "LBLCTR", "TOOLTIP"},
 };
-#endif
 
 // Used filters
 enum EFilters {
@@ -452,3 +453,6 @@ enum EFilters {
   kDC,
   kNumFilters
 };
+
+
+#endif

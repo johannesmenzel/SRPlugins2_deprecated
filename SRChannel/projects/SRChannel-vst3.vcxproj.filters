@@ -467,16 +467,16 @@
       <UniqueIdentifier>{5f06b03e-5093-46c0-9513-efb4e494c857}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{a7e109d7-028e-4045-ae27-d0eec1b8e4df}</UniqueIdentifier>
+      <UniqueIdentifier>{fe6a2156-2f04-4960-9978-03069772ce73}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{f314f249-58ff-433a-a36c-52855c868b1b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\Graphics">
-      <UniqueIdentifier>{6d7adffc-81ac-4a03-acd0-1df0fc39dd48}</UniqueIdentifier>
+      <UniqueIdentifier>{6d6942b9-4199-4b40-a409-33fd8b13f62f}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Utils">
-      <UniqueIdentifier>{473d1409-c183-47ef-a3e3-872a507e5c01}</UniqueIdentifier>
+      <UniqueIdentifier>{998798a8-7bc7-43da-89d7-b0fda45bc1df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRClasses\Graphics">
+      <UniqueIdentifier>{5c15bbe7-0c71-4329-b24b-1d024b5e907a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -78,11 +78,11 @@
     <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp">
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp">
-      <Filter>SRClasses\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
       <Filter>SRClasses\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp">
+      <Filter>SRClasses\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -257,11 +257,11 @@
     <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h">
       <Filter>SRClasses\DSP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h">
-      <Filter>SRClasses\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h">
       <Filter>SRClasses\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h">
+      <Filter>SRClasses\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -290,16 +290,16 @@
       <UniqueIdentifier>{8c338368-7512-426b-af83-0f50719ca0bd}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{eb318932-df48-4030-a39d-fc99ae0d8dd4}</UniqueIdentifier>
+      <UniqueIdentifier>{d243dfbc-3e83-4f47-8cf8-7f3a478d1a46}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{fbcef826-f77b-42dc-9e75-b52ff6f2dc55}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\Graphics">
-      <UniqueIdentifier>{66c632c9-91b8-49f0-9ee0-42242a74f746}</UniqueIdentifier>
+      <UniqueIdentifier>{3258a7e5-6e9a-4975-ada7-89af753ba265}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Utils">
-      <UniqueIdentifier>{2cefe33c-36e1-4a0a-9ce4-c46c4562a613}</UniqueIdentifier>
+      <UniqueIdentifier>{892da603-5d7c-4130-b567-094333df2c8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRClasses\Graphics">
+      <UniqueIdentifier>{cb2b5295-ee9a-41d9-abc2-e817ba9b8895}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -248,8 +248,9 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
 
     // LOAD
-    pGraphics->LoadFont("Roboto-Regular", ROBOTTO_FN);                                        // Load std font
-    //pGraphics->LoadFont("Century-Gothic", CENTURY_FN);
+    pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);                                        // Load std font
+    pGraphics->LoadFont("Century-Gothic", CENTURY_FN);    
+
     IBitmap bmpSRPluginsLogo = pGraphics->LoadBitmap(SRPLUGINSLOGO_FN);                       // Load logo bitmap
     IBitmap bmpSRChannelLogo = pGraphics->LoadBitmap(SRCHANNELLOGO_FN);                       // Load logo bitmap
 

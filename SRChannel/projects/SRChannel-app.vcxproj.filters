@@ -104,11 +104,11 @@
     <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp">
       <Filter>SRClasses\DSP</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp">
-      <Filter>SRClasses\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
       <Filter>SRClasses\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp">
+      <Filter>SRClasses\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
@@ -319,11 +319,11 @@
     <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h">
       <Filter>SRClasses\DSP</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h">
-      <Filter>SRClasses\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h">
       <Filter>SRClasses\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h">
+      <Filter>SRClasses\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
@@ -359,16 +359,16 @@
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses">
-      <UniqueIdentifier>{11e688aa-37be-4092-a9cb-ff2a3b2be99d}</UniqueIdentifier>
+      <UniqueIdentifier>{ff8b34fd-f89c-4446-9a11-aef3f74a6dc4}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{673220b9-db7d-45e0-b727-a9aee31d414a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\Graphics">
-      <UniqueIdentifier>{66540cea-b34a-4e40-99e4-9efab375bb08}</UniqueIdentifier>
+      <UniqueIdentifier>{5f5e81f5-8213-4cb5-b215-691637e71352}</UniqueIdentifier>
     </Filter>
     <Filter Include="SRClasses\Utils">
-      <UniqueIdentifier>{130c22d3-4c69-44bb-a711-2e45b0ec15db}</UniqueIdentifier>
+      <UniqueIdentifier>{4c082909-9fa3-496d-ae98-48026e6cf8e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SRClasses\Graphics">
+      <UniqueIdentifier>{5c9d5a63-2898-4c2e-8a4e-e865e9067751}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

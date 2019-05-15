@@ -297,15 +297,6 @@
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_hdr.h" />
     <ClInclude Include="..\..\..\IPlug\IPlug_include_in_plug_src.h" />
     <ClInclude Include="..\..\..\IPlug\VST2\IPlugVST2.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRGain.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h" />
-    <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h" />
-    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h" />
-    <ClInclude Include="..\..\SRClasses\SRConstants.h" />
-    <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h" />
     <ClInclude Include="..\SRChannel.h" />
     <ClInclude Include="..\resources\resource.h" />
     <ClInclude Include="..\SRChannelConstants.h" />
@@ -380,13 +371,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
     <ClCompile Include="..\..\..\IPlug\VST2\IPlugVST2.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp" />
-    <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp" />
-    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp" />
-    <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp" />
     <ClCompile Include="..\SRChannel.cpp" />
     <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>

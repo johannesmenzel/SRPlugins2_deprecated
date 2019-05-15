@@ -17,14 +17,14 @@
 //#include "IPlugQueue.h"
 
 // SRClasses
-#include "../SRClasses/SRConstants.h"
-#include "../SRClasses/DSP/SRBuffer.h"
-#include "../SRClasses/DSP/SRGain.h"
-#include "../SRClasses/DSP/SRFilters.h"
-#include "../SRClasses/DSP/SRDynamics.h"
-#include "../SRClasses/DSP/SRSaturation.h"
-#include "../SRClasses/Utils/SRHelpers.h"
-#include "../SRClasses/Graphics/SRControls.h"
+#include "SRConstants.h"
+#include "DSP/SRBuffer.h"
+#include "DSP/SRGain.h"
+#include "DSP/SRFilters.h"
+#include "DSP/SRDynamics.h"
+#include "DSP/SRSaturation.h"
+#include "Utils/SRHelpers.h"
+#include "Graphics/SRControls.h"
 // Plugin constants
 #ifndef SRCHANNELCONSTANTS_H
 #include "SRChannelConstants.h"

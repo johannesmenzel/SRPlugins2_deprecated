@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SRCompressor-vst3", "projec
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SRCompressor-aax", "projects\SRCompressor-aax.vcxproj", "{DC4B5920-933D-4C82-B842-F34431D55A93}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SRClasses", "..\SRClasses\SRClasses.vcxproj", "{4271148A-BF7D-44F1-969C-59770FC3738F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -69,6 +71,18 @@ Global
 		{DC4B5920-933D-4C82-B842-F34431D55A93}.Tracer|Win32.Build.0 = Debug|Win32
 		{DC4B5920-933D-4C82-B842-F34431D55A93}.Tracer|x64.ActiveCfg = Debug|x64
 		{DC4B5920-933D-4C82-B842-F34431D55A93}.Tracer|x64.Build.0 = Debug|x64
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Debug|Win32.Build.0 = Debug|Win32
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Debug|x64.ActiveCfg = Debug|x64
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Debug|x64.Build.0 = Debug|x64
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Release|Win32.ActiveCfg = Release|Win32
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Release|Win32.Build.0 = Release|Win32
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Release|x64.ActiveCfg = Release|x64
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Release|x64.Build.0 = Release|x64
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Tracer|Win32.ActiveCfg = Release|Win32
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Tracer|Win32.Build.0 = Release|Win32
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Tracer|x64.ActiveCfg = Release|x64
+		{4271148A-BF7D-44F1-969C-59770FC3738F}.Tracer|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

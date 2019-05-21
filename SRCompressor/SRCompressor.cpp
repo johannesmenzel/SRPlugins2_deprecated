@@ -1,24 +1,66 @@
 #include "SRCompressor.h"
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
+#include "Utils/SRHelpers.h"
 
 SRCompressor::SRCompressor(IPlugInstanceInfo instanceInfo)
-: IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
+  : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
+  , mSamplerate(44100.0)
+  , mThresh(0.0)
+  , mRatio(1.0)
+  , mAttack(10.0)
+  , mRelease(100.0)
+  , mKneeWidth(10.0)
+  , mSidechainFc(10.0)
+  , mMaxGr(12.0)
+  , mMakeup(0.0)
+  , mReference(-18.0)
+  , mMix(1.0)
+  , mIsMaxGrRatioDependent(true)
+  , mIsFeedback(true)
+  , mIsAutoMakeup(true)
+  , mIsBypassed(false)
 {
-  GetParam(kGain)->InitDouble("Gain", 0., 0., 100.0, 0.01, "%");
+  GetParam(kThresh)->InitDouble("Threshold", 0., -50., 0., 0.0001, "dB");
+  GetParam(kRatio)->InitDouble("Ratio", 3., 1., 100., 0.0001, ":1", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(1., 100., 3., .5)));
+  GetParam(kAttack)->InitDouble("Attack", 10., 0.02, 200., 0.0001, "ms", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(0.02, 200, 10., .5)));
+  GetParam(kRelease)->InitDouble("Release", 100., 30., 2000., 0.0001, "ms", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(30., 2000., 100., .5)));
+  GetParam(kKneeWidth)->InitDouble("Knee", 10., 0., 30., 0.0001, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(0., 30., 10., .5)));
+  GetParam(kSidechainFc)->InitDouble("SC Filter", 10., 10., 5000., 0.0001, "Hz", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(10., 5000., 200., .5)));
+  GetParam(kMaxGr)->InitDouble("GR Limiter", 12., 0., 30., 0.0001, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(0., 30., 3., .5)));
+  GetParam(kMakeup)->InitDouble("Makeup", 0., 0., 20., 0.0001, "dB");
+  GetParam(kReference)->InitDouble("Reference", -18., -50., 10., 0.0001, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(-50., 10., -18., .5)));
+  GetParam(kMix)->InitDouble("Mix", 100., 0., 100., 0.0001, "%");
+  GetParam(kIsMaxGrRatioDependent)->InitBool("GR Lmt RatDep", true, "", 0, "", "Rt-Ind", "Rt-Dep");
+  GetParam(kIsFeedback)->InitBool("Topology", true, "FFD/FDB", 0, "", "F-Forward", "F-Back");
+  GetParam(kIsAutoMakeup)->InitBool("Auto Makeup", true, "", 0, "", "Man Make", "Auto Make");
+  GetParam(kIsBypassed)->InitBool("Bypassed", false, "", 0, "", "Active", "Bypass");
+
 
 #if IPLUG_EDITOR // All UI methods and member variables should be within an IPLUG_EDITOR guard, should you want distributed UI
   mMakeGraphicsFunc = [&]() {
     return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
   };
-  
+
   mLayoutFunc = [&](IGraphics* pGraphics) {
     pGraphics->AttachCornerResizer(kUIResizerScale, false);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
-    const IRECT b = pGraphics->GetBounds();
-    pGraphics->AttachControl(new ITextControl(b, "Hello iPlug 2!", IText(50)));
-    pGraphics->AttachControl(new IVKnobControl(b.GetCentredInside(100).GetVShifted(-100), kGain));
+    const IRECT rectPlug = pGraphics->GetBounds();
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(2, 1, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kThresh, "Thresh", true, DEFAULT_SPEC), cThresh);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(2, 6, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kRatio, "Ratio", true, DEFAULT_SPEC), cRatio);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 1, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kSidechainFc, "SC Filter", true, DEFAULT_SPEC), cSidechainFc);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 3, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kAttack, "Attack", true, DEFAULT_SPEC), cAttack);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 6, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kRelease, "Release", true, DEFAULT_SPEC), cRelease);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 8, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kKneeWidth, "Knee", true, DEFAULT_SPEC), cKneeWidth);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(2.f, true), kMix, "Mix", true, DEFAULT_SPEC), cMix);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(2, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), kMakeup, DEFAULT_SPEC, kVertical), cMakeup);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(3, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kReference, DEFAULT_SPEC, kVertical), cReference);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(3, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kMaxGr, DEFAULT_SPEC, kVertical), cMaxGr);
+    pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(0, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsBypassed, SplashAnimationFunc, "Bypass"));
+    pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(0, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsFeedback, SplashAnimationFunc, "Topo"));
+    pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(2, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsAutoMakeup, SplashAnimationFunc, "Auto"));
+    pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(2, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsMaxGrRatioDependent, SplashAnimationFunc, "R-Dep"));
   };
 #endif
 }
@@ -26,13 +68,94 @@ SRCompressor::SRCompressor(IPlugInstanceInfo instanceInfo)
 #if IPLUG_DSP
 void SRCompressor::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
-  const double gain = GetParam(kGain)->Value() / 100.;
   const int nChans = NOutChansConnected();
-  
+
   for (int s = 0; s < nFrames; s++) {
     for (int c = 0; c < nChans; c++) {
-      outputs[c][s] = inputs[c][s] * gain;
+      outputs[c][s] = inputs[c][s];
+      fSoftSatInput[c].Process(outputs[c][s]);
     }
+
+    if (!mIsBypassed) {
+      fCompressor.Process(outputs[0][s], outputs[1][s]);
+
+      for (int c = 0; c < nChans; c++) {
+        fSoftSatOutput[c].Process(outputs[c][s]);
+        outputs[c][s] = ((1. - mMix) * inputs[c][s]) + mMix * outputs[c][s];
+      }
+    }
+  }
+}
+void SRCompressor::OnReset()
+{
+  mSamplerate = GetSampleRate();
+  fCompressor.InitCompressor(mThresh, mRatio, mAttack, mRelease, mSidechainFc / mSamplerate, mKneeWidth, mIsFeedback, mIsAutoMakeup, mReference, mSamplerate);
+  fCompressor.InitSidechainFilter(mSidechainFc / mSamplerate);
+  fCompressor.Reset();
+  fCompressor.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+  for (int c = 0; c < 2; c++) {
+    fSoftSatInput[c].SetSaturation(SR::DSP::SRSaturation::kSoftSat, 0., 1., 1., false, 0., 1., mSamplerate);
+    fSoftSatOutput[c].SetSaturation(SR::DSP::SRSaturation::kSoftSat, 0., 1., 1., false, 0., 1., mSamplerate);
+  }
+}
+void SRCompressor::OnParamChange(int paramIdx)
+{
+  switch (paramIdx)
+  {
+  case kThresh:
+    mThresh = GetParam(paramIdx)->Value();
+    fCompressor.SetThresh(mThresh);
+    break;
+  case kRatio:
+    mRatio = 1. / GetParam(paramIdx)->Value();
+    fCompressor.SetRatio(mRatio);
+    break;
+  case kAttack:
+    mAttack = GetParam(paramIdx)->Value();
+    fCompressor.SetAttack(mAttack);
+    break;
+  case kRelease:
+    mRelease = GetParam(paramIdx)->Value();
+    fCompressor.SetRelease(mRelease);
+    break;
+  case kMakeup:
+    mMakeup = GetParam(paramIdx)->Value();
+    fCompressor.SetMakeup(mMakeup);
+    break;
+  case kKneeWidth:
+    mKneeWidth = GetParam(paramIdx)->Value();
+    fCompressor.SetKnee(mKneeWidth);
+    break;
+  case kReference:
+    mReference = GetParam(paramIdx)->Value();
+    fCompressor.SetReference(mReference);
+    break;
+  case kMix:
+    mMix = GetParam(paramIdx)->Value() * 0.01;
+    break;
+  case kSidechainFc:
+    mSidechainFc = GetParam(paramIdx)->Value();
+    fCompressor.SetSidechainFilterFreq(mSidechainFc / mSamplerate);
+    break;
+  case kMaxGr:
+  case kIsMaxGrRatioDependent:
+    mMaxGr = GetParam(kMaxGr)->Value();
+    mIsMaxGrRatioDependent = GetParam(kIsMaxGrRatioDependent)->Bool();
+    fCompressor.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+    break;
+  case kIsBypassed:
+    mIsBypassed = GetParam(paramIdx)->Bool();
+    break;
+  case kIsAutoMakeup:
+    mIsAutoMakeup = GetParam(paramIdx)->Bool();
+    fCompressor.SetIsAutoMakeup(mIsAutoMakeup);
+    break;
+  case kIsFeedback:
+    mIsFeedback = GetParam(paramIdx)->Bool();
+    fCompressor.SetTopologyFeedback(mIsFeedback);
+    break;
+  default:
+    break;
   }
 }
 #endif

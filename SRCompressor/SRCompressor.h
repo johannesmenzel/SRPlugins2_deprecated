@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IPlug_include_in_plug_hdr.h"
+#include "SRConstants.h"
 #include "DSP/SRDynamics.h"
 #include "DSP/SRSaturation.h"
 

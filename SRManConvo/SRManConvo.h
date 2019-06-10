@@ -2,8 +2,9 @@
 
 #include "IPlug_include_in_plug_hdr.h"
 #include <vector>
-#define NUMCONVOSAMPLES 10
+#define NUMCONVOSAMPLES 20
 const int kNumPrograms = 1;
+
 
 enum EParams
 {
@@ -17,6 +18,17 @@ enum EParams
   kSpl7,
   kSpl8,
   kSpl9,
+  kSpl10,
+  kSpl11,
+  kSpl12,
+  kSpl13,
+  kSpl14,
+  kSpl15,
+  kSpl16,
+  kSpl17,
+  kSpl18,
+  kSpl19,
+  kIsWindowing,
   kNumParams
 };
 
@@ -30,11 +42,17 @@ public:
   void OnParamChange(int paramIdx) override;
   void OnReset() override;
 
+  double GetRightHalfOfHannWindow(int n, int windowWidth) {
+    return 0.5 * (1 + std::cos((2. * PI * n) / (2 * windowWidth - 1)));
+  }
+
 
 private:
   int mConvoCounter;
   double mConvoMatrix[NUMCONVOSAMPLES];
   double mLastSamples[2][NUMCONVOSAMPLES];
+  bool mIsWindowing;
+  //std::vector<double> mLastSamples[2];
 
 #endif
 };

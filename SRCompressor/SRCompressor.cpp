@@ -13,7 +13,7 @@ SRCompressor::SRCompressor(IPlugInstanceInfo instanceInfo)
   , mRelease(100.0)
   , mKneeWidth(10.0)
   , mSidechainFc(10.0)
-  , mMaxGr(12.0)
+  , mMaxGr(-50.)
   , mMakeup(0.0)
   , mReference(-18.0)
   , mMix(1.0)
@@ -29,7 +29,7 @@ SRCompressor::SRCompressor(IPlugInstanceInfo instanceInfo)
   GetParam(kRelease)->InitDouble("Release", 100., 30., 2000., 0.0001, "ms", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(30., 2000., 100., .5)));
   GetParam(kKneeWidth)->InitDouble("Knee", 10., 0., 30., 0.0001, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(0., 30., 10., .5)));
   GetParam(kSidechainFc)->InitDouble("SC Filter", 10., 10., 5000., 0.0001, "Hz", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(10., 5000., 200., .5)));
-  GetParam(kMaxGr)->InitDouble("GR Limiter", 12., 0., 30., 0.0001, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(0., 30., 3., .5)));
+  GetParam(kMaxGr)->InitDouble("GR Limiter", -50., -50, 0., 0.0001, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(-50., 0., -10., .5)));
   GetParam(kMakeup)->InitDouble("Makeup", 0., 0., 20., 0.0001, "dB");
   GetParam(kReference)->InitDouble("Reference", -18., -50., 0., 0.0001, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(-50., 0., -18., .5)));
   GetParam(kMix)->InitDouble("Mix", 100., 0., 100., 0.0001, "%");
@@ -52,31 +52,34 @@ SRCompressor::SRCompressor(IPlugInstanceInfo instanceInfo)
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
 
     const IRECT rectPlug = pGraphics->GetBounds();
-    //pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(2, 1, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kThresh, "Thresh", true, DEFAULT_SPEC), cThresh);
-    //pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(2, 6, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kRatio, "Ratio", true, DEFAULT_SPEC), cRatio);
-    //pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 1, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kSidechainFc, "SC Filter", true, DEFAULT_SPEC), cSidechainFc);
-    //pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 3, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kAttack, "Attack", true, DEFAULT_SPEC), cAttack);
-    //pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 6, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kRelease, "Release", true, DEFAULT_SPEC), cRelease);
-    //pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 8, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kKneeWidth, "Knee", true, DEFAULT_SPEC), cKneeWidth);
-    //pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(2.f, true), kMix, "Mix", true, DEFAULT_SPEC), cMix);
-    pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(2, 1, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kThresh, "Thresh", "-50", "0", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cThresh);
-    pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(2, 6, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kRatio, "Ratio", "1", "100", "5", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cRatio);
-    pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 1, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kSidechainFc, "SC Filter", "", "", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cSidechainFc);
-    pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 3, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kAttack, "Attack", "", "", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cAttack);
-    pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 6, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kRelease, "Release", "", "", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cRelease);
-    pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 8, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kKneeWidth, "Knee", "0", "30", "10", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cKneeWidth);
-    pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(2.f, true), kMix, "Mix", "0", "100", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cMix);
-    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(2, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), kMakeup, DEFAULT_SPEC, kVertical), cMakeup);
-    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(3, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kReference, DEFAULT_SPEC, kVertical), cReference);
-    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(3, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kMaxGr, DEFAULT_SPEC, kVertical), cMaxGr);
-    //pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(0, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsBypassed, SplashAnimationFunc, "Bypass"));
-    //pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(0, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsFeedback, SplashAnimationFunc, "Topo"));
-    //pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(2, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsAutoMakeup, SplashAnimationFunc, "Auto"));
-    //pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(2, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsMaxGrRatioDependent, SplashAnimationFunc, "R-Dep"));
-    pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(rectPlug.GetGridCell(0, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsBypassed, SplashAnimationFunc, "Bypass", SRLayout.colorSpec));
-    pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(rectPlug.GetGridCell(0, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsFeedback, SplashAnimationFunc, "Topo", SRLayout.colorSpec));
-    pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(rectPlug.GetGridCell(2, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsAutoMakeup, SplashAnimationFunc, "Auto", SRLayout.colorSpec));
-    pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(rectPlug.GetGridCell(2, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsMaxGrRatioDependent, SplashAnimationFunc, "R-Dep", SRLayout.colorSpec));
+    // Knob
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(2, 1, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kThresh, "Thresh", true, SRLayout.colorSpec, SRLayout.textKnobLabel, SRLayout.textKnobValue), cThresh);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(2, 6, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kRatio, "Ratio", true, SRLayout.colorSpec, SRLayout.textKnobLabel, SRLayout.textKnobValue), cRatio);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 1, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kSidechainFc, "SC Filter", true, SRLayout.colorSpec, SRLayout.textKnobLabel, SRLayout.textKnobValue), cSidechainFc);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 3, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kAttack, "Attack", true, SRLayout.colorSpec, SRLayout.textKnobLabel, SRLayout.textKnobValue), cAttack);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 6, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kRelease, "Release", true, SRLayout.colorSpec, SRLayout.textKnobLabel, SRLayout.textKnobValue), cRelease);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 8, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kKneeWidth, "Knee", true, SRLayout.colorSpec, SRLayout.textKnobLabel, SRLayout.textKnobValue), cKneeWidth);
+    pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(0, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(2.f, true), kMix, "Mix", true, SRLayout.colorSpec, SRLayout.textKnobLabel, SRLayout.textKnobValue), cMix);
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(2, 1, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kThresh, "Thresh", "-50", "0", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cThresh);
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(2, 6, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kRatio, "Ratio", "1", "100", "5", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cRatio);
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 1, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kSidechainFc, "SC Filter", "", "", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cSidechainFc);
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 3, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kAttack, "Attack", "", "", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cAttack);
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 6, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kRelease, "Release", "", "", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cRelease);
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 8, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kKneeWidth, "Knee", "0", "30", "10", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cKneeWidth);
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(rectPlug.GetGridCell(0, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(2.f, true), kMix, "Mix", "0", "100", "", true, true, SRLayout.colorSpec, SRLayout.colorKnobSslBlue, SRLayout.textKnobLabel, SRLayout.textKnobValue), cMix);
+// Fader
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(2, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), kMakeup, SRLayout.colorSpec, kVertical), cMakeup);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(3, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kReference, SRLayout.colorSpec, kVertical), cReference);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(3, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kMaxGr, SRLayout.colorSpec, kVertical), cMaxGr);
+    // Switch
+    pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(0, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsBypassed, SplashAnimationFunc, "Bypass", SRLayout.colorSpec));
+    pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(0, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsFeedback, SplashAnimationFunc, "Topo", SRLayout.colorSpec));
+    pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(2, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsAutoMakeup, SplashAnimationFunc, "Auto", SRLayout.colorSpec));
+    pGraphics->AttachControl(new IVSwitchControl(rectPlug.GetGridCell(2, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsMaxGrRatioDependent, SplashAnimationFunc, "R-Dep", SRLayout.colorSpec));
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(rectPlug.GetGridCell(0, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsBypassed, SplashAnimationFunc, "Bypass", SRLayout.colorSpec));
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(rectPlug.GetGridCell(0, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsFeedback, SplashAnimationFunc, "Topo", SRLayout.colorSpec));
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(rectPlug.GetGridCell(2, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsAutoMakeup, SplashAnimationFunc, "Auto", SRLayout.colorSpec));
+    //pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(rectPlug.GetGridCell(2, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsMaxGrRatioDependent, SplashAnimationFunc, "R-Dep", SRLayout.colorSpec));
   };
 #endif
 }
@@ -89,10 +92,15 @@ void SRCompressor::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
   for (int s = 0; s < nFrames; s++) {
     for (int c = 0; c < nChans; c++) {
       outputs[c][s] = inputs[c][s];
-      fSoftSatInput[c].Process(outputs[c][s]);
     }
+  }
 
-    if (!mIsBypassed) {
+  if (!mIsBypassed) {
+    for (int s = 0; s < nFrames; s++) {
+      for (int c = 0; c < nChans; c++) {
+        fSoftSatInput[c].Process(outputs[c][s]);
+      }
+
       fCompressor.Process(outputs[0][s], outputs[1][s]);
 
       for (int c = 0; c < nChans; c++) {
@@ -102,6 +110,7 @@ void SRCompressor::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
     }
   }
 }
+
 
 void SRCompressor::OnReset()
 {

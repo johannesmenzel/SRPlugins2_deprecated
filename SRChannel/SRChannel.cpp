@@ -25,7 +25,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mEnvPost(0.0)
   , mEnvOutput(0.0)
 {
-  
+
   //// Name channels:
   // // for VST2 we name individual outputs
   //if (GetAPI() == kAPIVST2) {
@@ -172,7 +172,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     const IRECT rectMeter = rectControls.SubRectHorizontal(6, 5).GetPadded(-5.f);
 
     // Make PATTERNS:
-    const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(SRLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f) });
+    const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(SR::Graphics::SRLayout.colorPanelBG, 0.2f), IColorStop(COLOR_BLACK, 0.5f) });
 
     // Resize loop:
     if (pGraphics->NControls()) {
@@ -212,7 +212,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       pGraphics->GetControlWithTag(cFreqMeter)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f));
 
       // Resize PRESET menu:
-      pGraphics->GetControlWithTag(cPresetMenu)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 2).SubRectVertical(4, 1).FracRectVertical(2.f, true).GetPadded(-5.f));
+      //pGraphics->GetControlWithTag(cPresetMenu)->SetTargetAndDrawRECTs(rectHeader.SubRectHorizontal(6, 2).SubRectVertical(4, 1).FracRectVertical(2.f, true).GetPadded(-5.f));
 
       // Resize: Loop through parameters:
       for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
@@ -249,7 +249,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     // LOAD
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);                                        // Load std font
-    pGraphics->LoadFont("Century-Gothic", CENTURY_FN);    
+    pGraphics->LoadFont("Century-Gothic", CENTURY_FN);
 
     IBitmap bmpSRPluginsLogo = pGraphics->LoadBitmap(SRPLUGINSLOGO_FN);                       // Load logo bitmap
     IBitmap bmpSRChannelLogo = pGraphics->LoadBitmap(SRCHANNELLOGO_FN);                       // Load logo bitmap
@@ -259,12 +259,12 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     if (!pGraphics->TooltipsEnabled()) pGraphics->EnableTooltips(true);                                        // Enable Tooltips
 
     // ATTACH
-    pGraphics->AttachPanelBackground(SRLayout.colorPluginBG);        // Attach Background
-    pGraphics->AttachCornerResizer(kUIResizerSize, true);                 // Attach Resizer
+    pGraphics->AttachPanelBackground(SR::Graphics::SRLayout.colorPluginBG);        // Attach Background
+    pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);                 // Attach Resizer
 
     // Attach logos and version string:
-    pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromLeft(float(bmpSRPluginsLogo.W())), bmpSRPluginsLogo, -1, EBlendType::kBlendNone), cSRPluginsLogo, "UI");
-    pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromRight(float(bmpSRChannelLogo.W())), bmpSRChannelLogo, -1, EBlendType::kBlendNone), cSRChannelLogo, "UI");
+    pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromLeft(float(bmpSRPluginsLogo.W())), bmpSRPluginsLogo, -1, EBlend::None), cSRPluginsLogo, "UI");
+    pGraphics->AttachControl(new IBitmapControl(rectHeader.SubRectVertical(2, 0).GetFromRight(float(bmpSRChannelLogo.W())), bmpSRChannelLogo, -1, EBlend::None), cSRChannelLogo, "UI");
     //pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", SRLayout.textVersionString), cVersion, "UI");
 
     // Attach section rect PANELS
@@ -276,7 +276,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new SR::Graphics::SRPanel(rectMeter, patternPanel, true), cPanelMeter, "UI");
 
     // Attach Info boxes
-    pGraphics->AttachControl(new ITextControl(rectFooter.GetFromBottom(10.f), "TEST THINGY", SRLayout.textKnobLabel), cInfo, "UI");
+    pGraphics->AttachControl(new ITextControl(rectFooter.GetFromBottom(10.f), "TEST THINGY", SR::Graphics::SRLayout.textKnobLabel), cInfo, "UI");
 
     // Attach meters
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 1), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
@@ -284,12 +284,12 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new SR::Graphics::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(5, 2), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 3), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 4), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeterRms, "Meter");
-    pGraphics->AttachControl(new IVScopeControl<2>(rectHeader.SubRectHorizontal(6, 0).GetVPadded(-5.f), "Left", "Right"), cScope, "Meter");
+    pGraphics->AttachControl(new IVScopeControl<2>(rectHeader.SubRectHorizontal(6, 0).GetVPadded(-5.f), "Waveform", SR::Graphics::SRLayout.style, "Left"), cScope, "UI");
     //pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5), SRLayout.colorSpec), cFreqMeter, "Meter");
-    pGraphics->AttachControl(new SR::Graphics::SRGraphBase(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SRLayout.colorSpec), cFreqMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::SRGraphBase(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Graphics::SRLayout.style), cFreqMeter, "Meter");
 
     // Attach preset menu:
-    pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectHorizontal(6, 2).SubRectVertical(4, 1).FracRectVertical(2.f, true).GetPadded(-5.f), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
+    //pGraphics->AttachControl(new SR::Graphics::SRPresetMenu(this, rectHeader.SubRectHorizontal(6, 2).SubRectVertical(4, 1).FracRectVertical(2.f, true).GetPadded(-5.f), SRLayout.textPresetMenu, namedParams), cPresetMenu, "UI");
 
     // Set Tooltip for non-parameter controls:
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
@@ -322,14 +322,14 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
       IColor knobColor;               // "knobColor" gets what IColor is stated in the param struct
       switch (p.Knobs) {
-      case EControlImages::SslBlue: knobColor = SRLayout.colorKnobSslBlue; break;
-      case EControlImages::SslGreen: knobColor = SRLayout.colorKnobSslGreen; break;
-      case EControlImages::SslRed: knobColor = SRLayout.colorKnobSslRed; break;
-      case EControlImages::SslOrange: knobColor = SRLayout.colorKnobSslOrange; break;
-      case EControlImages::SslYellow: knobColor = SRLayout.colorKnobSslYellow; break;
-      case EControlImages::SslBlack: knobColor = SRLayout.colorKnobSslBlack; break;
-      case EControlImages::SslWhite: knobColor = SRLayout.colorKnobSslWhite; break;
-      default: knobColor = SRLayout.colorSpec.mFGColor; break;
+      case EControlImages::SslBlue: knobColor = SR::Graphics::SRLayout.colorKnobSslBlue; break;
+      case EControlImages::SslGreen: knobColor = SR::Graphics::SRLayout.colorKnobSslGreen; break;
+      case EControlImages::SslRed: knobColor = SR::Graphics::SRLayout.colorKnobSslRed; break;
+      case EControlImages::SslOrange: knobColor = SR::Graphics::SRLayout.colorKnobSslOrange; break;
+      case EControlImages::SslYellow: knobColor = SR::Graphics::SRLayout.colorKnobSslYellow; break;
+      case EControlImages::SslBlack: knobColor = SR::Graphics::SRLayout.colorKnobSslBlack; break;
+      case EControlImages::SslWhite: knobColor = SR::Graphics::SRLayout.colorKnobSslWhite; break;
+      default: knobColor = SR::Graphics::SRLayout.style.colorSpec.GetColor(EVColor::kFG); break;
       }
 
       switch (p.Type)
@@ -341,12 +341,15 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
         case kInputGain:
         case kOutputGain:
-          // Attach imput and output faders
-          pGraphics->AttachControl(new IVSliderControl(rectCurrentControl, paramIdx, SRLayout.colorSpec, kVertical, true, 32.f, 2.f), ctrlIdx);
+          // Attach input and output faders
+          pGraphics->AttachControl(new IVSliderControl(rectCurrentControl, paramIdx, p.label, SR::Graphics::SRLayout.style, true, EDirection::Vertical, false, 8.f, 2.f), ctrlIdx);
           break;
 
         default:
           // Attach knobs for all other double
+
+          // This will return when old Knob is implemented again
+          /*
           pGraphics->AttachControl(new SR::Graphics::SRVectorKnobText(
             rectCurrentControl,
             paramIdx,
@@ -367,22 +370,52 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             kVertical,
             4.f
           ), ctrlIdx);
+          */
+
+          pGraphics->AttachControl(new SR::Graphics::SRVectorKnob(
+            rectCurrentControl,
+            paramIdx,
+            p.label,
+            SR::Graphics::SRLayout.style,
+            true,
+            false
+          ), ctrlIdx);
           break;
         }
         break;
 
+      // Attach switches for bool and enum
       case IParam::EParamType::kTypeEnum:
+
+        pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(
+          rectCurrentControl,
+          paramIdx,
+          p.label,
+          SR::Graphics::SRLayout.style,
+          false
+        ), ctrlIdx);
+        break;
+
       case IParam::EParamType::kTypeBool:
-        // Attach switches for bool and enum
+
+        // TODO: Commented until reimplementation
+        /*
         pGraphics->AttachControl(new SR::Graphics::SRVectorSwitch(
           rectCurrentControl,
           paramIdx,
           SplashClickActionFunc,
           p.label,
-          DEFAULT_SPEC,
+          SRLayout.style,
           GetParam(paramIdx)->NDisplayTexts()
         ), ctrlIdx);
-        break;
+        */
+
+        pGraphics->AttachControl(new SR::Graphics::SRVectorToggle(
+          rectCurrentControl,
+          paramIdx,
+          p.label,
+          SR::Graphics::SRLayout.style
+        ), ctrlIdx);
 
       default:
         break;
@@ -394,7 +427,8 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     }
 
     // Other setup for ALL parameter controls
-    pGraphics->StyleAllVectorControls(true, true, false, 0.1f, 2.f, 3.f, SRLayout.colorSpec);
+    //pGraphics->StyleAllVectorControls(true, true, false, 0.1f, 2.f, 3.f, SRLayout.colorSpec); //TODO: DEPRECATED
+    pGraphics->StyleAllVectorControls(SR::Graphics::SRLayout.style);
 
   };
   // END LAYOUT function
@@ -546,8 +580,10 @@ void SRChannel::InitEffects() {
   }
 
   // Init compressor
-  fCompressorPeak.InitCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, false, mSampleRate);
+  fCompressorPeak.InitCompressor(mCompPeakThresh, mCompPeakRatio, mCompPeakAttack, mCompPeakRelease, mCompPeakSidechainFilterFreq, mCompPeakKneeWidthDb, mCompPeakIsFeedback, false, -18., mSampleRate);
+  fCompressorPeak.InitSidechainFilter(mCompPeakSidechainFilterFreq);
   fCompressorPeak.Reset();
+  fCompressorPeak.SetMaxGrDb(-50., false);
 
   // For sidechain filter frequency it requires an own knob later
   fCompressorRms.InitCompressor(mCompRmsThresh, mCompRmsRatio, mCompRmsAttack, mCompRmsRelease, mCompPeakSidechainFilterFreq, mCompRmsKneeWidthDb, 300., mCompRmsIsFeedback, false, mSampleRate);
@@ -929,8 +965,8 @@ void SRChannel::ProcessBlock(sample** inputs, sample** outputs, int nFrames) {
     // fill meter value buffers w ith current sample
     bOutputMeter.ProcessBuffer(*out1, 0, s);
     bOutputMeter.ProcessBuffer(*out2, 1, s);
-    bGrMeter.ProcessBuffer(fCompressorPeak.GetGrLin(), 0, s);
-    bGrMeter.ProcessBuffer(fCompressorRms.GetGrLin(), 1, s);
+    bGrMeter.ProcessBuffer(fCompressorRms.GetGrLin(), 0, s);
+    bGrMeter.ProcessBuffer(fCompressorPeak.GetGrLin(), 1, s);
     bGrMeter.ProcessBuffer(fDeesser.GetGrLin(), 2, s);
 
   }

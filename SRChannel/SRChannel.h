@@ -11,8 +11,9 @@
 #include "IPlug_include_in_plug_hdr.h"
 
 // Extra IPlug2 libs
-#include "IVMeterControl.h"
-#include "IVScopeControl.h"
+#include "IControls.h"
+//#include "IVMeterControl.h"
+//#include "IVScopeControl.h"
 #include "Oversampler.h"
 //#include "IPlugQueue.h"
 
@@ -134,7 +135,7 @@ private:
   SR::Graphics::SRMeter<3, 1024>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
   SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
   SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mOutputRmsMeterBallistics{ cOutputMeterRms };
-  IVScopeControl<2>::IVScopeBallistics mScopeBallistics{ cScope };
+  IVScopeControl<2>::Sender mScopeBallistics{ cScope };
 
   // sample** buffers storing meter values
   SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bInputMeter;

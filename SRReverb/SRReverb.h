@@ -2,8 +2,12 @@
 
 #include "IPlug_include_in_plug_hdr.h"
 #include "verbengine.h"
-#include "../SRClasses/DSP/SRFilters.h"
-#include "../SRClasses/DSP/SRDynamics.h"
+#include "simple_pitchshift.h"
+//#include "simple_pitchshift2.h"
+#include "DSP/SRFilters.h"
+#include "DSP/SRDynamics.h"
+
+
 
 const int kNumPrograms = 1;
 
@@ -17,6 +21,8 @@ enum EParams
   kHighpass,
   kLowpass,
   kCompress,
+  kPitchShift,
+  kPitchTempo,
   kNumParams
 };
 
@@ -32,10 +38,13 @@ public:
 
 private:
   WDL_ReverbEngine fReverb;
+  WDL_SimplePitchShifter fPitch;
+  //WDL_SimplePitchShifter2 fPitch2;
   SR::DSP::SRFilterIIR<sample, 2> fHighpass, fLowpass;
   SR::DSP::SRCompressorRMS fCompressor;
   double mDry, mWidth, mDamp, mSize, mWet, mHighpass, mLowpass, mCompress;
-
   double mCompThresh, mCompRatio, mCompAttack, mCompRelease;
+  double mPitchShift, mPitchTempo;
+
 #endif
 };

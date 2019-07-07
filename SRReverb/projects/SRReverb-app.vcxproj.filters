@@ -89,27 +89,6 @@
     <ClCompile Include="..\..\..\IPlug\IPlugPaths.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRDynamics.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRFilters.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRGain.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRParam.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\DSP\SRSaturation.cpp">
-      <Filter>SRClasses\DSP</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\Graphics\SRControls.cpp">
-      <Filter>SRClasses\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\SRClasses\Utils\SRHelpers.cpp">
-      <Filter>SRClasses\Utils</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SRReverb.h" />
@@ -297,33 +276,6 @@
     <ClInclude Include="..\..\..\IPlug\IPlugPaths.h">
       <Filter>IPlug</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\SRClasses\SRConstants.h">
-      <Filter>SRClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRBuffer.h">
-      <Filter>SRClasses\DSP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRDynamics.h">
-      <Filter>SRClasses\DSP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRFilters.h">
-      <Filter>SRClasses\DSP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRGain.h">
-      <Filter>SRClasses\DSP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRParam.h">
-      <Filter>SRClasses\DSP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\DSP\SRSaturation.h">
-      <Filter>SRClasses\DSP</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\Graphics\SRControls.h">
-      <Filter>SRClasses\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\SRClasses\Utils\SRHelpers.h">
-      <Filter>SRClasses\Utils</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">
@@ -355,18 +307,6 @@
     </Filter>
     <Filter Include="IPlug\APP\RTAudioMidi\include">
       <UniqueIdentifier>{649c5de3-b4c2-4de9-8d57-3b1762646259}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses">
-      <UniqueIdentifier>{ec60b083-9d7d-4ac4-bde9-ea1d1cde5281}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\DSP">
-      <UniqueIdentifier>{af5b95dc-cf44-402f-9fbc-aa52d6ec0e27}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\Graphics">
-      <UniqueIdentifier>{01538755-4029-47a7-a262-daea3b48a7d6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SRClasses\Utils">
-      <UniqueIdentifier>{b724a7f4-0c26-4695-8c97-de6c82b79b08}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

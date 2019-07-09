@@ -3,7 +3,7 @@
 #include "../SRClasses/SRConstants.h"
 #include <stddef.h>
 
-#define FREQUENCYRESPONSE 100
+#define FREQUENCYRESPONSE 300
 #define MAXNUMOUTCHANNELS 2
 
 
@@ -299,6 +299,7 @@ enum ECtrlTags {
   cVersion,
   cFreqMeter,
   cInfo,
+  cDisplayTestMeter,
 
   // Number of controls
   kNumCtrlTags,

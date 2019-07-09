@@ -130,11 +130,11 @@ private:
   OverSampler<sample> mOverSampler[MAXNUMOUTCHANNELS]{ EFactor::kNone };
 
   // meter ballistics attached to meter controls
-  SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
-  SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mInputRmsMeterBallistics{ cInputMeterRms };
-  SR::Graphics::SRMeter<3, 1024>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
-  SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
-  SR::Graphics::SRMeter<2, 1024>::SRMeterBallistics mOutputRmsMeterBallistics{ cOutputMeterRms };
+  SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
+  //SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mInputRmsMeterBallistics{ cInputMeterRms };
+  SR::Graphics::Controls::SRMeter<3, 1024>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
+  SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
+  //SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mOutputRmsMeterBallistics{ cOutputMeterRms };
   IVScopeControl<2>::Sender mScopeBallistics{ cScope };
 
   // sample** buffers storing meter values
@@ -142,8 +142,10 @@ private:
   SR::DSP::SRBuffer<sample, 3, 1024> bGrMeter;
   SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bOutputMeter;
 
+  SR::Graphics::Base::SRRoomInfo mRoomInfo;
+
   // Frequency response meter values
-  double* mFreqMeterValues = new double[FREQUENCYRESPONSE];
+  float* mFreqMeterValues = new float[FREQUENCYRESPONSE];
 };
 
 #endif // SRCHANNEL_H

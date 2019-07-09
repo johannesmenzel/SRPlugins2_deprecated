@@ -146,8 +146,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>$(APP_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(APP_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
@@ -163,9 +164,9 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>$(APP_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(APP_LIBS);%(AdditionalDependencies)</AdditionalDependencies>
@@ -183,9 +184,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>$(APP_DEFS);$(RELEASE_DEFS);$(EXTRA_RELEASE_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -204,9 +206,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>$(APP_DEFS);$(RELEASE_DEFS);$(EXTRA_RELEASE_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -225,8 +228,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>$(APP_DEFS);$(TRACER_DEFS);$(EXTRA_TRACER_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -245,8 +249,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>$(APP_DEFS);$(TRACER_DEFS);$(EXTRA_TRACER_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(APP_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -287,6 +292,7 @@
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsLice.h" />
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsLice_src.h" />
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsNanoVG.h" />
+    <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h" />
     <ClInclude Include="..\..\..\IGraphics\IControl.h" />
     <ClInclude Include="..\..\..\IGraphics\IGraphics.h" />
     <ClInclude Include="..\..\..\IGraphics\IGraphicsConstants.h" />
@@ -380,6 +386,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\IGraphics\IControl.cpp" />

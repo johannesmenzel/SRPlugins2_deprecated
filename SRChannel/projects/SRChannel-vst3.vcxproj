@@ -153,7 +153,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>$(VST3_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -169,8 +170,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>$(VST3_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -188,7 +189,8 @@
       <PreprocessorDefinitions>$(VST3_DEFS);$(RELEASE_DEFS);$(EXTRA_RELEASE_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -209,7 +211,8 @@
       <PreprocessorDefinitions>$(VST3_DEFS);$(RELEASE_DEFS);$(EXTRA_RELEASE_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -228,7 +231,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>$(VST3_DEFS);$(TRACER_DEFS);$(EXTRA_TRACER_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -248,7 +252,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>$(VST3_DEFS);$(TRACER_DEFS);$(EXTRA_TRACER_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)..\SRClasses</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VST3_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -299,6 +304,7 @@
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsLice.h" />
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsLice_src.h" />
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsNanoVG.h" />
+    <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h" />
     <ClInclude Include="..\..\..\IGraphics\IControl.h" />
     <ClInclude Include="..\..\..\IGraphics\IGraphics.h" />
     <ClInclude Include="..\..\..\IGraphics\IGraphicsConstants.h" />
@@ -371,6 +377,46 @@
     <ClCompile Include="..\..\..\IGraphics\Controls\IControls.cpp" />
     <ClCompile Include="..\..\..\IGraphics\Controls\IPopupMenuControl.cpp" />
     <ClCompile Include="..\..\..\IGraphics\Controls\ITextEntryControl.cpp" />
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsAGG.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsCairo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsLice.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsNanoVG.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\IGraphics\IControl.cpp" />
     <ClCompile Include="..\..\..\IGraphics\IGraphics.cpp" />
     <ClCompile Include="..\..\..\IGraphics\Platforms\IGraphicsWin.cpp" />

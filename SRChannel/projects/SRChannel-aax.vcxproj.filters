@@ -71,6 +71,10 @@
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp">
       <Filter>IPlug</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
+      <Filter>IGraphics\Drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SRChannel.h" />
@@ -231,6 +235,10 @@
     <ClInclude Include="..\..\..\IPlug\IPlugUtilities.h">
       <Filter>IPlug</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h">
+      <Filter>IGraphics\Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

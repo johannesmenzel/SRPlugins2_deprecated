@@ -136,7 +136,7 @@
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(AAX_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -173,7 +173,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(AAX_DEFS);$(RELEASE_DEFS);$(EXTRA_RELEASE_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -215,7 +215,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(AAX_DEFS);$(TRACER_DEFS);$(EXTRA_TRACER_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -259,7 +259,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(AAX_DEFS);$(DEBUG_DEFS);$(EXTRA_DEBUG_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -299,7 +299,7 @@
     </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(AAX_DEFS);$(RELEASE_DEFS);$(EXTRA_RELEASE_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -344,7 +344,7 @@
     </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
-      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(AAX_INC_PATHS);%(AdditionalIncludeDirectories);$(SolutionDir)../SRClasses</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(AAX_DEFS);$(TRACER_DEFS);$(EXTRA_TRACER_DEFS);%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -428,6 +428,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tracer|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\IGraphics\IControl.cpp" />
     <ClCompile Include="..\..\..\IGraphics\IGraphics.cpp" />
     <ClCompile Include="..\..\..\IGraphics\IGraphicsEditorDelegate.cpp" />
@@ -449,6 +457,7 @@
     </ClCompile>
     <ClCompile Include="..\..\..\IPlug\IPlugTimer.cpp" />
     <ClCompile Include="..\SRChannel.cpp" />
+    <ClCompile Include="..\SRChannelPresets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuildStep Include="..\..\AAX_SDK\Libs\Release\AAXLibrary.lib">
@@ -494,6 +503,7 @@
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsLice.h" />
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsLice_src.h" />
     <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsNanoVG.h" />
+    <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h" />
     <ClInclude Include="..\..\..\IGraphics\IControl.h" />
     <ClInclude Include="..\..\..\IGraphics\IGraphics.h" />
     <ClInclude Include="..\..\..\IGraphics\IGraphicsConstants.h" />
@@ -534,6 +544,7 @@
     <ClInclude Include="..\config.h" />
     <ClInclude Include="..\SRChannel.h" />
     <ClInclude Include="..\resources\resource.h" />
+    <ClInclude Include="..\SRChannelConstants.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\resources\main.rc" />

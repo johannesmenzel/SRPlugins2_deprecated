@@ -23,8 +23,8 @@
 #define PLUG_DOES_MPE 0
 #define PLUG_DOES_STATE_CHUNKS 0
 #define PLUG_HAS_UI 1
-#define PLUG_WIDTH 1280
-#define PLUG_HEIGHT 800
+#define PLUG_WIDTH 1080
+#define PLUG_HEIGHT 720
 #define PLUG_FPS 60
 #define PLUG_SHARED_RESOURCES 0
 
@@ -51,6 +51,6 @@
 #define APP_SIGNAL_VECTOR_SIZE 64
 
 #define ROBOTO_FN "Roboto-Regular.ttf"
-#define CENTURY_FN "../SRImages/Gothic.ttf"
+#define CENTURY_FN "../SRImages/GOTHIC.TTF"
 #define SRCHANNELLOGO_FN "../SRImages/SRChannel_Logo.png"
 #define SRPLUGINSLOGO_FN "../SRImages/SRPlugins_Logo.png"

@@ -38,7 +38,7 @@ class SRChannel : public IPlug
 {
 public:
   SRChannel(IPlugInstanceInfo instanceInfo);
-
+  ~SRChannel();
 
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
@@ -46,7 +46,6 @@ public:
   void OnParamChange(int paramIdx) override;
   void OnIdle() override;
 #endif
-
 
 #if IPLUG_EDITOR
   void OnParamChangeUI(int paramIdx, EParamSource source = kUnknown) override;
@@ -108,44 +107,45 @@ private:
   bool mAgcTrigger;
 
   // FILTERS
-  // Gain Filters
+  // Gain
   SR::DSP::SRGain fInputGain, fOutputGain, fAutoGain, fPan;
 
-  // Spectral Filters
+  // Filters
   SR::DSP::SRFilterIIR<sample, MAXNUMOUTCHANNELS> fFilters[kNumFilters] = {};
   SR::DSP::SRFilterParamSmooth fEnvInput, fEnvPost, fEnvOutput;
 
-  // Dynamic Filters
+  // Dynamics
   SR::DSP::SRCompressor fCompressorPeak;
   SR::DSP::SRCompressorRMS fCompressorRms;
   SR::DSP::SRLimiter fLimiter;
   SR::DSP::SRDeesser fDeesser;
 
-  //SR::DSP::EnvelopeDetector fOutputVuMeterEnvelopeDetector1, fOutputVuMeterEnvelopeDetector2;
-  //SR::DSP::AttRelEnvelope fOutputVuMeterEnvelope1, fOutputVuMeterEnvelope2;
-
   // Saturation
   SR::DSP::SRSaturation fInputSaturation[MAXNUMOUTCHANNELS] = {};
-  //OverSampler<sample> mOverSampler[MAXNUMOUTCHANNELS]{ OverSampler<sample>::EFactor::kNone };
   OverSampler<sample> mOverSampler[MAXNUMOUTCHANNELS]{ EFactor::kNone };
 
-  // meter ballistics attached to meter controls
+  // Meter Ballistics
   SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mInputMeterBallistics{ cInputMeter };
-  //SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mInputRmsMeterBallistics{ cInputMeterRms };
   SR::Graphics::Controls::SRMeter<3, 1024>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
   SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mOutputMeterBallistics{ cOutputMeter };
-  //SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mOutputRmsMeterBallistics{ cOutputMeterRms };
   IVScopeControl<2>::Sender mScopeBallistics{ cScope };
+
+  // Frequency response meter values
+  float* mFreqMeterValues = new float[FREQUENCYRESPONSE];
+
+  // (Temporarily) deprecated
+  //SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mInputRmsMeterBallistics{ cInputMeterRms };
+  //SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mOutputRmsMeterBallistics{ cOutputMeterRms };
+  //SR::DSP::EnvelopeDetector fOutputVuMeterEnvelopeDetector1, fOutputVuMeterEnvelopeDetector2;
+  //SR::DSP::AttRelEnvelope fOutputVuMeterEnvelope1, fOutputVuMeterEnvelope2;
 
   // sample** buffers storing meter values
   SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bInputMeter;
   SR::DSP::SRBuffer<sample, 3, 1024> bGrMeter;
   SR::DSP::SRBuffer<sample, MAXNUMOUTCHANNELS, 1024> bOutputMeter;
 
+  // Graphics
   SR::Graphics::Base::SRRoomInfo mRoomInfo;
-
-  // Frequency response meter values
-  float* mFreqMeterValues = new float[FREQUENCYRESPONSE];
 };
 
 #endif // SRCHANNEL_H

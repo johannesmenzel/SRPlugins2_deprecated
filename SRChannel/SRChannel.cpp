@@ -473,6 +473,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   // END LAYOUT function
 
 }
+SRChannel::~SRChannel()
+{
+  delete[] mFreqMeterValues;
+}
 // End of plugin class constructor
 
 #pragma mark - User methods

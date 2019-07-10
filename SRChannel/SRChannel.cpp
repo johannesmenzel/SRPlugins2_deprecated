@@ -26,49 +26,38 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mEnvOutput(0.0)
 {
 
-  //// Name channels:
-  // // for VST2 we name individual outputs
-  //if (GetAPI() == kAPIVST2) {
-
-    //SetChannelLabel(ERoute::kInput, 0, "In 1", false);
-    //SetChannelLabel(ERoute::kInput, 1, "In 2", false);
-    //SetChannelLabel(ERoute::kInput, 2, "SC 1", false);
-    //SetChannelLabel(ERoute::kInput, 3, "SC 2", false);
-    //SetChannelLabel(ERoute::kOutput, 0, "Out 1", false);
-    //SetChannelLabel(ERoute::kOutput, 1, "Out 2", false);
-
-  //  //SetChannelLabel(ERoute::kOutput, 2, "SC Out 1", true);
-  //  //SetChannelLabel(ERoute::kOutput, 3, "SC Out 2", true);
-
-  //}
-  //else {
-  //  //GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
-  //  //GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
-  //  GetIOConfig(0)->GetBusInfo(ERoute::kInput, 0)->mLabel.Set("In", MAX_CHAN_NAME_LEN);
-  //  GetIOConfig(0)->GetBusInfo(ERoute::kInput, 1)->mLabel.Set("SC", MAX_CHAN_NAME_LEN);
-  //  GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 0)->mLabel.Set("Out", MAX_CHAN_NAME_LEN);
-  //  //GetIOConfig(0)->GetBusInfo(ERoute::kOutput, 1)->mLabel.Set("SC Out", MAX_CHAN_NAME_LEN);
-  //}
-
+  // When implemented correctly, add channel naming here
 
   // Initialize Parameters:
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
-    const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
-    IParam* thisParameter = GetParam(paramIdx);												          // ... for which we temporally create a pointer "param"
+
+    // Pointer to current parameter information:
+    const SRParamProperties &p = srchannelParamProperties[paramIdx];
+    // Pointer to current parameter
+    IParam* thisParameter = GetParam(paramIdx);
+
+    // Parameter Initialization per type:
     switch (p.Type)
     {
+
     case IParam::EParamType::kTypeDouble:
       thisParameter->InitDouble(p.name, p.defaultVal, p.minVal, p.maxVal, p.stepValue, p.unit, p.Flags, p.group, ShapeFromMiddle(p.minVal, p.maxVal, p.centerVal, p.centerPoint), IParam::kUnitCustom);
       break;
+
     case IParam::EParamType::kTypeInt:
       thisParameter->InitInt(p.name, (int)p.defaultVal, (int)p.minVal, (int)p.maxVal, p.unit, 0, p.group);
       break;
+
     case IParam::EParamType::kTypeBool:
       thisParameter->InitBool(p.name, (bool)p.defaultVal, p.unit, 0, p.group, p.labelMin, p.labelMax);
       break;
+
     case IParam::EParamType::kTypeEnum:
+
       switch (paramIdx) {
-      case kEqHpOrder: /*case kEqLpOrder:*/
+
+      case kEqHpOrder:
+        //case kEqLpOrder:
         thisParameter->InitEnum(
           p.name,
           (int)p.defaultVal,
@@ -76,17 +65,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           p.unit,
           0,
           p.group,
-          "6 dB/oct",
-          "12 dB/oct",
-          "18 dB/oct",
-          "24 dB/oct",
-          "36 dB/oct",
-          "48 dB/oct",
-          "60 dB/oct",
-          "72 dB/oct",
-          "120 dB/oct"
+          "6 dB/oct", "12 dB/oct", "18 dB/oct", "24 dB/oct", "36 dB/oct", "48 dB/oct", "60 dB/oct", "72 dB/oct", "120 dB/oct"
         );
         break;
+
       case kSaturationType:
         thisParameter->InitEnum(p.name,
           (int)p.defaultVal,
@@ -94,15 +76,10 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           p.unit,
           0,
           p.group,
-          "MusicDSP",
-          "Zoelzer",
-          "Pirkle",
-          "Pirkle Mod",
-          "Soft Sat",
-          "Half Rect",
-          "Full Rect"
+          "MusicDSP", "Zoelzer", "Pirkle", "Pirkle Mod", "Soft Sat", "Half Rect", "Full Rect"
         );
         break;
+
       case kOversamplingRate:
         thisParameter->InitEnum(
           p.name,
@@ -111,29 +88,36 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           p.unit,
           0,
           p.group,
-          "OS OFF",
-          "OS 2X",
-          "OS 4X",
-          "OS 8X",
-          "OS 16X"
+          "OS OFF", "OS 2X", "OS 4X", "OS 8X", "OS 16X"
         );
         break;
+
       default:
         break;
+
       }
+
     default:
       break;
     }
 
-    // Setup display texts
+    // Setup display texts for double parameters
     switch (paramIdx)
     {
-    case kLimiterThresh: thisParameter->SetDisplayText((int)p.maxVal, "Off"); break;
-    case kEqHpFreq: case kCompPeakSidechainFilterFreq: thisParameter->SetDisplayText((int)p.minVal, "Off"); break;
-    case kEqLpFreq: thisParameter->SetDisplayText((int)p.maxVal, "Off"); break;
-    case kCompPeakRatio: thisParameter->SetDisplayText((int)p.maxVal, "inf"); break;
-    case kPanFreq: thisParameter->SetDisplayText((int)p.minVal, "Off"); break;
-    default: break;
+    case kLimiterThresh:
+    case kEqLpFreq:
+      thisParameter->SetDisplayText((int)p.maxVal, "Off");
+      break;
+    case kEqHpFreq:
+    case kCompPeakSidechainFilterFreq:
+    case kPanFreq:
+      thisParameter->SetDisplayText((int)p.minVal, "Off");
+      break;
+    case kCompPeakRatio:
+      thisParameter->SetDisplayText((int)p.maxVal, "inf");
+      break;
+    default:
+      break;
     }
 
     // To set default parameter member variable:
@@ -147,11 +131,6 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   MakePresets();
 
 
-
-
-
-
-
 #if IPLUG_EDITOR
 
   // Create graphics context:
@@ -162,6 +141,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   // Create layout:
   mLayoutFunc = [&](IGraphics* pGraphics) {
 
+    // TODO: Set room informations, doesn't work on resize by now
     mRoomInfo.Reset(
       GetEditorWidth() * 0.5f,
       GetEditorHeight() * 0.5f,
@@ -170,12 +150,13 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       GetEditorWidth()
     );
 
-    // Make RECTs:
-    const IRECT rectPlugin = pGraphics->GetBounds();      // Plug canvas
+    // Make IRECTs:
+    const IRECT rectPlugin = pGraphics->GetBounds();
     const IRECT rectHeader = rectPlugin.GetFromTop(40.f);
     const IRECT rectFooter = rectPlugin.GetFromBottom(40.f);
-    const IRECT rectControls = rectPlugin.GetReducedFromTop(rectHeader.H()).GetReducedFromBottom(rectFooter.H()); // Control canvas
-    // Make section RECTs:
+    const IRECT rectControls = rectPlugin.GetReducedFromTop(rectHeader.H()).GetReducedFromBottom(rectFooter.H());
+
+    // Make section IRECTs:
     const IRECT rectInput = rectControls.SubRectHorizontal(6, 0).GetPadded(-1.f);
     const IRECT rectEq = rectControls.SubRectHorizontal(6, 1).GetPadded(-1.f);
     const IRECT rectComp = rectControls.SubRectHorizontal(6, 2).GetPadded(-1.f);
@@ -183,60 +164,59 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     const IRECT rectOutput = rectControls.SubRectHorizontal(6, 4).GetPadded(-1.f);
     const IRECT rectMeter = rectControls.SubRectHorizontal(6, 5).GetPadded(-1.f);
 
-    // Make PATTERNS:
-    //const IPattern patternPanel = IPattern::CreateLinearGradient(rectControls.L, rectControls.T, rectControls.R, rectControls.B, { IColorStop(SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kPanelBg), 0.2f), IColorStop(COLOR_BLACK, 0.5f) });
-    const IPattern patternBackground = IPattern::CreateRadialGradient(mRoomInfo.GetLightPositionX(), mRoomInfo.GetLightPositionY(), rectControls.W(), { IColorStop(SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kPluginBg), 0.0f), IColorStop(COLOR_BLACK, 1.f) });
-    const IPattern patternPanel = IPattern::CreateRadialGradient(mRoomInfo.GetLightPositionX(), mRoomInfo.GetLightPositionY(), rectControls.W(), { IColorStop(SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kPanelBg), 0.0f), IColorStop(COLOR_BLACK, 1.f) });
-    // Resize loop:
+    // Make IPatterns:
+    const IPattern patternPanel = IPattern::CreateRadialGradient(mRoomInfo.GetLightPositionX(), mRoomInfo.GetLightPositionY(), rectControls.W(), { IColorStop(SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kPanelBg), 0.3f), IColorStop(COLOR_BLACK, 0.6f) });
+
+    // Resize loop, if controls already present:
     if (pGraphics->NControls()) {
 
-      // Rezize BACKGROUND:
+      // Resize Background and info controls:
       pGraphics->GetBackgroundControl()->SetRECT(rectPlugin);
-      // Resize LOGO and VERSION STRING:
       pGraphics->GetControlWithTag(cSRPluginsLogo)->SetRECT(rectHeader./*SubRectVertical(2, 0).*/GetFromLeft(pGraphics->GetControlWithTag(cSRPluginsLogo)->GetRECT().W()));
       pGraphics->GetControlWithTag(cSRChannelLogo)->SetRECT(rectHeader./*SubRectVertical(2, 0).*/GetFromRight(pGraphics->GetControlWithTag(cSRChannelLogo)->GetRECT().W()));
+      pGraphics->GetControlWithTag(cInfo)->SetRECT(rectFooter.GetFromBottom(10.f));
       //pGraphics->GetControlWithTag(cVersion)->SetRECT(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize));
 
-      // Resize section rect PANELS and patterns:
+      // Resize Panels:
       pGraphics->GetControlWithTag(cPanelInput)->SetRECT(rectInput);
-      //dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelInput))->SetPattern(patternPanel);
-      dynamic_cast<IPanelControl*>(pGraphics->GetControlWithTag(cPanelInput))->SetPattern(patternPanel);
       pGraphics->GetControlWithTag(cPanelEq)->SetRECT(rectEq);
-      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelEq))->SetPattern(patternPanel);
       pGraphics->GetControlWithTag(cPanelComp)->SetRECT(rectComp);
-      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelComp))->SetPattern(patternPanel);
       pGraphics->GetControlWithTag(cPanelPost)->SetRECT(rectPost);
-      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelPost))->SetPattern(patternPanel);
       pGraphics->GetControlWithTag(cPanelOutput)->SetRECT(rectOutput);
-      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelOutput))->SetPattern(patternPanel);
       pGraphics->GetControlWithTag(cPanelMeter)->SetRECT(rectMeter);
+
+      // Update Panel patterns
+      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelInput))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelEq))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelComp))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelPost))->SetPattern(patternPanel);
+      dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelOutput))->SetPattern(patternPanel);
       dynamic_cast<SR::Graphics::Controls::SRPanel*>(pGraphics->GetControlWithTag(cPanelMeter))->SetPattern(patternPanel);
 
-      // Resize info boxes
-      pGraphics->GetControlWithTag(cInfo)->SetRECT(rectFooter.GetFromBottom(10.f));
-
-
-      // Resize METERS:
+      // Resize Meters:
       pGraphics->GetControlWithTag(cFreqMeter)->SetRECT(rectControls);
       pGraphics->GetControlWithTag(cDisplayTestMeter)->SetRECT(rectControls);
       pGraphics->GetControlWithTag(cScope)->SetRECT(rectControls);
       pGraphics->GetControlWithTag(cInputMeter)->SetRECT(rectMeter.SubRectHorizontal(3, 0));
-      //pGraphics->GetControlWithTag(cInputMeterRms)->SetRECT(rectMeter.SubRectHorizontal(5, 0));
       pGraphics->GetControlWithTag(cGrMeter)->SetRECT(rectMeter.SubRectHorizontal(3, 1));
       pGraphics->GetControlWithTag(cOutputMeter)->SetRECT(rectMeter.SubRectHorizontal(3, 2));
+      //pGraphics->GetControlWithTag(cInputMeterRms)->SetRECT(rectMeter.SubRectHorizontal(5, 0));
       //pGraphics->GetControlWithTag(cOutputMeterRms)->SetRECT(rectMeter.SubRectHorizontal(5, 4));
-      
 
-      // Resize PRESET menu:
+      // Resize preset menu:
       pGraphics->GetControlWithTag(cPresetMenu)->SetRECT(rectHeader.SubRectHorizontal(6, 2)/*.SubRectVertical(4, 1).FracRectVertical(2.f, true)*/.GetPadded(-5.f));
 
-      // Resize: Loop through parameters:
+      // Resize parameter controls:
       for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
 
+        // Empty pointer, becoming drawing target rect:
         const IRECT* rect;
-        const SRParamProperties& p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
+        // Pointer to parameter information:
+        const SRParamProperties& p = srchannelParamProperties[paramIdx];
+        // int control tag
         const int ctrlIdx = p.ctrlTag;
-        IControl* thisControl = pGraphics->GetControlWithTag(ctrlIdx);												          // ... for which we temporally create a pointer "thisControl"
+        // Pointer to current IControl
+        IControl* thisControl = pGraphics->GetControlWithTag(ctrlIdx);
 
         // Resize: Choose RECT for parameter control:
         switch (p.position.AttachToControlPanel) {
@@ -251,61 +231,58 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         }
 
         // Place parameter controls here:
-        const IRECT rectCurrentControl = rect->GetGridCell(p.position.y, p.position.x, sectionRectGridCells[p.position.AttachToControlPanel][0], sectionRectGridCells[p.position.AttachToControlPanel][1]).FracRectHorizontal(p.position.w, false).FracRectVertical(p.position.h, true).GetPadded((p.Knobs == Button) ? -5.0f : 0.0f);
+        const IRECT rectCurrentControl = rect->GetGridCell(
+          p.position.y,
+          p.position.x,
+          sectionRectGridCells[p.position.AttachToControlPanel][0],
+          sectionRectGridCells[p.position.AttachToControlPanel][1]).FracRectHorizontal(p.position.w, false).FracRectVertical(p.position.h, true).GetPadded((p.Knobs == Button) ? -5.0f : 0.0f
+          );
         thisControl->SetRECT(rectCurrentControl);
-
       }
 
-      // If resizing finished:
+      // If resizing finished, don't attach new ones:
       return;
 
     } // End resize function
 
-
-
-    // LOAD
-    pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);                                        // Load std font
+    // Load Fonts:
+    pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     pGraphics->LoadFont("Century-Gothic", CENTURY_FN);
 
-    IBitmap bmpSRPluginsLogo = pGraphics->LoadBitmap(SRPLUGINSLOGO_FN);                       // Load logo bitmap
-    IBitmap bmpSRChannelLogo = pGraphics->LoadBitmap(SRCHANNELLOGO_FN);                       // Load logo bitmap
+    // Load Bitmaps:
+    IBitmap bmpSRPluginsLogo = pGraphics->LoadBitmap(SRPLUGINSLOGO_FN);
+    IBitmap bmpSRChannelLogo = pGraphics->LoadBitmap(SRCHANNELLOGO_FN);
 
-    // SETUP
-    if (!pGraphics->CanHandleMouseOver()) pGraphics->HandleMouseOver(true);                                       // Enable Mouseovers
-    if (!pGraphics->TooltipsEnabled()) pGraphics->EnableTooltips(true);                                        // Enable Tooltips
+    // Setup:
+    if (!pGraphics->CanHandleMouseOver()) pGraphics->HandleMouseOver(true);
+    if (!pGraphics->TooltipsEnabled()) pGraphics->EnableTooltips(true);
 
-    // ATTACH
-    //pGraphics->AttachPanelBackground(SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kPluginBg));        // Attach Background
-    pGraphics->AttachPanelBackground(patternBackground);
-    pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);                 // Attach Resizer
-
-    // Attach logos and version string:
+    // Attach background, logos and info boxes:
+    pGraphics->AttachPanelBackground(SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kPluginBg));
+    pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
     pGraphics->AttachControl(new IBitmapControl(rectHeader./*SubRectVertical(2, 0).*/GetFromLeft(float(bmpSRPluginsLogo.W())), bmpSRPluginsLogo, -1, EBlend::None), cSRPluginsLogo, "UI");
     pGraphics->AttachControl(new IBitmapControl(rectHeader./*SubRectVertical(2, 0).*/GetFromRight(float(bmpSRChannelLogo.W())), bmpSRChannelLogo, -1, EBlend::None), cSRChannelLogo, "UI");
+    pGraphics->AttachControl(new ITextControl(rectFooter.GetFromBottom(10.f), "TEST THINGY", SR::Graphics::Layout::layout.texts.textLabel), cInfo, "UI");
     //pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", SRLayout.textVersionString), cVersion, "UI");
 
     // Attach section rect PANELS
-    //pGraphics->AttachControl(new SR::Graphics::Controls::SRPanel(rectInput, patternPanel, false), cPanelInput, "UI");
-    pGraphics->AttachControl(new IPanelControl(rectInput, patternPanel, false), cPanelInput, "UI");
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRPanel(rectInput, patternPanel, false), cPanelInput, "UI");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRPanel(rectEq, patternPanel, false), cPanelEq, "UI");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRPanel(rectComp, patternPanel, false), cPanelComp, "UI");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRPanel(rectPost, patternPanel, false), cPanelPost, "UI");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRPanel(rectOutput, patternPanel, false), cPanelOutput, "UI");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRPanel(rectMeter, patternPanel, false), cPanelMeter, "UI");
 
-    // Attach Info boxes
-    pGraphics->AttachControl(new ITextControl(rectFooter.GetFromBottom(10.f), "TEST THINGY", SR::Graphics::Layout::layout.texts.textLabel), cInfo, "UI");
-
     // Attach meters
-    //pGraphics->AttachControl(new SR::Graphics::SRFrequencyResponseMeter(rectHeader.SubRectHorizontal(6, 1).GetVPadded(-5.f), FREQUENCYRESPONSE, mFreqMeterValues, SR::Utils::SetShapeCentered(0., 22000., 1000., .5), SRLayout.colorSpec), cFreqMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRGraphBase(rectControls, FREQUENCYRESPONSE, mFreqMeterValues, SR::Graphics::Layout::layout.SRStyleKnob), cFreqMeter, "Meter");
     pGraphics->AttachControl(new IVScopeControl<2>(rectControls, "Waveform", SR::Graphics::Layout::layout.SRStyleButton, "Left"), cScope, "UI");
     pGraphics->AttachControl(new IVDisplayControl(rectControls, "Wave", SR::Graphics::Layout::layout.SRStyleButton, EDirection::Horizontal, -60.f, 12.f, -60.f, 128U), cDisplayTestMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
-    //pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeterRms, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(3, 1), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 2), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
+    //pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeterRms, "Meter");
     //pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 4), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeterRms, "Meter");
+
     // Attach preset menu:
     pGraphics->AttachControl(new SR::Graphics::Controls::SRPresetMenu(rectHeader.SubRectHorizontal(6, 2)/*.SubRectVertical(4, 1).FracRectVertical(2.f, true)*/.GetPadded(-5.f), SR::Graphics::Layout::text.textPresetMenu, namedParams), cPresetMenu, "UI");
 
@@ -313,15 +290,18 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
     pGraphics->GetControlWithTag(cGrMeter)->SetTooltip("Gain reduction meter for RMS, peak and deessing compressors");
     pGraphics->GetControlWithTag(cOutputMeter)->SetTooltip("Output peak meter for left and right channel");
-    pGraphics->GetControlWithTag(cScope)->SetTooltip("Scope for left and right channel");
-    pGraphics->GetControlWithTag(cFreqMeter)->SetTooltip("Frequency response of EQ");
+
+
 
     // Loop through parameters:
     for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {
-      const IRECT* rect;
-      const SRParamProperties &p = srchannelParamProperties[paramIdx];		// ... and a variable "p" pointing at the current parameters p
-      const int ctrlIdx = p.ctrlTag;
 
+      // Empty pointer, becoming drawing target rect:
+      const IRECT* rect;
+      // Pointer to parameter information:
+      const SRParamProperties &p = srchannelParamProperties[paramIdx];
+      // int control tag
+      const int ctrlIdx = p.ctrlTag;
 
       // Choose RECT for parameter control:
       switch (p.position.AttachToControlPanel) {
@@ -338,17 +318,18 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       // Place parameter controls here:
       const IRECT rectCurrentControl = rect->GetGridCell(p.position.y, p.position.x, sectionRectGridCells[p.position.AttachToControlPanel][0], sectionRectGridCells[p.position.AttachToControlPanel][1]).FracRectHorizontal(p.position.w, false).FracRectVertical(p.position.h, true).GetPadded((p.Knobs == Button) ? -5.0f : 0.0f);
 
-      IColor knobColor;               // "knobColor" gets what IColor is stated in the param struct
-      switch (p.Knobs) {
-      case EControlImages::SslBlue: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kBlue); break;
-      case EControlImages::SslGreen: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kGreen); break;
-      case EControlImages::SslRed: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kRed); break;
-      case EControlImages::SslOrange: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kOrange); break;
-      case EControlImages::SslYellow: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kYellow); break;
-      case EControlImages::SslBlack: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kBlack); break;
-      case EControlImages::SslWhite: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kWhite); break;
-      default: knobColor = SR::Graphics::Layout::layout.SRStyleKnob.colorSpec.GetColor(EVColor::kFG); break;
-      }
+      //// "knobColor" gets what IColor is stated in the param struct
+      //IColor knobColor;
+      //switch (p.Knobs) {
+      //case EControlImages::SslBlue: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kBlue); break;
+      //case EControlImages::SslGreen: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kGreen); break;
+      //case EControlImages::SslRed: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kRed); break;
+      //case EControlImages::SslOrange: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kOrange); break;
+      //case EControlImages::SslYellow: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kYellow); break;
+      //case EControlImages::SslBlack: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kBlack); break;
+      //case EControlImages::SslWhite: knobColor = SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kWhite); break;
+      //default: knobColor = SR::Graphics::Layout::layout.SRStyleKnob.colorSpec.GetColor(EVColor::kFG); break;
+      //}
 
       switch (p.Type)
       {
@@ -382,7 +363,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             p.label,
             SR::Graphics::Layout::layout.SRStyleKnob,
             mRoomInfo,
-            knobColor,
+            p.Color,
             false,
             false,
             -155.f,
@@ -419,7 +400,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
         }
         break;
 
-      // Attach switches for bool and enum
+        // Attach switches for bool and enum
       case IParam::EParamType::kTypeEnum:
 
         pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorSwitch(

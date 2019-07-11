@@ -165,7 +165,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     const IRECT rectMeter = rectControls.SubRectHorizontal(6, 5).GetPadded(-1.f);
 
     // Make IPatterns:
-    const IPattern patternPanel = IPattern::CreateRadialGradient(mRoomInfo.GetLightPositionX(), mRoomInfo.GetLightPositionY(), rectControls.W(), { IColorStop(SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kPanelBg), 0.3f), IColorStop(COLOR_BLACK, 0.6f) });
+    const IPattern patternPanel = IPattern::CreateRadialGradient(mRoomInfo.GetLightPositionX(), mRoomInfo.GetLightPositionY(), rectControls.W(), { IColorStop(SR::Graphics::Layout::layout.GetColor(SR::Graphics::Layout::SRCustomColors::ECustomColors::kPanelBg), 0.3f), IColorStop(COLOR_BLACK, 0.6f) });
 
     // Resize loop, if controls already present:
     if (pGraphics->NControls()) {
@@ -258,11 +258,11 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     if (!pGraphics->TooltipsEnabled()) pGraphics->EnableTooltips(true);
 
     // Attach background, logos and info boxes:
-    pGraphics->AttachPanelBackground(SR::Graphics::Layout::color.GetColor(SR::Graphics::Layout::ESRCustomColors::kPluginBg));
+    pGraphics->AttachPanelBackground(SR::Graphics::Layout::layout.GetColor(SR::Graphics::Layout::SRCustomColors::ECustomColors::kPluginBg));
     pGraphics->AttachCornerResizer(EUIResizerMode::Size, true);
-    pGraphics->AttachControl(new IBitmapControl(rectHeader./*SubRectVertical(2, 0).*/GetFromLeft(float(bmpSRPluginsLogo.W())), bmpSRPluginsLogo, -1, EBlend::None), cSRPluginsLogo, "UI");
-    pGraphics->AttachControl(new IBitmapControl(rectHeader./*SubRectVertical(2, 0).*/GetFromRight(float(bmpSRChannelLogo.W())), bmpSRChannelLogo, -1, EBlend::None), cSRChannelLogo, "UI");
-    pGraphics->AttachControl(new ITextControl(rectFooter.GetFromBottom(10.f), "TEST THINGY", SR::Graphics::Layout::layout.texts.textLabel), cInfo, "UI");
+    pGraphics->AttachControl(new IBitmapControl(rectHeader.GetFromLeft(float(bmpSRPluginsLogo.W())), bmpSRPluginsLogo, -1, EBlend::None), cSRPluginsLogo, "UI");
+    pGraphics->AttachControl(new IBitmapControl(rectHeader.GetFromRight(float(bmpSRChannelLogo.W())), bmpSRChannelLogo, -1, EBlend::None), cSRChannelLogo, "UI");
+    pGraphics->AttachControl(new ITextControl(rectFooter.GetFromBottom(10.f), "TEST THINGY", SR::Graphics::Layout::layout.GetText(SR::Graphics::Layout::SRCustomTexts::ECustomTexts::kDefault)), cInfo, "UI");
     //pGraphics->AttachControl(new ITextControl(pGraphics->GetControlWithTag(cBitmapLogo)->GetRECT().GetFromTop(SRLayout.textKnobLabel.mSize), "v" PLUG_VERSION_STR"-a", SRLayout.textVersionString), cVersion, "UI");
 
     // Attach section rect PANELS
@@ -274,9 +274,9 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     pGraphics->AttachControl(new SR::Graphics::Controls::SRPanel(rectMeter, patternPanel, false), cPanelMeter, "UI");
 
     // Attach meters
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRGraphBase(rectControls, FREQUENCYRESPONSE, mFreqMeterValues, SR::Graphics::Layout::layout.SRStyleKnob), cFreqMeter, "Meter");
-    pGraphics->AttachControl(new IVScopeControl<2>(rectControls, "Waveform", SR::Graphics::Layout::layout.SRStyleButton, "Left"), cScope, "UI");
-    pGraphics->AttachControl(new IVDisplayControl(rectControls, "Wave", SR::Graphics::Layout::layout.SRStyleButton, EDirection::Horizontal, -60.f, 12.f, -60.f, 128U), cDisplayTestMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRGraphBase(rectControls, FREQUENCYRESPONSE, mFreqMeterValues, SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kGraph)), cFreqMeter, "Meter");
+    pGraphics->AttachControl(new IVScopeControl<2>(rectControls, "Waveform", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kGraph), "Left"), cScope, "UI");
+    pGraphics->AttachControl(new IVDisplayControl(rectControls, "Wave", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kGraph), EDirection::Horizontal, -60.f, 12.f, -60.f, 128U), cDisplayTestMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(3, 1), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 2), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeter, "Meter");
@@ -284,7 +284,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
     //pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(5, 4), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "Out Left", "Out Right"), cOutputMeterRms, "Meter");
 
     // Attach preset menu:
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRPresetMenu(rectHeader.SubRectHorizontal(6, 2)/*.SubRectVertical(4, 1).FracRectVertical(2.f, true)*/.GetPadded(-5.f), SR::Graphics::Layout::text.textPresetMenu, namedParams), cPresetMenu, "UI");
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRPresetMenu(rectHeader.SubRectHorizontal(6, 2).GetPadded(-5.f), SR::Graphics::Layout::layout.GetText(SR::Graphics::Layout::SRCustomTexts::ECustomTexts::kPresetMenu), namedParams), cPresetMenu, "UI");
 
     // Set Tooltip for non-parameter controls:
     pGraphics->GetControlWithTag(cInputMeter)->SetTooltip("Input peak meter for left and right channel");
@@ -345,7 +345,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             rectCurrentControl,
             paramIdx,
             p.label,
-            SR::Graphics::Layout::layout.SRStyleButton,
+            SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kFader),
             true,
             EDirection::Vertical,
             false,
@@ -361,7 +361,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
             rectCurrentControl,
             paramIdx,
             p.label,
-            SR::Graphics::Layout::layout.SRStyleKnob,
+            SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kKnob),
             mRoomInfo,
             p.Color,
             false,
@@ -407,7 +407,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           rectCurrentControl,
           paramIdx,
           p.label,
-          SR::Graphics::Layout::layout.SRStyleButton,
+          SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kButton),
           mRoomInfo,
           true
         ), ctrlIdx);
@@ -419,7 +419,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
           rectCurrentControl,
           paramIdx,
           p.label,
-          SR::Graphics::Layout::layout.SRStyleButton,
+          SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kButton),
           mRoomInfo,
           p.labelMin,
           p.labelMax

@@ -9,9 +9,11 @@
 #define PLUG_COPYRIGHT_STR "Copyright 2019 Johannes Menzel"
 #define PLUG_CLASS_NAME SRChannel
 
-#define BUNDLE_NAME "SREffects"
+#define BUNDLE_NAME "SRChannel"
 #define BUNDLE_MFR "SRPlugins"
 #define BUNDLE_DOMAIN "com"
+
+SHARED_RESOURCES_SUBPATH "SRChannel"
 
 #define PLUG_CHANNEL_IO "2-2 4-2"
 //#define PLUG_SC_CHANS 2

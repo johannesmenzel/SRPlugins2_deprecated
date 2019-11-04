@@ -1,6 +1,6 @@
-include ./config/SRReverb-web.mk
+include ../config/SRReverb-web.mk
 
-TARGET = ./build-web/scripts/SRReverb-wam.js
+TARGET = ../build-web/scripts/SRReverb-wam.js
 
 SRC += $(WAM_SRC)
 CFLAGS += $(WAM_CFLAGS)

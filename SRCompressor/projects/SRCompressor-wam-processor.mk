@@ -1,6 +1,6 @@
-include ./config/SRCompressor-web.mk
+include ../config/SRCompressor-web.mk
 
-TARGET = ./build-web/scripts/SRCompressor-wam.js
+TARGET = ../build-web/scripts/SRCompressor-wam.js
 
 SRC += $(WAM_SRC)
 CFLAGS += $(WAM_CFLAGS)

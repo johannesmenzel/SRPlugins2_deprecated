@@ -13,6 +13,8 @@
 #define BUNDLE_MFR "SRPlugins"
 #define BUNDLE_DOMAIN "com"
 
+#define SHARED_RESOURCES_SUBPATH "SRCompressor"
+
 #define PLUG_CHANNEL_IO "2-2"
 
 #define PLUG_LATENCY 0

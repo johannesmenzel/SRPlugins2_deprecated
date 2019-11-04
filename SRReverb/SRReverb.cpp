@@ -8,8 +8,8 @@
 #endif // !WDL_SIMPLEPITCHSHIFT_IMPLEMENT
 
 
-SRReverb::SRReverb(IPlugInstanceInfo instanceInfo)
-  : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
+SRReverb::SRReverb(const InstanceInfo& info)
+: Plugin(info, MakeConfig(kNumParams, kNumPrograms))
   , mWidth(1.)
   , mDamp(.5)
   , mSize(.5)
@@ -45,7 +45,7 @@ SRReverb::SRReverb(IPlugInstanceInfo instanceInfo)
   mLayoutFunc = [&](IGraphics* pGraphics) {
     pGraphics->AttachCornerResizer(EUIResizerMode::Scale, false);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
-    pGraphics->LoadFont("Roboto-Regular", ROBOTTO_FN);
+    pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     const IRECT b = pGraphics->GetBounds();
     const IRECT rectReverb = IRECT(b.GetGridCell(0, 0, 2, 2).GetPadded(-5.f));
     const IRECT rectFilter = IRECT(b.GetGridCell(0, 1, 2, 2).GetPadded(-5.f));

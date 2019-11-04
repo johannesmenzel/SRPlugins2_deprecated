@@ -8,7 +8,6 @@
 #include "DSP/SRDynamics.h"
 
 
-
 const int kNumPrograms = 1;
 
 enum EParams
@@ -26,10 +25,13 @@ enum EParams
   kNumParams
 };
 
-class SRReverb : public IPlug
+using namespace iplug;
+using namespace igraphics;
+
+class SRReverb : public Plugin
 {
 public:
-  SRReverb(IPlugInstanceInfo instanceInfo);
+  SRReverb(const InstanceInfo& info);
 
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;

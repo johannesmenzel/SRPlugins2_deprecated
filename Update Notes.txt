@@ -1,0 +1,7 @@
+- Duplicate from IPlugEffects
+- [For current update] Merge Changes in Plugin Classes from Examples to Effect folder
+- Copy Effect.h, Effect.cpp and any user .h files to new example
+- Selectivly merge config.h, resources/main.rc
+- Copy modified podtbuild call from former project to config/Effect-win.props
+- copy modified scripts/postbuild-win-hannes.bat to new scripts folder
+- Selectively merge from already updated project: Each targets *.vsproj: C++ lang and Add includes and *.vsproj.user: Remote Debugger Paths

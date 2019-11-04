@@ -27,7 +27,7 @@ SRChannel::SRChannel(const InstanceInfo& info)
   , mFreqMeterValues(new float[FREQUENCYRESPONSE])
 {
 
-  // When implemented correctly, add channel naming here
+  // When implemented correctly, add channel naming here:
 
   // Initialize Parameters:
   for (int paramIdx = 0; paramIdx < kNumParams; paramIdx++) {

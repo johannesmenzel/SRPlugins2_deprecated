@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4F78DAF113B643600032E0F3"
-               BuildableName = "All"
-               BlueprintName = "All"
+               BlueprintIdentifier = "4F9828AA140A9EB700F3FCC1"
+               BuildableName = "SRChannel.vst3"
+               BlueprintName = "VST3"
                ReferencedContainer = "container:SRChannel-macOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -41,13 +41,19 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
+      enableGPUFrameCaptureMode = "3"
+      enableGPUValidationMode = "1"
       allowLocationSimulation = "YES">
+      <PathRunnable
+         runnableDebuggingMode = "0"
+         FilePath = "/Applications/VST3PluginTestHost.app">
+      </PathRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4F78DAF113B643600032E0F3"
-            BuildableName = "All"
-            BlueprintName = "All"
+            BlueprintIdentifier = "4F9828AA140A9EB700F3FCC1"
+            BuildableName = "SRChannel.vst3"
+            BlueprintName = "VST3"
             ReferencedContainer = "container:SRChannel-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -60,6 +66,10 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
+      <PathRunnable
+         runnableDebuggingMode = "0"
+         FilePath = "/Applications/VST3PluginTestHost.app">
+      </PathRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

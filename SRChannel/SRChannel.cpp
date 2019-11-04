@@ -12,8 +12,8 @@
 
 #pragma mark - Plugin connector
 
-SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
-  : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
+SRChannel::SRChannel(const InstanceInfo& info)
+  : Plugin(info, MakeConfig(kNumParams, kNumPrograms))
   , mEqHfQ(stQ)
   , mEqLfQ(stQ)
   , mEqAmount(1.)
@@ -24,6 +24,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
   , mEnvInput(0.0)
   , mEnvPost(0.0)
   , mEnvOutput(0.0)
+  , mFreqMeterValues(new float[FREQUENCYRESPONSE])
 {
 
   // When implemented correctly, add channel naming here
@@ -196,7 +197,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       // Resize Meters:
       pGraphics->GetControlWithTag(cFreqMeter)->SetRECT(rectControls);
       pGraphics->GetControlWithTag(cDisplayTestMeter)->SetRECT(rectControls);
-      pGraphics->GetControlWithTag(cScope)->SetRECT(rectControls);
+      pGraphics->GetControlWithTag(cScope)->SetRECT(rectInput.GetGridCell(9, 1, 10, 2));
       pGraphics->GetControlWithTag(cInputMeter)->SetRECT(rectMeter.SubRectHorizontal(3, 0));
       pGraphics->GetControlWithTag(cGrMeter)->SetRECT(rectMeter.SubRectHorizontal(3, 1));
       pGraphics->GetControlWithTag(cOutputMeter)->SetRECT(rectMeter.SubRectHorizontal(3, 2));
@@ -275,7 +276,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
 
     // Attach meters
     pGraphics->AttachControl(new SR::Graphics::Controls::SRGraphBase(rectControls, FREQUENCYRESPONSE, mFreqMeterValues, SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kGraph)), cFreqMeter, "Meter");
-    pGraphics->AttachControl(new IVScopeControl<2>(rectControls, "Waveform", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kGraph), "Left"), cScope, "UI");
+    pGraphics->AttachControl(new IVScopeControl<2>(rectInput.GetGridCell(9, 1, 10, 2), "Waveform", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kGraph)), cScope, "UI");
     pGraphics->AttachControl(new IVDisplayControl(rectControls, "Wave", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kGraph), EDirection::Horizontal, -60.f, 12.f, -60.f, 128U), cDisplayTestMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectMeter.SubRectHorizontal(3, 0), false, false, -60.f, 12.f, (float)SR::Utils::SetShapeCentered(-60., 12., 0., .75), 1, 6, "In Left", "In Right"), cInputMeter, "Meter");
     pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<3, 1024>(rectMeter.SubRectHorizontal(3, 1), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "GR RMS", "GR Peak", "GR Deesser"), cGrMeter, "Meter");
@@ -442,7 +443,7 @@ SRChannel::SRChannel(IPlugInstanceInfo instanceInfo)
       }
 
       // Other setup for EACH parameter control
-      pGraphics->GetControlWithTag(ctrlIdx)->SetMOWhenGrayed(true);
+      pGraphics->GetControlWithTag(ctrlIdx)->SetMouseOverWhenDisabled(true);
       pGraphics->GetControlWithTag(ctrlIdx)->SetTooltip(p.tooltip);
     }
 
@@ -478,7 +479,7 @@ void SRChannel::GrayOutControls() {
         //: (paramIdx == kEqLpOrder ? true
         : false;
 
-      GetUI()->GetControlWithTag(p.ctrlTag)->GrayOut(grayout);
+      GetUI()->GetControlWithTag(p.ctrlTag)->SetDisabled(grayout);
     }
   }
 }
@@ -511,7 +512,7 @@ void SRChannel::SetFreqMeterValues() {
     if (mDeesserThresh < 0.) mFreqMeterValues[i] += fDeesser.fDynamicEqFilter.GetFrequencyResponse(freq / mSampleRate, 12., false);
   }
   //if (GetUI()) dynamic_cast<SR::Graphics::SRFrequencyResponseMeter*>(GetUI()->GetControlWithTag(cFreqMeter))->Process(mFreqMeterValues);
-  if (GetUI()) dynamic_cast<SR::Graphics::Controls::SRGraphBase*>(GetUI()->GetControlWithTag(cFreqMeter))->Process(mFreqMeterValues);
+  if (GetUI() && mFreqMeterValues != 0) dynamic_cast<SR::Graphics::Controls::SRGraphBase*>(GetUI()->GetControlWithTag(cFreqMeter))->Process(mFreqMeterValues);
 }
 
 

@@ -1,21 +1,31 @@
 #ifndef SRCHANNEL_H
 #define SRCHANNEL_H
 
+
+
+
 // Use automatic gain compensation
 #define USEAGC
-
-// C++ classes
-#include <functional> // for oversampler std::function
 
 // IPlug2 source
 #include "IPlug_include_in_plug_hdr.h"
 
 // Extra IPlug2 libs
 #include "IControls.h"
+
+using namespace iplug;
+using namespace igraphics;
+
+// C++ classes
+#include <functional> // for oversampler std::function
+
+
 //#include "IVMeterControl.h"
 //#include "IVScopeControl.h"
 #include "Oversampler.h"
 //#include "IPlugQueue.h"
+
+
 
 // SRClasses
 #include "SRConstants.h"
@@ -34,10 +44,10 @@
 
 
 
-class SRChannel : public IPlug
+class SRChannel : public Plugin
 {
 public:
-  SRChannel(IPlugInstanceInfo instanceInfo);
+  SRChannel(const InstanceInfo& info);
   ~SRChannel();
 
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
@@ -131,7 +141,8 @@ private:
   IVScopeControl<2>::Sender mScopeBallistics{ cScope };
 
   // Frequency response meter values
-  float* mFreqMeterValues = new float[FREQUENCYRESPONSE];
+  float* mFreqMeterValues;
+  //float* mFreqMeterValues = new float[FREQUENCYRESPONSE];
 
   // (Temporarily) deprecated
   //SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mInputRmsMeterBallistics{ cInputMeterRms };

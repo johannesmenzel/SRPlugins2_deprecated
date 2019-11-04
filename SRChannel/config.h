@@ -1,7 +1,7 @@
 #define PLUG_NAME "SRChannel"
 #define PLUG_MFR "SRPlugins"
-#define PLUG_VERSION_HEX 0x00000201
-#define PLUG_VERSION_STR "0.2.1"
+#define PLUG_VERSION_HEX 0x00000300
+#define PLUG_VERSION_STR "0.3.0"
 #define PLUG_UNIQUE_ID 'SrCn'
 #define PLUG_MFR_ID 'ShRa'
 #define PLUG_URL_STR "https://github.com/johannesmenzel"
@@ -13,7 +13,7 @@
 #define BUNDLE_MFR "SRPlugins"
 #define BUNDLE_DOMAIN "com"
 
-SHARED_RESOURCES_SUBPATH "SRChannel"
+#define SHARED_RESOURCES_SUBPATH "SRChannel"
 
 #define PLUG_CHANNEL_IO "2-2 4-2"
 //#define PLUG_SC_CHANS 2

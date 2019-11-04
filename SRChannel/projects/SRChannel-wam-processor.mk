@@ -1,6 +1,6 @@
-include ./config/SRChannel-web.mk
+include ../config/SRChannel-web.mk
 
-TARGET = ./build-web/scripts/SRChannel-wam.js
+TARGET = ../build-web/scripts/SRChannel-wam.js
 
 SRC += $(WAM_SRC)
 CFLAGS += $(WAM_CFLAGS)

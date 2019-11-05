@@ -28,10 +28,13 @@ enum ECtrlTags {
   kNumCtrlTags
 };
 
-class SROverdrive : public IPlug
+using namespace iplug;
+using namespace igraphics;
+
+class SROverdrive : public Plugin
 {
 public:
-  SROverdrive(IPlugInstanceInfo instanceInfo);
+  SROverdrive(const InstanceInfo& info);
 
 #if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
@@ -45,7 +48,7 @@ private:
   bool mBypass;
   SR::DSP::SRFilterParamSmooth fSidechainSmoother[2];
   SR::DSP::SRFilterIIR<sample, 2> fLowpass, fHighpass, fLowpassDriven;
-  IVMeterControl<1, 1024>::IVMeterBallistics cMeterBoost;
+  IVMeterControl<1, 1024>::Sender cMeterBoost;
   sample** meterValues;
 #endif
 };

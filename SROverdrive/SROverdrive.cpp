@@ -2,8 +2,8 @@
 #include "IPlug_include_in_plug_src.h"
 #include "IControls.h"
 
-SROverdrive::SROverdrive(IPlugInstanceInfo instanceInfo)
-  : IPLUG_CTOR(kNumParams, kNumPrograms, instanceInfo)
+SROverdrive::SROverdrive(const InstanceInfo& info)
+: Plugin(info, MakeConfig(kNumParams, kNumPrograms))
   , mSampleRate(44100.0)
   , mDrive(0.0)
   , mDriveEnv(0.0)
@@ -25,13 +25,13 @@ SROverdrive::SROverdrive(IPlugInstanceInfo instanceInfo)
   };
 
   mLayoutFunc = [&](IGraphics* pGraphics) {
-    pGraphics->AttachCornerResizer(kUIResizerScale, false);
+    pGraphics->AttachCornerResizer(EUIResizerMode::Scale, false);
     pGraphics->AttachPanelBackground(COLOR_GRAY);
-    pGraphics->LoadFont(ROBOTTO_FN);
+    pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     const IRECT b = pGraphics->GetBounds();
     const IRECT controls = b.GetPadded(-10.f).GetFromTop(200.f);
     const IRECT button = b.GetFromBottom(100.f).GetCentredInside(40.f);
-    pGraphics->AttachControl(new IVMeterControl<1, 1024>(b), cBoostMeter);
+    pGraphics->AttachControl(new IVMeterControl<1, 1024>(b, "Boost"), cBoostMeter);
     pGraphics->AttachControl(new IVKnobControl(controls.GetGridCell(0, 0, 2, 3), kDrive, "DRIVE", true), cDrive);
     pGraphics->AttachControl(new IVKnobControl(controls.GetGridCell(0, 1, 2, 3), kGain, "GAIN", true), cGain);
     pGraphics->AttachControl(new IVKnobControl(controls.GetGridCell(0, 2, 2, 3), kMix, "MIX", true), cMix);

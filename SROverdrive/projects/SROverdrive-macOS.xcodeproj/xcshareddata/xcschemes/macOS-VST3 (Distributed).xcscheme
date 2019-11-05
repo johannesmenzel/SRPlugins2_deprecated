@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1010"
+   LastUpgradeVersion = "1030"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4F9828AA140A9EB700F3FCC1"
+               BlueprintIdentifier = "4FFBB8F820863B0E00DDD0E7"
                BuildableName = "SROverdrive.vst3"
-               BlueprintName = "VST3"
+               BlueprintName = "VST3P"
                ReferencedContainer = "container:SROverdrive-macOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -41,19 +41,18 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-      enableGPUFrameCaptureMode = "3"
-      enableGPUValidationMode = "1"
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
+         BundleIdentifier = "com.steinberg.vst3.plugintesthost"
          FilePath = "/Applications/VST3PluginTestHost.app">
       </PathRunnable>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4F9828AA140A9EB700F3FCC1"
+            BlueprintIdentifier = "4FFBB8F820863B0E00DDD0E7"
             BuildableName = "SROverdrive.vst3"
-            BlueprintName = "VST3"
+            BlueprintName = "VST3P"
             ReferencedContainer = "container:SROverdrive-macOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -66,10 +65,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <PathRunnable
-         runnableDebuggingMode = "0"
-         FilePath = "/Applications/VST3PluginTestHost.app">
-      </PathRunnable>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "4FFBB8F820863B0E00DDD0E7"
+            BuildableName = "SROverdrive.vst3"
+            BlueprintName = "VST3P"
+            ReferencedContainer = "container:SROverdrive-macOS.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

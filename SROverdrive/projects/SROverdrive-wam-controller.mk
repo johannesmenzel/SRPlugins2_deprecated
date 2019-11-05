@@ -1,6 +1,6 @@
-include ./config/SROverdrive-web.mk
+include ../config/SROverdrive-web.mk
 
-TARGET = ./build-web/scripts/SROverdrive-web.js
+TARGET = ../build-web/scripts/SROverdrive-web.js
 
 SRC += $(WEB_SRC)
 CFLAGS += $(WEB_CFLAGS)

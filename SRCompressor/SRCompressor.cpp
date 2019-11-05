@@ -23,10 +23,10 @@ SRCompressor::SRCompressor(const InstanceInfo& info)
   , mIsBypassed(false)
 {
   // double parameters
-  GetParam(kThresh)->InitDouble("Threshold", 0., -50., 0., 0.1, "dB");
-  GetParam(kRatio)->InitDouble("Ratio", 5., 1., 100., 0.1, ":1", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(1., 100., 3., .5)));
-  GetParam(kAttack)->InitDouble("Attack", 10., 0.02, 200., 0.01, "ms", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(0.02, 200, 10., .5)));
-  GetParam(kRelease)->InitDouble("Release", 100., 30., 2000., 1., "ms", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(30., 2000., 100., .5)));
+  GetParam(kThresh)->InitDouble("Threshold", 0., 0., 10., 1., "", 0, "", IParam::ShapeLinear());
+  GetParam(kRatio)->InitDouble("Ratio", 5., 0., 10., 1., "", 0, "", IParam::ShapeLinear());
+  GetParam(kAttack)->InitDouble("Attack", 5., 0., 10., 1., "", 0, "", IParam::ShapeLinear());
+  GetParam(kRelease)->InitDouble("Release", 5., 0., 10., 1., "", 0, "", IParam::ShapeLinear());
   GetParam(kKneeWidth)->InitDouble("Knee", 10., 0., 30., 0.1, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(0., 30., 10., .5)));
   GetParam(kSidechainFc)->InitDouble("SC Filter", 10., 10., 5000., 1., "Hz", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(10., 5000., 200., .5)));
   GetParam(kMaxGr)->InitDouble("GR Limiter", -50., -50, 0., 0.1, "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(-50., 0., -10., .5)));
@@ -50,9 +50,9 @@ SRCompressor::SRCompressor(const InstanceInfo& info)
     
     // TODO: Set room informations, doesn't work on resize by now
     mRoomInfo.Reset(
-      GetEditorWidth() * 0.5f,
-      GetEditorHeight() * 0.5f,
-      (GetEditorHeight() + GetEditorWidth()) * 0.5f,
+      GetEditorWidth() * 0.33f,
+      GetEditorHeight() * 0.33f,
+      GetEditorHeight() + GetEditorWidth(),
       GetEditorHeight(),
       GetEditorWidth()
     );
@@ -63,8 +63,10 @@ SRCompressor::SRCompressor(const InstanceInfo& info)
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
 
     const IRECT rectPlug = pGraphics->GetBounds();
+
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<5, 1024>(rectPlug.GetGridCell(2, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -9., .5), 1, 3, "Lvl", "Opt", "Ds", "FET", "Lim"), cGrMeter, "Meter");
+
     // Knob
-    //pGraphics->AttachControl(new IVKnobControl(rectPlug.GetGridCell(2, 1, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kThresh, "Thresh", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kKnob)), cThresh);
     pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(2, 1, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kThresh, "Thresh", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kKnob), mRoomInfo, SR::Graphics::Layout::layout.GetColor(SR::Graphics::Layout::SRCustomColors::ECustomColors::kRed), false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kThresh)->GetDefault(true)), cThresh);
     pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(2, 6, 6, 11).FracRectHorizontal(4.f, false).FracRectVertical(4.f, true), kRatio, "Ratio", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kKnob), mRoomInfo, SR::Graphics::Layout::layout.GetColor(SR::Graphics::Layout::SRCustomColors::ECustomColors::kRed), false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kRatio)->GetDefault(true)), cRatio);
     pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(0, 1, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kSidechainFc, "SC Filter", SR::Graphics::Layout::layout.GetStyle(SR::Graphics::Layout::SRCustomStyles::ECustomStyles::kKnob), mRoomInfo, SR::Graphics::Layout::layout.GetColor(SR::Graphics::Layout::SRCustomColors::ECustomColors::kRed), false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kSidechainFc)->GetDefault(true)), cSidechainFc);
@@ -90,6 +92,8 @@ SRCompressor::SRCompressor(const InstanceInfo& info)
 void SRCompressor::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
   const int nChans = NOutChansConnected();
+  bGrMeter.SetNumFrames(nFrames);
+
 
   for (int s = 0; s < nFrames; s++) {
     for (int c = 0; c < nChans; c++) {
@@ -103,28 +107,56 @@ void SRCompressor::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
         fSoftSatInput[c].Process(outputs[c][s]);
       }
 
-      fCompressor.Process(outputs[0][s], outputs[1][s]);
+      fCompLevel.Process(outputs[0][s], outputs[1][s]);
+      fCompOpto.Process(outputs[0][s], outputs[1][s]);
+      fCompFet.Process(outputs[0][s], outputs[1][s]);
+      fCompLim.Process(outputs[0][s], outputs[1][s]);
 
       for (int c = 0; c < nChans; c++) {
         fSoftSatOutput[c].Process(outputs[c][s]);
         outputs[c][s] = ((1. - mMix) * inputs[c][s]) + mMix * outputs[c][s];
       }
+
+      bGrMeter.ProcessBuffer(fCompLevel.GetGrLin(), 0, s);
+      bGrMeter.ProcessBuffer(fCompOpto.GetGrLin(), 1, s);
+      bGrMeter.ProcessBuffer(0.0, 2, s);
+      bGrMeter.ProcessBuffer(fCompFet.GetGrLin(), 3, s);
+      bGrMeter.ProcessBuffer(fCompLim.GetGrLin(), 4, s);
     }
+  mGrMeterBallistics.ProcessBlock(bGrMeter.GetBuffer(), nFrames);
   }
+
 }
 
 
 void SRCompressor::OnReset()
 {
   mSamplerate = GetSampleRate();
-  fCompressor.InitCompressor(mThresh, mRatio, mAttack, mRelease, mSidechainFc / mSamplerate, mKneeWidth, mIsFeedback, mIsAutoMakeup, mReference, mSamplerate);
-  fCompressor.InitSidechainFilter(mSidechainFc / mSamplerate);
-  fCompressor.Reset();
-  fCompressor.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+
+  fCompLevel.InitCompressor(mThresh, mRatio, mAttack, mRelease, mSidechainFc / mSamplerate, mKneeWidth, mIsFeedback, mIsAutoMakeup, mReference, mSamplerate);
+  fCompLevel.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+  
+  fCompOpto.InitCompressor(mThresh, mRatio, mAttack, mRelease, mSidechainFc / mSamplerate, mKneeWidth, mIsFeedback, mIsAutoMakeup, mReference, mSamplerate);
+  fCompOpto.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+  
+  fDeesser.SetDeesser(mThresh, mRatio, mAttack, mRelease, mSidechainFc / mSamplerate, 0.5, mKneeWidth, mSamplerate);
+  fDeesser.Reset();
+
+  fCompFet.InitCompressor(mThresh, mRatio, mAttack, mRelease, mSidechainFc / mSamplerate, mKneeWidth, mIsFeedback, mIsAutoMakeup, mReference, mSamplerate);
+  fCompFet.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+  
+  fCompLim.InitCompressor(mThresh, mRatio, mAttack, mRelease, mSidechainFc / mSamplerate, mKneeWidth, mIsFeedback, mIsAutoMakeup, mReference, mSamplerate);
+  fCompLim.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+
   for (int c = 0; c < 2; c++) {
     fSoftSatInput[c].SetSaturation(SR::DSP::SRSaturation::kSoftSat, 0., 1., 1., false, 0., 1., mSamplerate);
     fSoftSatOutput[c].SetSaturation(SR::DSP::SRSaturation::kSoftSat, 0., 1., 1., false, 0., 1., mSamplerate);
   }
+  bGrMeter.ResetBuffer(5, GetBlockSize());
+}
+
+void SRCompressor::OnIdle() {
+  mGrMeterBallistics.TransmitData(*this);
 }
 
 void SRCompressor::OnParamChange(int paramIdx)
@@ -132,56 +164,89 @@ void SRCompressor::OnParamChange(int paramIdx)
   switch (paramIdx)
   {
   case kThresh:
-    mThresh = GetParam(paramIdx)->Value();
-    fCompressor.SetThresh(mThresh);
+    mThresh = GetParam(paramIdx)->Value() * 0.1;
+    fCompLevel.SetThresh(-mThresh * 48.);
+    fCompOpto.SetThresh(-mThresh * 36.);
+    fCompFet.SetThresh(-mThresh * 24.);
+    fCompLim.SetThresh(-mThresh * 12.);
     break;
   case kRatio:
-    mRatio = 1. / GetParam(paramIdx)->Value();
-    fCompressor.SetRatio(mRatio);
+    mRatio = GetParam(paramIdx)->Value() * 0.1;
+    fCompLevel.SetRatio(1. / (1. + mRatio * 1));
+    fCompOpto.SetRatio(1. / (1. + mRatio * 4.));
+    fCompFet.SetRatio(1. / (1. + mRatio * 19.));
+    fCompLim.SetRatio(1. / (1. + mRatio * 99.));
     break;
   case kAttack:
-    mAttack = GetParam(paramIdx)->Value();
-    fCompressor.SetAttack(mAttack);
+    mAttack = GetParam(paramIdx)->Value() * 0.1;
+    fCompLevel.SetAttack(20. + mAttack * 80.);
+    fCompOpto.SetAttack(5. + mAttack * 20.);
+    fCompFet.SetAttack(1. + mAttack * 4.);
+    fCompLim.SetAttack(0.02 + mAttack * 0.08);
     break;
   case kRelease:
-    mRelease = GetParam(paramIdx)->Value();
-    fCompressor.SetRelease(mRelease);
+    mRelease = GetParam(paramIdx)->Value() * 0.1;
+    fCompLevel.SetRelease(500. + mRelease * 4500.);
+    fCompOpto.SetRelease(200. + mRelease * 1800.);
+    fCompFet.SetRelease(40. + mRelease * 360.);
+    fCompLim.SetRelease(20. + mRelease * 180.);
     break;
   case kMakeup:
     mMakeup = GetParam(paramIdx)->Value();
-    fCompressor.SetMakeup(mMakeup);
+    fCompLevel.SetMakeup(mMakeup);
+    fCompOpto.SetMakeup(mMakeup);
+    fCompFet.SetMakeup(mMakeup);
+    fCompLim.SetMakeup(mMakeup);
     break;
   case kKneeWidth:
     mKneeWidth = GetParam(paramIdx)->Value();
-    fCompressor.SetKnee(mKneeWidth);
+    fCompLevel.SetKnee(mKneeWidth);
+    fCompOpto.SetKnee(mKneeWidth);
+    fCompFet.SetKnee(mKneeWidth);
+    fCompLim.SetKnee(mKneeWidth);
     break;
   case kReference:
     mReference = GetParam(paramIdx)->Value();
-    fCompressor.SetReference(mReference);
+    fCompLevel.SetReference(mReference);
+    fCompOpto.SetReference(mReference);
+    fCompFet.SetReference(mReference);
+    fCompLim.SetReference(mReference);
     break;
   case kMix:
     mMix = GetParam(paramIdx)->Value() * 0.01;
     break;
   case kSidechainFc:
     mSidechainFc = GetParam(paramIdx)->Value();
-    fCompressor.SetSidechainFilterFreq(mSidechainFc / mSamplerate);
+    fCompLevel.SetSidechainFilterFreq(mSidechainFc / mSamplerate);
+    fCompOpto.SetSidechainFilterFreq(mSidechainFc / mSamplerate);
+    fCompFet.SetSidechainFilterFreq(mSidechainFc / mSamplerate);
+    fCompLim.SetSidechainFilterFreq(mSidechainFc / mSamplerate);
     break;
   case kMaxGr:
   case kIsMaxGrRatioDependent:
     mMaxGr = GetParam(kMaxGr)->Value();
     mIsMaxGrRatioDependent = GetParam(kIsMaxGrRatioDependent)->Bool();
-    fCompressor.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+    fCompLevel.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+    fCompOpto.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+    fCompFet.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
+    fCompLim.SetMaxGrDb(mMaxGr, mIsMaxGrRatioDependent);
     break;
   case kIsBypassed:
     mIsBypassed = GetParam(paramIdx)->Bool();
     break;
   case kIsAutoMakeup:
     mIsAutoMakeup = GetParam(paramIdx)->Bool();
-    fCompressor.SetIsAutoMakeup(mIsAutoMakeup);
+    fCompLevel.SetIsAutoMakeup(mIsAutoMakeup);
+    fCompOpto.SetIsAutoMakeup(mIsAutoMakeup);
+    fCompFet.SetIsAutoMakeup(mIsAutoMakeup);
+    fCompLim.SetIsAutoMakeup(mIsAutoMakeup);
     break;
   case kIsFeedback:
     mIsFeedback = GetParam(paramIdx)->Bool();
-    fCompressor.SetTopologyFeedback(mIsFeedback);
+    fCompLevel.SetTopologyFeedback(mIsFeedback);
+    fCompOpto.SetTopologyFeedback(mIsFeedback);
+    fCompFet.SetTopologyFeedback(mIsFeedback);
+    fCompLim.SetTopologyFeedback(mIsFeedback);
     break;
   default:
     break;

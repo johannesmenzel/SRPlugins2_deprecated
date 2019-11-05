@@ -15,7 +15,7 @@
 
 #define SHARED_RESOURCES_SUBPATH "SRCompressor"
 
-#define PLUG_CHANNEL_IO "2-2"
+#define PLUG_CHANNEL_IO "2-2, 4-2"
 
 #define PLUG_LATENCY 0
 #define PLUG_TYPE 0
@@ -24,8 +24,8 @@
 #define PLUG_DOES_MPE 0
 #define PLUG_DOES_STATE_CHUNKS 0
 #define PLUG_HAS_UI 1
-#define PLUG_WIDTH 550
-#define PLUG_HEIGHT 300
+#define PLUG_WIDTH 1000
+#define PLUG_HEIGHT 500
 #define PLUG_FPS 60
 #define PLUG_SHARED_RESOURCES 0
 

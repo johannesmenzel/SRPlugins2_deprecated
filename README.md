@@ -68,7 +68,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 # Screenshot
 
-This is the current state. 
+This is the current state (0.3.0-alpha). It has easier controls for lower resource footprint.
+![Screenshot SRChannel v0.3.0-alpha](SRMisc/Screenshot_SRChannel-0-3.0a.jpg "Screenshot SRChannel v0.3.0-alpha")
+
+This was version 0.2.1-alpha:
 ![Screenshot SRChannel v0.2.1-alpha](SRMisc/Screenshot_SRChannel-0-2-1a.jpg "Screenshot SRChannel v0.2.1-alpha")
 
 And this was the old version of it, made with WDL-OL. You'll notice the GUI is still a little messy.:

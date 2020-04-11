@@ -52,7 +52,7 @@ enum ECtrlTags
 using namespace iplug;
 using namespace igraphics;
 
-class SRCompressor : public Plugin
+class SRCompressor final: public Plugin
 {
 public:
   SRCompressor(const InstanceInfo& info);
@@ -63,6 +63,8 @@ public:
   void OnReset() override;
   void OnIdle();
   void OnParamChange(int paramIdx) override;
+  const double GetCompressorValues(int stage, int param, double value);
+
 
 private:
   double mSamplerate;
@@ -84,4 +86,6 @@ private:
   SR::DSP::SRBuffer<sample, 5, 1024> bGrMeter;
 
 
+
 };
+

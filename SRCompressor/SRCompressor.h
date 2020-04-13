@@ -24,6 +24,7 @@ enum EParams
   kIsMaxGrRatioDependent,
   kIsFeedback,
   kIsAutoMakeup,
+  kOutGain,
   kIsBypassed,
   kNumParams
 };
@@ -43,9 +44,11 @@ enum ECtrlTags
   cIsMaxGrRatioDependent,
   cIsFeedback,
   cIsAutoMakeup,
+  cOutGain,
   cIsBypassed,
   // Meter
   cGrMeter,
+  cInputRMSMeter,
   kNumCtrlTags
 };
 
@@ -68,9 +71,10 @@ public:
 
 private:
   double mSamplerate;
-  double mThresh, mRatio, mAttack, mRelease, mKneeWidth, mSidechainFc, mMaxGr, mMakeup, mReference, mMix;
+  double mThresh, mRatio, mAttack, mRelease, mKneeWidth, mSidechainFc, mMaxGr, mMakeup, mReference, mMix, mOutGain;
   bool mIsMaxGrRatioDependent, mIsFeedback, mIsAutoMakeup, mIsBypassed;
 
+  SR::DSP::SRGain fOutGain;
   SR::DSP::SRCompressor fCompLevel;
   SR::DSP::SRCompressor fCompOpto;
   SR::DSP::SRDeesser fDeesser;
@@ -83,7 +87,9 @@ private:
   SR::Graphics::Base::SRRoomInfo mRoomInfo;
 
   SR::Graphics::Controls::SRMeter<5, 1024>::SRMeterBallistics mGrMeterBallistics{ cGrMeter };
+  SR::Graphics::Controls::SRMeter<2, 1024>::SRMeterBallistics mInputRMSMeterBallistics{ cGrMeter };
   SR::DSP::SRBuffer<sample, 5, 1024> bGrMeter;
+  SR::DSP::SRBuffer<sample, 2, 1024> bInputRMSMeter;
 
 
 

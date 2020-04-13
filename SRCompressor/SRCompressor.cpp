@@ -20,6 +20,7 @@ SRCompressor::SRCompressor(const InstanceInfo& info)
   , mIsMaxGrRatioDependent(true)
   , mIsFeedback(false)
   , mIsAutoMakeup(true)
+  , mOutGain(0.0)
   , mIsBypassed(false)
 {
   // double parameters
@@ -33,6 +34,7 @@ SRCompressor::SRCompressor(const InstanceInfo& info)
   GetParam(kMakeup)->InitDouble("Makeup", 0., -20., 20., 0.1, "dB");
   GetParam(kReference)->InitDouble("Reference", -18., -50., 0., 1., "dB", 0, "", IParam::ShapePowCurve(SR::Utils::SetShapeCentered(-50., 0., -18., .5)));
   GetParam(kMix)->InitDouble("Mix", 100., 0., 100., 0.1, "%");
+  GetParam(kOutGain)->InitDouble("Output Gain", 0., -12., 12., 0.1, "dB");
   // bolean parameters
   GetParam(kIsMaxGrRatioDependent)->InitBool("GR-Dep", true, "GR-Dep", 0, "", "Off", "Ratio");
   GetParam(kIsFeedback)->InitBool("Topology", false, "Topology", 0, "", "FF", "FB");
@@ -79,30 +81,32 @@ SRCompressor::SRCompressor(const InstanceInfo& info)
 
     const IRECT rectPlug = pGraphics->GetBounds();
 
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<5, 1024>(rectPlug.GetGridCell(2, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -6., .5), 1, 3, "Lvl", "Opt", "Ds", "FET", "Lim"), cGrMeter, "Meter");
+    const int gridX = 13;
+    const int gridY = 8;
+
+    pGraphics->AttachControl(new IPanelControl(rectPlug.GetGridCell(0, 0, gridY, 1), COLOR_BLACK.WithOpacity(.5f), false));
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<5, 1024>(rectPlug.GetGridCell(4, 6, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), true, true, -18.f, 0.f, (float)SR::Utils::SetShapeCentered(-18., 0., -6., .5), 1, 3, "Lvl", "Opt", "Ds", "FET", "Lim"), cGrMeter, "Meter");
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRMeter<2, 1024>(rectPlug.GetGridCell(4, 5, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), false, true, -6.f, 6.f, 1.f, 1, 1), cInputRMSMeter, "Meter");
 
     // Knob
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(2, 2, 6, 11).FracRectHorizontal(3.f, false).FracRectVertical(3.f, true), kThresh, "Thresh", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_RED, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kThresh)->GetDefault(true)), cThresh);
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(2, 6, 6, 11).FracRectHorizontal(3.f, false).FracRectVertical(3.f, true), kRatio, "Ratio", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_RED, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kRatio)->GetDefault(true)), cRatio);
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(0, 1, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kSidechainFc, "SC Filter", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_ORANGE, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kSidechainFc)->GetDefault(true)), cSidechainFc);
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(0, 3, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kAttack, "Attack", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_BLUE, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kAttack)->GetDefault(true)), cAttack);
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(0, 6, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kRelease, "Release", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_BLUE, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kRelease)->GetDefault(true)), cRelease);
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(0, 8, 6, 11).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kKneeWidth, "Knee", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_GREEN, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kKneeWidth)->GetDefault(true)), cKneeWidth);
-    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(0, 5, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(2.f, true), kMix, "Mix", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_BLUE, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kMix)->GetDefault(true)), cMix);
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(4, 2, gridY, gridX).FracRectHorizontal(3.f, false).FracRectVertical(3.f, true), kThresh, "Thresh", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_RED, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kThresh)->GetDefault(true)), cThresh);
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(4, 8, gridY, gridX).FracRectHorizontal(3.f, false).FracRectVertical(3.f, true), kRatio, "Ratio", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_RED, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kRatio)->GetDefault(true)), cRatio);
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(1, 1, gridY, gridX).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kSidechainFc, "SC Filter", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_ORANGE, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kSidechainFc)->GetDefault(true)), cSidechainFc);
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(1, 3, gridY, gridX).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kAttack, "Attack", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_BLUE, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kAttack)->GetDefault(true)), cAttack);
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(1, 8, gridY, gridX).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kRelease, "Release", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_BLUE, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kRelease)->GetDefault(true)), cRelease);
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(1, 10, gridY, gridX).FracRectHorizontal(2.f, false).FracRectVertical(2.f, true), kKneeWidth, "Knee", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_GREEN, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kKneeWidth)->GetDefault(true)), cKneeWidth);
+    pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorKnob(rectPlug.GetGridCell(1, 6, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(2.f, true), kMix, "Mix", SR::Graphics::Layout::SR_DEFAULT_STYLE_KNOB, mRoomInfo, SR::Graphics::Layout::SR_DEFAULT_COLOR_CUSTOM_BLUE, false, false, -155.f, 155.f, -155.f + 310.f * (float)GetParam(kMix)->GetDefault(true)), cMix);
 
     // Fader
-    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(2, 9, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), kMakeup, "Makeup", SR::Graphics::Layout::SR_DEFAULT_STYLE_FADER), cMakeup);
-    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(3, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kReference, "Reference", SR::Graphics::Layout::SR_DEFAULT_STYLE_FADER), cReference);
-    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(3, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kMaxGr, "Max GR", SR::Graphics::Layout::SR_DEFAULT_STYLE_FADER), cMaxGr);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(5, 0, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kReference, "Reference", SR::Graphics::Layout::SR_DEFAULT_STYLE_FADER), cReference);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(4, 1, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), kMakeup, "Makeup", SR::Graphics::Layout::SR_DEFAULT_STYLE_FADER), cMakeup);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(4, 11, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(4.f, true), kOutGain, "Output", SR::Graphics::Layout::SR_DEFAULT_STYLE_FADER), cOutGain);
+    pGraphics->AttachControl(new IVSliderControl(rectPlug.GetGridCell(5, 12, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(3.f, true), kMaxGr, "Max GR", SR::Graphics::Layout::SR_DEFAULT_STYLE_FADER), cMaxGr);
     // Switch
-    //pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorSwitch(rectPlug.GetGridCell(0, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsBypassed, "Bypass", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, mRoomInfo, true), cIsBypassed);
-    //pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorSwitch(rectPlug.GetGridCell(0, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsFeedback, "Topo", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, mRoomInfo, true), cIsFeedback);
-    //pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorSwitch(rectPlug.GetGridCell(2, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsAutoMakeup, "Auto", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, mRoomInfo, true), cIsAutoMakeup);
-    //pGraphics->AttachControl(new SR::Graphics::Controls::SRVectorSwitch(rectPlug.GetGridCell(2, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsMaxGrRatioDependent, "R-Dep", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, mRoomInfo, true), cIsMaxGrRatioDependent);
-    pGraphics->AttachControl(new IVSlideSwitchControl(rectPlug.GetGridCell(0, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsBypassed, "Bypass", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, true, EDirection::Vertical), cIsBypassed);
-    pGraphics->AttachControl(new IVSlideSwitchControl(rectPlug.GetGridCell(0, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsFeedback, "Topology", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, true, EDirection::Vertical), cIsFeedback);
-    pGraphics->AttachControl(new IVSlideSwitchControl(rectPlug.GetGridCell(2, 0, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsAutoMakeup, "Makeup", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, true, EDirection::Vertical), cIsAutoMakeup);
-    pGraphics->AttachControl(new IVSlideSwitchControl(rectPlug.GetGridCell(2, 10, 6, 11).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsMaxGrRatioDependent, "GR-Dep", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, true, EDirection::Vertical), cIsMaxGrRatioDependent);
+    pGraphics->AttachControl(new IVSlideSwitchControl(rectPlug.GetGridCell(1, 0, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsBypassed, "Bypass", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, true, EDirection::Vertical), cIsBypassed);
+    pGraphics->AttachControl(new IVSlideSwitchControl(rectPlug.GetGridCell(1, 12, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsFeedback, "Topology", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, true, EDirection::Vertical), cIsFeedback);
+    pGraphics->AttachControl(new IVSlideSwitchControl(rectPlug.GetGridCell(4, 0, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsAutoMakeup, "Makeup", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, true, EDirection::Vertical), cIsAutoMakeup);
+    pGraphics->AttachControl(new IVSlideSwitchControl(rectPlug.GetGridCell(4, 12, gridY, gridX).FracRectHorizontal(1.f, false).FracRectVertical(1.f, true), kIsMaxGrRatioDependent, "GR-Dep", SR::Graphics::Layout::SR_DEFAULT_STYLE_BUTTON, true, EDirection::Vertical), cIsMaxGrRatioDependent);
   };
 #endif
 }
@@ -178,6 +182,8 @@ void SRCompressor::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
         outputs[c][s] = ((1. - mMix) * inputs[c][s]) + mMix * outputs[c][s];
       }
 
+      fOutGain.Process(outputs[0][s], outputs[1][s]);
+
       bGrMeter.ProcessBuffer(fCompLevel.GetGrLin(), 0, s);
       bGrMeter.ProcessBuffer(fCompOpto.GetGrLin(), 1, s);
       bGrMeter.ProcessBuffer(0.0, 2, s);
@@ -193,6 +199,8 @@ void SRCompressor::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 void SRCompressor::OnReset()
 {
   mSamplerate = GetSampleRate();
+
+  fOutGain.InitGain(100);
 
   fCompLevel.InitCompressor(
     GetCompressorValues(1, 1, mThresh),
@@ -327,6 +335,9 @@ void SRCompressor::OnParamChange(int paramIdx)
     fCompFet.SetIsAutoMakeup(mIsAutoMakeup);
     fCompLim.SetIsAutoMakeup(mIsAutoMakeup);
     break;
+  case kOutGain:
+    mOutGain = DBToAmp(GetParam(paramIdx)->Value());
+    fOutGain.SetGain(mOutGain);
   case kIsFeedback:
     mIsFeedback = GetParam(paramIdx)->Bool();
     fCompLevel.SetTopologyFeedback(mIsFeedback);

@@ -77,6 +77,9 @@
     <ClCompile Include="..\..\..\IPlug\Extras\Synth\VoiceAllocator.cpp">
       <Filter>IPlug\Extras\Synth</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.cpp">
+      <Filter>IGraphics\Drawing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\SRSynth.h" />
@@ -115,6 +118,9 @@
       <Filter>IGraphics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\IGraphics\IGraphicsStructs.h">
+      <Filter>IGraphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\IGraphics\IGraphicsPrivate.h">
       <Filter>IGraphics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\IGraphics\IGraphicsUtilities.h">
@@ -222,6 +228,9 @@
     <ClInclude Include="..\..\..\IPlug\IPlugPluginBase.h">
       <Filter>IPlug</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\IGraphics\ISender.h">
+      <Filter>IGraphics</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\IPlug\IPlugProcessor.h">
       <Filter>IPlug</Filter>
     </ClInclude>
@@ -249,6 +258,10 @@
     <ClInclude Include="..\..\..\IPlug\Extras\Synth\VoiceAllocator.h">
       <Filter>IPlug\Extras\Synth</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\IGraphics\Drawing\IGraphicsSkia.h">
+      <Filter>IGraphics\Drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SRSynth_DSP.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="resources">

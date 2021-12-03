@@ -1,11 +1,9 @@
 #pragma once
 
 #include "IPlug_include_in_plug_hdr.h"
-#include "SRSynth_DSP.h"
-#include "IVMeterControl.h"
-#include "../SRClasses/DSP/SRSaturation.h"
+#include "IControls.h"
 
-const int kNumPrograms = 1;
+const int kNumPresets = 1;
 
 enum EParams
 {
@@ -15,30 +13,50 @@ enum EParams
   kParamDecay,
   kParamSustain,
   kParamRelease,
+  kParamLFOShape,
+  kParamLFORateHz,
+  kParamLFORateTempo,
+  kParamLFORateMode,
+  kParamLFODepth,
   kNumParams
 };
 
-enum ECtrlTags
+#if IPLUG_DSP
+// will use EParams in SRSynth_DSP.h
+#include "SRSynth_DSP.h"
+#endif
+
+enum EControlTags
 {
   kCtrlTagMeter = 0,
+  kCtrlTagLFOVis,
+  kCtrlTagScope,
+  kCtrlTagRTText,
   kCtrlTagKeyboard,
+  kCtrlTagBender,
   kNumCtrlTags
 };
 
-class SRSynth : public IPlug
+using namespace iplug;
+using namespace igraphics;
+
+class SRSynth final : public Plugin
 {
 public:
-  SRSynth(IPlugInstanceInfo instanceInfo);
+  SRSynth(const InstanceInfo& info);
 
-#if IPLUG_DSP // All DSP methods and member variables should be within an IPLUG_DSP guard, should you want distributed UI
+#if IPLUG_DSP // http://bit.ly/2S64BDd
 public:
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
   void ProcessMidiMsg(const IMidiMsg& msg) override;
   void OnReset() override;
   void OnParamChange(int paramIdx) override;
   void OnIdle() override;
+  bool OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData) override;
+
 private:
-  SRSynthDSP mDSP {16};
-  IVMeterControl<1>::IVMeterBallistics mMeterBallistics {kCtrlTagMeter};
+  SRSynthDSP<sample> mDSP {16};
+  IPeakSender<2> mMeterSender;
+  ISender<1> mLFOVisSender;
 #endif
 };

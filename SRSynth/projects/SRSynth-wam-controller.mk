@@ -1,6 +1,6 @@
-include ./config/SRSynth-web.mk
+include ../config/SRSynth-web.mk
 
-TARGET = ./build-web/scripts/SRSynth-web.js
+TARGET = ../build-web/scripts/SRSynth-web.js
 
 SRC += $(WEB_SRC)
 CFLAGS += $(WEB_CFLAGS)

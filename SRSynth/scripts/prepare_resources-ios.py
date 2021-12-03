@@ -12,7 +12,9 @@ import plistlib, os, datetime, fileinput, glob, sys, string, shutil
 scriptpath = os.path.dirname(os.path.realpath(__file__))
 projectpath = os.path.abspath(os.path.join(scriptpath, os.pardir))
 
-sys.path.insert(0, projectpath + '/../../scripts/')
+IPLUG2_ROOT = "../../.."
+
+sys.path.insert(0, os.path.join(os.getcwd(), IPLUG2_ROOT + '/Scripts'))
 
 from parse_config import parse_config, parse_xcconfig
 
@@ -36,7 +38,7 @@ def main():
            shutil.copy(projectpath + "/resources/fonts/" + font, dst)
            
   config = parse_config(projectpath)
-  xcconfig = parse_xcconfig(projectpath + '/../../common-ios.xcconfig')
+  xcconfig = parse_xcconfig(os.path.join(os.getcwd(), IPLUG2_ROOT +  '/common-ios.xcconfig'))
 
   CFBundleGetInfoString = config['BUNDLE_NAME'] + " v" + config['FULL_VER_STR'] + " " + config['PLUG_COPYRIGHT_STR']
   CFBundleVersion = config['FULL_VER_STR']
@@ -63,7 +65,7 @@ def main():
   plistpath = projectpath + "/resources/" + config['BUNDLE_NAME'] + "-iOS-AUv3-Info.plist"
   auv3 = plistlib.readPlist(plistpath)
   auv3['CFBundleExecutable'] = config['BUNDLE_NAME'] + "AppExtension"
-  auv3['CFBundleIdentifier'] = config['BUNDLE_DOMAIN'] + "." + config['BUNDLE_MFR'] + ".app." + config['BUNDLE_NAME'] + ".AUv3"
+  auv3['CFBundleIdentifier'] = "$(PRODUCT_BUNDLE_IDENTIFIER)"
   auv3['CFBundleName'] = config['BUNDLE_NAME'] + "AppExtension"
   auv3['CFBundleDisplayName'] = config['BUNDLE_NAME'] + "AppExtension"
   auv3['CFBundleVersion'] = CFBundleVersion
@@ -82,12 +84,15 @@ def main():
   auv3['NSExtension']['NSExtensionAttributes']['AudioComponents'][0]['type'] = COMPONENT_TYPE
   auv3['NSExtension']['NSExtensionAttributes']['AudioComponents'][0]['version'] = config['PLUG_VERSION_INT']
   auv3['NSExtension']['NSExtensionAttributes']['AudioComponents'][0]['sandboxSafe'] = True
-  auv3['NSExtension']['NSExtensionAttributes']['AudioComponents'][0]['tags'] = [{}]
+  auv3['NSExtension']['NSExtensionAttributes']['AudioComponents'][0]['tags'] = ["",""]
 
   if config['PLUG_TYPE'] == 1:
     auv3['NSExtension']['NSExtensionAttributes']['AudioComponents'][0]['tags'][0] = "Synth"
   else:
     auv3['NSExtension']['NSExtensionAttributes']['AudioComponents'][0]['tags'][0] = "Effects"
+    
+  auv3['NSExtension']['NSExtensionAttributes']['AudioComponents'][0]['tags'][1] = "size:{" + str(config['PLUG_WIDTH']) + "," + str(config['PLUG_HEIGHT']) + "}"
+
 
   plistlib.writePlist(auv3, plistpath)
 
@@ -96,7 +101,7 @@ def main():
   plistpath = projectpath + "/resources/" + config['BUNDLE_NAME'] + "-iOS-Info.plist"
   iOSapp = plistlib.readPlist(plistpath)
   iOSapp['CFBundleExecutable'] = config['BUNDLE_NAME']
-  iOSapp['CFBundleIdentifier'] = config['BUNDLE_DOMAIN'] + "." + config['BUNDLE_MFR'] + ".app." + config['BUNDLE_NAME']
+  iOSapp['CFBundleIdentifier'] = "$(PRODUCT_BUNDLE_IDENTIFIER)"
   iOSapp['CFBundleName'] = config['BUNDLE_NAME']
   iOSapp['CFBundleVersion'] = CFBundleVersion
   iOSapp['CFBundleShortVersionString'] = CFBundleVersion

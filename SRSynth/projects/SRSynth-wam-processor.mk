@@ -1,6 +1,6 @@
-include ./config/SRSynth-web.mk
+include ../config/SRSynth-web.mk
 
-TARGET = ./build-web/scripts/SRSynth-wam.js
+TARGET = ../build-web/scripts/SRSynth-wam.js
 
 SRC += $(WAM_SRC)
 CFLAGS += $(WAM_CFLAGS)
